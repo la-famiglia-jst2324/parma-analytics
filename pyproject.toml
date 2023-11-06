@@ -22,7 +22,7 @@ requires-python = ">=3.11"
 repository = "https://github.com/la-famiglia-jst2324/parma-analytics"
 
 [tool.setuptools.packages.find]
-include = ["parma-analytics"]
+include = ["parma_analytics"]
 namespaces = false
 
 [project.scripts]

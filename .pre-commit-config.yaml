@@ -1,0 +1,45 @@
+ci:
+  autoupdate_commit_msg: "chore: Update pre-commit hooks"
+exclude: ^(\.conda_lock_files/)
+repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.1.4"
+    hooks:
+      - id: ruff-format
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 23.10.1
+    hooks:
+      - id: black
+        language_version: python3.11
+        args:
+          - --safe
+          - --target-version=py311
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: "v1.5.1"
+    hooks:
+      - id: mypy
+        additional_dependencies:
+          [types-setuptools, types-pyyaml, sqlalchemy-stubs]
+  - repo: https://github.com/pre-commit/mirrors-prettier
+    rev: "v3.0.3"
+    hooks:
+      - id: prettier
+        files: "\\.(md|json|yml|yaml)$"
+  - repo: https://github.com/myint/docformatter
+    rev: v1.7.5
+    hooks:
+      - id: docformatter
+        args: [--in-place, --black]
+  - repo: https://github.com/sqlfluff/sqlfluff
+    rev: 2.3.5
+    hooks:
+      - id: sqlfluff-fix
+  - repo: https://github.com/crate-ci/typos
+    rev: v1.16.22
+    hooks:
+      - id: typos
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.5.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
