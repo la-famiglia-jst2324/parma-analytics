@@ -1,0 +1,56 @@
+[build-system]
+requires = ["setuptools", "setuptools-scm", "wheel"]
+
+[tool.setuptools_scm]
+version_scheme = "post-release"
+
+[project]
+name = "parma-analytics"
+description = "ParmaAI analytics repository providing data processing and inference."
+readme = "README.md"
+dynamic = ["version"]
+authors = [
+  {name = "Robin Holzinger", email = "robin.holzinger@tum.de"},
+]
+classifiers = [
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11",
+]
+requires-python = ">=3.11"
+
+[project.urls]
+repository = "https://github.com/la-famiglia-jst2324/parma-analytics"
+
+[tool.setuptools.packages.find]
+include = ["parma-analytics"]
+namespaces = false
+
+[project.scripts]
+
+[tool.black]
+exclude = '''
+/(
+    \.eggs
+  | \.git
+  | \.venv
+  | build
+  | dist
+)/
+'''
+
+[tool.ruff]
+line-length = 88
+select = ["F", "E", "W", "I", "N", "UP", "D", "PL"]
+target-version = "py311"
+
+[tool.mypy]
+python_version = '3.11'
+ignore_missing_imports = true
+no_implicit_optional = true
+check_untyped_defs = true
+
+[tool.docformatter]
+black = true
+
+[tool.pytest.ini_options]
+addopts = "--import-mode=importlib --cov='parma-analytics' --cov-report term-missing --color=yes"

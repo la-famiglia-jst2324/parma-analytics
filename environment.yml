@@ -1,0 +1,25 @@
+name: parma-analytics
+channels:
+  - conda-forge
+  - nodefaults
+dependencies:
+  # Git
+  - pre-commit
+  # Python
+  - pip
+  - python >=3.11
+  - setuptools-scm
+  - setuptools >=61 # pyproject.toml support
+  # Development
+  - types-pyyaml
+  # Testing
+  - pytest >=6 # --import-mode option
+  - pytest-cov
+  # Dependencies (core)
+  - numpy
+  - polars >=0.19.0
+  - pydantic >=2
+  - pyyaml
+  - typer >=0.9.0
+  # Dependencies (db)
+  - sqlalchemy >=2.0
