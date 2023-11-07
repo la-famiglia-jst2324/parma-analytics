@@ -1,0 +1,14 @@
+version: "3.9"
+services:
+  parma-prod-db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    container_name: parma-prod-db
+    volumes:
+      - .data/parma-prod-db/postgresql:/var/lib/postgresql/data/
+    ports:
+      - "9000:5432"
+    environment:
+      POSTGRES_USER: parma-prod-db
+      POSTGRES_PASSWORD: parma-prod-db
+      POSTGRES_DB: parma-prod-db

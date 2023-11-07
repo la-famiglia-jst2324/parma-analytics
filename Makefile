@@ -1,4 +1,4 @@
-.PHONY: prerequisites install dev lint build test start clean purge
+.PHONY: prerequisites install dev test purge-db purge
 
 # This Makefile should provide you with a simple way to get your dev
 # environment up and running. It will install all the dependencies
@@ -12,22 +12,19 @@ prerequisites:
 install:
 	pre-commit install
 	micromamba create -f environment.yml  # Create a new environment
-	micromamba activate parma-analytics  # Activate the new environment
-	pip install -e . # Install the project in editable mode
+	# execute the following two steps manually
+	# micromamba activate parma-analytics  # Activate the new environment
+	# pip install -e . # Install the project in editable mode
 
 dev:
+	uvicorn parma_analytics.api:app --reload
 
+test:
+	pytest tests/
 
-lint:
-	pre-commit run --all-files
+purge-db:
+	docker-compose down
+	rm -rf .data
 
-build:
-
-test: lint
-
-start:
-
-clean:
-	rm -rf .mypycache
-
-purge: clean
+purge: purge-db
+	rm -rf .mypy_cache .pytest_cache .coverage .eggs
