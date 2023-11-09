@@ -39,7 +39,15 @@ jobs:
     name: Testing CI
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    # TODO: include services database container once needed
+    services:
+      postgres-db:
+        image: postgres:16-alpine
+        ports:
+          - 5432:5432
+        env:
+          POSTGRES_USER: parma-prod-db
+          POSTGRES_PASSWORD: parma-prod-db
+          POSTGRES_DB: parma-prod-db
     steps:
       - uses: actions/checkout@v4
       - name: conda env setup
@@ -51,6 +59,12 @@ jobs:
         run: python -m pip install --no-build-isolation --no-deps --disable-pip-version-check -e .
       - name: Run unit tests
         run: python -m pytest --cov-report=xml
+        env:
+          POSTGRES_HOST: localhost
+          POSTGRES_PORT: 5432
+          POSTGRES_USER: parma-prod-db
+          POSTGRES_PASSWORD: parma-prod-db
+          POSTGRES_DB: parma-prod-db
       - name: Get Cover
         uses: orgoro/coverage@v3.1
         if: github.event_name == 'pull_request'
