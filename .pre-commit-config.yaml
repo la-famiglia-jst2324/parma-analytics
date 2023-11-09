@@ -18,8 +18,7 @@ repos:
     rev: "v1.5.1"
     hooks:
       - id: mypy
-        additional_dependencies:
-          [types-setuptools, types-pyyaml, sqlalchemy-stubs]
+        additional_dependencies: [types-setuptools, types-pyyaml]
   - repo: https://github.com/pre-commit/mirrors-prettier
     rev: "v3.0.3"
     hooks:

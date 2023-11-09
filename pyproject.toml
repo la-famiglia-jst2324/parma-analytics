@@ -49,8 +49,11 @@ ignore_missing_imports = true
 no_implicit_optional = true
 check_untyped_defs = true
 
+[tool.ruff.pydocstyle]
+convention = "google"
+
 [tool.docformatter]
 black = true
 
 [tool.pytest.ini_options]
-addopts = "--import-mode=importlib --cov='parma-analytics' --cov-report term-missing --color=yes"
+addopts = "--import-mode=importlib --cov='parma_analytics' --cov-report xml --color=yes"
