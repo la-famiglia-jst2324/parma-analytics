@@ -45,7 +45,6 @@ jobs:
       - name: conda env setup
         uses: mamba-org/setup-micromamba@da9b4fa3cd810fa222215d6062647d3e717e7662
         with:
-          condarc-file: .github/assets/.condarc
           environment-file: environment.yml
           cache-environment: true
       - name: Install package
@@ -54,6 +53,7 @@ jobs:
         run: python -m pytest --cov-report=xml
       - name: Get Cover
         uses: orgoro/coverage@v3.1
+        if: github.event_name == 'pull_request'
         with:
           coverageFile: path/to/coverage.xml
           token: ${{ github.token }}

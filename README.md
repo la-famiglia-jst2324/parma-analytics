@@ -129,8 +129,6 @@ The following steps will get you started with the project.
 
 ## PR workflow
 
-## PR workflow
-
 1. **Create a new branch**
    [linear.app](linear.app) offers a button to copy branch names from tickets.
    In case there is no ticket, please use feel free to use an arbitrary name or create a ticket.
