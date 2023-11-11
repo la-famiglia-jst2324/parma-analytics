@@ -10,7 +10,6 @@ prerequisites:
 	# Conda environments also contain dedicated python interpreters that won't mess up your local python installation."
 
 install:
-	pre-commit install
 	micromamba create -f environment.yml  # Create a new environment
 
 dev:

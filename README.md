@@ -115,7 +115,9 @@ The following steps will get you started with the project.
     # fyi. there are IDE extensions to automatically activate the environment
     micromamba activate parma-analytics
 
-    pip install -e . # Install the project in editable mode (do this only once)
+    # do the following only once
+    pip install -e . # Install the project in editable mode
+    pre-commit install
    ```
 
 5. Export environment variables for the database:
