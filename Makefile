@@ -12,9 +12,6 @@ prerequisites:
 install:
 	pre-commit install
 	micromamba create -f environment.yml  # Create a new environment
-	# execute the following two steps manually
-	# micromamba activate parma-analytics  # Activate the new environment
-	# pip install -e . # Install the project in editable mode
 
 dev:
 	uvicorn parma_analytics.api:app --reload
