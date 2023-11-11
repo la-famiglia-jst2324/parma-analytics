@@ -87,11 +87,14 @@ graph LR
 
 The following steps will get you started with the project.
 
+> **NOTE**: Although the general steps should also work on a Windows, we highly recommend to use a Linux based machine for development. WSL is also an option. Use Windows at your own risk.
+
 1. Pre-requisites: to be able to contribute to JST in this repository, make sure to comply with the following prerequisites.
 
    - Configure GitHub via an ssh key. Key based authenticated is highly encouraged. See [GitHub Docs](https://docs.github.com/en/github/authenticating-to-github/connecting-to-github-with-ssh) for more information.
    - Please make sure to have an GPG key configured for GitHub. See [GitHub Docs](https://docs.github.com/en/authentication/managing-commit-signature-verification/adding-a-gpg-key-to-your-github-account) for more information.
    - Install **micromamba**, a conda environment management package manager, as described [here](https://mamba.readthedocs.io/en/latest/micromamba-installation.html). Alternatively conda or mamba installations should also work, but are highly discouraged because of their slow performance.
+   - Install docker and docker-compose. See [Docker Docs](https://docs.docker.com/get-docker/) for more information.
 
 2. **Clone the repository**
 
@@ -102,10 +105,34 @@ The following steps will get you started with the project.
 3. **Precommit & environment setup**:
 
    ```bash
-   make install  # execute the last 2 steps manually!
+   make install
    ```
 
-4. **Start the api server**:
+4. Activating the environment:
+
+   ```bash
+    # Activate the new environment (do this every time you start a new terminal)
+    # fyi. there are IDE extensions to automatically activate the environment
+    micromamba activate parma-analytics
+
+    # do the following only once
+    pip install -e . # Install the project in editable mode
+    pre-commit install
+   ```
+
+5. Export environment variables for the database:
+
+   ```bash
+   # fyi. there are IDE extensions to automatically load
+   # environment variables from a .env file
+   export POSTGRES_HOST=localhost
+   export POSTGRES_PORT=9000
+   export POSTGRES_USER=parma-prod-db
+   export POSTGRES_PASSWORD=parma-prod-db
+   export POSTGRES_DB=parma-prod-db
+   ```
+
+6. **Start the api server**:
 
    ```bash
    make dev
@@ -115,13 +142,13 @@ The following steps will get you started with the project.
 
    FastApi will provide you with an interactive documentation of the api. You can also use the swagger ui at [http://localhost:8000/docs](http://localhost:8000/docs) or the redoc ui at [http://localhost:8000/redoc](http://localhost:8000/redoc).
 
-5. Optional: Running the pre-commit pipeline manually
+7. Optional: Running the pre-commit pipeline manually
 
    ```bash
    pre-commit run --all
    ```
 
-6. Test your code:
+8. Test your code:
 
    ```bash
    make test
