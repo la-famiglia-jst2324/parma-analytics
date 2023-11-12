@@ -105,6 +105,9 @@ The following steps will get you started with the project.
 3. **Precommit & environment setup**:
 
    ```bash
+   # spinning up the database container for local development
+   docker-compose up -d
+
    make install
    ```
 
