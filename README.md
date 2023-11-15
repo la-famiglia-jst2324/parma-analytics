@@ -52,34 +52,49 @@ graph TD
         Email
     end
 
-    subgraph CrawlingLayer[Crawling Layer]
-        CrawlingContainer
+    subgraph DataSourcingLayer[Data Sourcing Layer]
+        DataSourcingContainer
+        DataRetrievalModules
     end
 
-    subgraph CrawlingContainer[Serverless Deployment - FAAS]
-        Crawler1[("Crawler 1")]
-        Crawler2[("Crawler 2")]
-        CrawlerN[("Crawler N")]
+    subgraph DataSourcingContainer[Data Sourcing Backend]
+        DataRetrievalController[("Data Retrieval Controller")]
+        NormalizationService[("Normalization Service")]
+        MonitoringAndLoggingSystem[("Monitoring and Logging System")]
+    end
+
+    subgraph DataRetrievalModules[Data Retrieval Modules]
+        Module1[("E.G. Hackernews Module")]
+        Module2[("Linkedin Module")]
+        Module3[("Reddit Module (Apify)")]
+        ModuleN[("Nth Module")]
     end
 
 
         %% Links
-   Users --> FrontendContainer
-   FrontendContainer -->|REST| ApiRestBackend
-   ApiRestBackend -->|SQL Framework| ProductionDatabase
-   ProductionDatabase -->|Replicate| AnalyticsDatabase
-   AnalyticsDev["Analytics<br>(Developers)"] --> AnalyticsDatabase
-   AnalyticsRestBackend -->|SQL Framework| ProductionDatabase
-   AnalyticsRestBackend --> NotificationContainer
-   NotificationContainer --> ExternalNotificationProvider["External Notification Provider"]
-   CrawlingContainer -->|SQL Framework| CrawlingDatabase
-   ApiRestBackend -->|Trigger Run - REST| CrawlingContainer
-   AnalyticsRestBackend -->|Trigger Run - REST| CrawlingContainer
-   CrawlingContainer -->|Notify Crawling Done| AnalyticsRestBackend
+    Users --> FrontendContainer
+    FrontendContainer -->|REST| ApiRestBackend
+    ApiRestBackend -->|SQL Framework| ProductionDatabase
+    ProductionDatabase -->|Replicate| AnalyticsDatabase
+    AnalyticsDev["Analytics<br>(Developers)"] --> AnalyticsDatabase
+    AnalyticsRestBackend -->|SQL Framework| ProductionDatabase
+    AnalyticsRestBackend --> NotificationContainer
+    NotificationContainer --> ExternalNotificationProvider["External Notification Provider"]
+    DataRetrievalModules -->|SQL Framework| CrawlingDatabase
+    ApiRestBackend -->|Trigger Run - REST| DataRetrievalController
+    AnalyticsRestBackend -->|Trigger Run - REST| DataRetrievalController
+    DataRetrievalController -->|Initiate| DataRetrievalModules
+    DataRetrievalModules -->|Raw Data| DataRetrievalController
+    DataRetrievalController -->|Raw Data| NormalizationService
+    NormalizationService -->|Send Normalized Data - REST| AnalyticsRestBackend
+    DataRetrievalModules --> MonitoringAndLoggingSystem
+    MonitoringAndLoggingSystem -->|Send Monitoring Data - REST| AnalyticsRestBackend
 
         %% Link Styles
     linkStyle default stroke:#9E9D91,stroke-width:2px;
-    linkStyle 5 stroke:#black,stroke-width:3px;
+    %%linkStyle 5 stroke:#black,stroke-width:3px;
+    %%linkStyle 9 stroke:#black,stroke-width:3px;
+    %%linkStyle 10 stroke:#black,stroke-width:3px;
 ```
 
 #### Process Flows
