@@ -9,7 +9,80 @@ ParmaAI analytics repository providing data processing and inference.
 
 ## `parma-ai` architecture
 
-### system's architecture
+### System's architecture
+
+#### Overall Architecture
+
+```mermaid
+graph TD
+
+        %% Subgraphs
+
+    subgraph FrontendContainer[FRONTEND]
+        Frontend[("Next.js<br>TypeScript")]
+    end
+
+    subgraph ApiBackendContainer[API BACKEND]
+        ApiRestBackend[("Next.js<br>Node.js<br>TypeScript")]
+        AuthUser(("Authentication<br>User Management"))
+    end
+
+    subgraph WebLayer[Web Layer]
+        FrontendContainer
+        ApiBackendContainer
+    end
+
+    subgraph DatabaseLayer[Database Layer]
+        AnalyticsDatabase[("Analytics Database")]
+        ProductionDatabase[("Production Database")]
+        CrawlingDatabase[("Crawling Database")]
+    end
+
+    subgraph AnalyticsLayer[Analytics Layer]
+        AnalyticsBackendContainer
+    end
+
+    subgraph AnalyticsBackendContainer[Analytics Backend]
+        AnalyticsRestBackend[("Python Backend")]
+        NotificationContainer
+    end
+
+    subgraph NotificationContainer[Notification Module]
+        Slack
+        Email
+    end
+
+    subgraph CrawlingLayer[Crawling Layer]
+        CrawlingContainer
+    end
+
+    subgraph CrawlingContainer[Serverless Deployment - FAAS]
+        Crawler1[("Crawler 1")]
+        Crawler2[("Crawler 2")]
+        CrawlerN[("Crawler N")]
+    end
+
+
+        %% Links
+   Users --> FrontendContainer
+   FrontendContainer -->|REST| ApiRestBackend
+   ApiRestBackend -->|SQL Framework| ProductionDatabase
+   ProductionDatabase -->|Replicate| AnalyticsDatabase
+   AnalyticsDev["Analytics<br>(Developers)"] --> AnalyticsDatabase
+   AnalyticsRestBackend -->|SQL Framework| ProductionDatabase
+   AnalyticsRestBackend --> NotificationContainer
+   NotificationContainer --> ExternalNotificationProvider["External Notification Provider"]
+   CrawlingContainer -->|SQL Framework| CrawlingDatabase
+   ApiRestBackend -->|Trigger Run - REST| CrawlingContainer
+   AnalyticsRestBackend -->|Trigger Run - REST| CrawlingContainer
+   CrawlingContainer -->|Notify Crawling Done| AnalyticsRestBackend
+
+        %% Link Styles
+    linkStyle default stroke:#9E9D91,stroke-width:2px;
+    linkStyle 5 stroke:#black,stroke-width:3px;
+```
+
+#### Process Flows
 
 The parma ai backend consists of the following process flow:
 
