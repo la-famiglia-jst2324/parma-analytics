@@ -80,7 +80,7 @@ graph TD
     AnalyticsRestBackend -->|SQL Framework| ProductionDatabase
     AnalyticsRestBackend --> NotificationContainer
     NotificationContainer --> ExternalNotificationProvider["External Notification Provider"]
-    DataRetrievalModules -->|SQL Framework| CrawlingDatabase
+    DataRetrievalController -->|SQL Framework| CrawlingDatabase
     ApiRestBackend -->|Trigger Run - REST| DataRetrievalController
     AnalyticsRestBackend -->|Trigger Run - REST| DataRetrievalController
     DataRetrievalController -->|Initiate| DataRetrievalModules
