@@ -7,7 +7,6 @@ on:
     types: [published]
   # TODO: remove before merge
   pull_request:
-    branches: [main]
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
