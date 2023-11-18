@@ -28,6 +28,11 @@ jobs:
       matrix:
         DEPLOYMENT_ENV:
           ["${{ github.event_name == 'release' && 'prod' || 'staging' }}"]
+    defaults:
+      run:
+        working-directory: ./terraform/${{ matrix.DEPLOYMENT_ENV }}
+    env:
+      TF_VAR_db_root_password: ${{ env.DB_ROOT_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -44,12 +49,13 @@ jobs:
         uses: hashicorp/setup-terraform@v3
         with:
           terraform_version: 1.5.3
-      - name: Terraform init, plan, apply
+      - name: Store credentials file
         run: |
-          pushd ./terraform/${{ matrix.DEPLOYMENT_ENV }}
-          terraform init
-          terraform plan
-          terraform apply -auto-approve
-          popd
-        env:
-          TF_VAR_db_root_password: ${{ env.DB_ROOT_PASSWORD }}
+          mkdir -p ./../.secrets/
+          echo ${{ secrets.GCP_SA_KEY }} > ./../.secrets/la-famiglia-parma-ai.json
+      - name: Terraform init
+        run: terraform init
+      - name: Terraform plan
+        run: terraform plan
+      - name: Terraform apply
+        run: terraform apply -auto-approve
