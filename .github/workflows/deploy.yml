@@ -1,0 +1,30 @@
+name: Deploy
+permissions: write-all
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+  # TODO: remove before merge
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash -el {0}
+
+env:
+  DEPLOYMENT_ENV: ${{ github.event_name == 'release' && 'prod' || 'staging' }}
+  DB_ROOT_PASSWORD: ${{ github.event_name == 'release' && secrets.PROD_POSTGRES_PASSWORD || secrets.STAGING_POSTGRES_PASSWORD}}
+
+jobs:
+  deploy:
+    name: Deploy - ${{ env.DEPLOYMENT_ENV }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - run: exit 0
