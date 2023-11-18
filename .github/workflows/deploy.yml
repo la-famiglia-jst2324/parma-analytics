@@ -53,6 +53,14 @@ jobs:
           echo -n '$KEYSTORE' > ./../.secrets/la-famiglia-parma-ai.json
         env:
           KEYSTORE: ${{ secrets.GCP_SA_KEY }}
+      - run: |
+          pwd
+          echo "<<>>"
+          ls -la ./../
+          echo "<<->>"
+          ls -la ./../.secrets/
+          echo "<<-->>"
+          exit 1
       - name: Terraform init
         run: terraform init
       - name: Terraform plan
