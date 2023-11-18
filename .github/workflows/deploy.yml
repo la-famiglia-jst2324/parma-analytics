@@ -67,9 +67,21 @@ jobs:
           ls -la ./../.secrets/
           echo "<<-->>"
           cat ./../.secrets/la-famiglia-parma-ai.json
-      - name: Terraform init
-        run: terraform init
-      - name: Terraform plan
-        run: terraform plan
-      - name: Terraform apply
-        run: terraform apply -auto-approve
+      - name: Activate service account
+        run: |
+          gcloud auth activate-service-account --key-file=./../.secrets/la-famiglia-parma-ai.json
+
+      - name: Authenticate with GCR
+        run: |
+          echo -n "${{ secrets.GCP_SA_KEY }}" | docker login -u _json_key --password-stdin https://gcr.io
+
+      - name: Push Docker image to GCR
+        run: |
+          docker push gcr.io/la-famiglia-parma-ai/nginx-example:latest
+
+      # - name: Terraform init
+      #   run: terraform init
+      # - name: Terraform plan
+      #   run: terraform plan
+      # - name: Terraform apply
+      #   run: terraform apply -auto-approve
