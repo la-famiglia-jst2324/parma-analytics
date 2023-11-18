@@ -73,7 +73,7 @@ jobs:
 
       - name: Authenticate with GCR
         run: |
-          echo -n "${{ secrets.GCP_SA_KEY }}" | docker login -u _json_key --password-stdin https://gcr.io
+          docker login -u _json_key --password-stdin https://gcr.io < ./../.secrets/la-famiglia-parma-ai.json
 
       - name: Push Docker image to GCR
         run: |
