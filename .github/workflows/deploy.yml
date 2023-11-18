@@ -37,12 +37,18 @@ jobs:
         with:
           fetch-depth: 0
       - name: Configure GCP credentials
+        uses: "google-github-actions/auth@v1"
+        with:
+          credentials_json: ${{ secrets.GCP_SA_KEY }}
+      - name: Configure gcloud CLI
         uses: google-github-actions/setup-gcloud@63496e652100112a8db8a71668b77c67aa1ab071
         with:
-          version: "290.0.1"
+          version: "416.0.0"
           service_account_email: ${{ secrets.GCP_SA_EMAIL }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
+      - name: Test gcloud cli
+        run: gcloud auth list --filter=status:ACTIVE --format="value(account)"
       - name: Terraform setup
         uses: hashicorp/setup-terraform@v3
         with:
