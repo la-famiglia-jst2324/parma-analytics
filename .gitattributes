@@ -1,4 +1,4 @@
 .conda_lock_files/** linguist-generated=true
 * text=auto
 *.{py,yaml,yml,sh} text eol=lf
-*.{tfstate} linguist-generated=true
+**/*.tfstate linguist-generated=true
