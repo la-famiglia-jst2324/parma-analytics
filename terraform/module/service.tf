@@ -7,7 +7,7 @@ resource "null_resource" "docker_build" {
 
   provisioner "local-exec" {
     working_dir = path.module
-    command     = "IMG=(${var.region}-docker.pkg.dev/${var.project}/parma-registry/parma-analytics:${var.env}-$(git rev-parse --short HEAD)) && docker build -t $IMG ./../../ && docker push $IMG && echo $IMG > .image.name"
+    command     = "IMG=${var.region}-docker.pkg.dev/${var.project}/parma-registry/parma-analytics:${var.env}-$(git rev-parse --short HEAD) && docker build -t $IMG ./../../ && docker push $IMG && echo $IMG > .image.name"
   }
 
   triggers = {
