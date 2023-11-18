@@ -7,7 +7,7 @@ dependencies:
   - pre-commit
   # Python
   - pip
-  - python >=3.11
+  - python =3.11
   - setuptools-scm
   - setuptools >=61 # pyproject.toml support
   # Infrastructure provisioning (IAC)
@@ -16,6 +16,7 @@ dependencies:
   - yamllint=1.32.0
   # Development
   - types-pyyaml
+  - google-cloud-sdk
   # Testing
   - pytest >=6 # --import-mode option
   - pytest-cov
