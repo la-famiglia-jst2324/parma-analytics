@@ -28,7 +28,6 @@ jobs:
       matrix:
         DEPLOYMENT_ENV:
           ["${{ github.event_name == 'release' && 'prod' || 'staging' }}"]
-
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -41,7 +40,7 @@ jobs:
           service_account_email: ${{ secrets.GCP_SA_EMAIL }}
           service_account_key: ${{ secrets.GCP_SA_KEY }}
           export_default_credentials: true
-      - run: pushd terraform/${{ env.DEPLOYMENT_ENV }}
+      - run: pushd terraform/${{ matrix.DEPLOYMENT_ENV }}
       - name: Terraform Init
         uses: hashicorp/setup-terraform@v3
         with:
