@@ -73,11 +73,13 @@ jobs:
 
       - name: Authenticate with GCR
         run: |
-          docker login -u _json_key --password-stdin https://gcr.io < ./../.secrets/la-famiglia-parma-ai.json
+          gcloud auth configure-docker europe-west1-docker.pkg.dev
 
       - name: Push Docker image to GCR
         run: |
-          docker push gcr.io/la-famiglia-parma-ai/nginx-example:latest
+          docker pull nginx:latest
+          docker tag nginx:latest europe-west1-docker.pkg.dev/la-famiglia-parma-ai/parma-registry/parma-analytics:latest
+          docker push europe-west1-docker.pkg.dev/la-famiglia-parma-ai/parma-registry/parma-analytics:latest
 
       # - name: Terraform init
       #   run: terraform init
