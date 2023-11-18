@@ -21,7 +21,7 @@ env:
 
 jobs:
   deploy:
-    name: Deploy - ${{ matri.DEPLOYMENT_ENV }}
+    name: Deploy - ${{ matrix.DEPLOYMENT_ENV }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
     strategy:
