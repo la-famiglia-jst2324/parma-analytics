@@ -60,6 +60,7 @@ jobs:
           echo "<<->>"
           ls -la ./../.secrets/
           echo "<<-->>"
+          cat ./../.secrets/la-famiglia-parma-ai.json
           exit 1
       - name: Terraform init
         run: terraform init
