@@ -17,7 +17,7 @@ defaults:
     shell: bash -el {0}
 
 env:
-  DB_ROOT_PASSWORD: ${{ github.event_name == 'release' && secrets.PROD_POSTGRES_PASSWORD || secrets.STAGING_POSTGRES_PASSWORD}}
+  TF_VAR_db_root_password: ${{ github.event_name == 'release' && secrets.PROD_POSTGRES_PASSWORD || secrets.STAGING_POSTGRES_PASSWORD}}
 
 jobs:
   deploy:
@@ -31,8 +31,6 @@ jobs:
     defaults:
       run:
         working-directory: ./terraform/${{ matrix.DEPLOYMENT_ENV }}
-    env:
-      TF_VAR_db_root_password: ${{ env.DB_ROOT_PASSWORD }}
     steps:
       - name: Checkout
         uses: actions/checkout@v2
