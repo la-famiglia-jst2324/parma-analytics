@@ -50,7 +50,7 @@ jobs:
       - name: Store credentials file
         run: |
           mkdir -p ./../.secrets/
-          echo '$KEYSTORE' > ./../.secrets/la-famiglia-parma-ai.json
+          echo -n "$KEYSTORE" > ./../.secrets/la-famiglia-parma-ai.json
         env:
           KEYSTORE: ${{ secrets.GCP_SA_KEY }}
       - run: |
