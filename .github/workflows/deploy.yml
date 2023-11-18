@@ -17,14 +17,18 @@ defaults:
     shell: bash -el {0}
 
 env:
-  DEPLOYMENT_ENV: ${{ github.event_name == 'release' && 'prod' || 'staging' }}
   DB_ROOT_PASSWORD: ${{ github.event_name == 'release' && secrets.PROD_POSTGRES_PASSWORD || secrets.STAGING_POSTGRES_PASSWORD}}
 
 jobs:
   deploy:
-    name: Deploy - ${{ env.DEPLOYMENT_ENV }}
+    name: Deploy - ${{ matri.DEPLOYMENT_ENV }}
     runs-on: ubuntu-latest
     timeout-minutes: 40
+    strategy:
+      matrix:
+        DEPLOYMENT_ENV:
+          ["${{ github.event_name == 'release' && 'prod' || 'staging' }}"]
+
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -45,9 +49,9 @@ jobs:
       - name: Terraform plan
         run: terraform plan
         env:
-          TF_VAR_db_root_password: ${{ secrets.DB_ROOT_PASSWORD }}
+          TF_VAR_db_root_password: ${{ env.DB_ROOT_PASSWORD }}
       - name: Terraform apply
         run: terraform apply -auto-approve
         env:
-          TF_VAR_db_root_password: ${{ secrets.DB_ROOT_PASSWORD }}
+          TF_VAR_db_root_password: ${{ env.DB_ROOT_PASSWORD }}
       - run: popd
