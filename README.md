@@ -2,7 +2,8 @@
 
 [![Chore](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/chore.yml/badge.svg?branch=main)](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/chore.yml)
 [![CI](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/ci.yml)
-[![Deploy](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/release.yml/badge.svg)](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/release.yml)
+[![Deploy Staging](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/deploy.yml/badge.svg?branch=main&event=push)](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/deploy.yml)
+[![Deploy Prod](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/deploy.yml/badge.svg?event=release)](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/deploy.yml)
 [![Major Tag](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/tag-major.yml/badge.svg)](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/tag-major.yml)
 
 ParmaAI analytics repository providing data processing and inference.
