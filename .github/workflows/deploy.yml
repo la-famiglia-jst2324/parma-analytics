@@ -27,4 +27,29 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 40
     steps:
-      - run: exit 0
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Configure GCP credentials
+        uses: google-github-actions/setup-gcloud@master
+        with:
+          version: "290.0.1"
+          service_account_email: ${{ secrets.GCP_SA_EMAIL }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+      - name: Terraform Init
+        uses: hashicorp/setup-terraform@v3
+        working_directory: terraform/${{ env.DEPLOYMENT_ENV }}
+        with:
+          terraform_version: 1.5.3
+      - name: Terraform plan
+        working_directory: terraform/${{ env.DEPLOYMENT_ENV }}
+        run: terraform plan
+        env:
+          TF_VAR_db_root_password: ${{ secrets.DB_ROOT_PASSWORD }}
+      - name: Terraform apply
+        working_directory: terraform/${{ env.DEPLOYMENT_ENV }}
+        run: terraform apply -auto-approve
+        env:
+          TF_VAR_db_root_password: ${{ secrets.DB_ROOT_PASSWORD }}
