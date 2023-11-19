@@ -4,6 +4,9 @@ import os
 from urllib.parse import quote
 
 from sqlalchemy.engine import create_engine
+from sqlalchemy.orm import sessionmaker
+
+engine = None
 
 
 def get_engine():
@@ -17,4 +20,16 @@ def get_engine():
     db_url = (
         f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
     )
-    return create_engine(db_url, client_encoding="utf8")
+    engine = create_engine(db_url, client_encoding="utf8")
+    return engine
+
+
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+def get_db():
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

@@ -3,7 +3,7 @@
 from fastapi import APIRouter, Depends
 from pydantic import UUID4
 from sqlalchemy.orm import Session
-from parma_analytics.api.main import get_db
+from parma_analytics.db.prod.engine import get_db
 
 # Import your models from the models file
 from parma_analytics.api.schemas.source_measurement import (

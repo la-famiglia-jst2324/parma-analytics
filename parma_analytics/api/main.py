@@ -1,7 +1,6 @@
 """Main entrypoint for the API routes in of parma-analytics."""
 
 from fastapi import FastAPI
-from sqlalchemy.orm import sessionmaker
 
 from parma_analytics.db.prod.engine import get_engine
 
@@ -11,19 +10,8 @@ from .routes import dummy_router, source_measurement_router
 app = FastAPI()
 
 # initialize database layer
-engine = get_engine()
-app.state.engine = engine
+app.state.engine = get_engine()
 init_db_models(app.state.engine)
-
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 # root endpoint
