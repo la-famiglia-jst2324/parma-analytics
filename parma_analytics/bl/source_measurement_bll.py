@@ -1,5 +1,5 @@
 # source_measurement_bll.py
-from parma_analytics.api.models.source_measurement import (
+from parma_analytics.api.schemas.source_measurement import (
     ApiSourceMeasurementCreateIn,
     ApiSourceMeasurementUpdateIn,
 )

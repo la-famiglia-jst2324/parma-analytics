@@ -1,4 +1,4 @@
-from parma_analytics.api.models.measurementGenericValue import (
+from parma_analytics.api.schemas.measurement_generic_value import (
     _ApiMeasurementGenericValueBase,
     _ApiMeasurementGenericValueIdMixin,
 )
@@ -8,16 +8,16 @@ from parma_analytics.api.models.measurementGenericValue import (
 # ------------------------------------------------------------------------------------ #
 
 
-class _ApiMeasurementFloatValueBase(_ApiMeasurementGenericValueBase):
-    """Internal base model for the MeasurementFloatValue endpoints."""
+class _ApiMeasurementIntegerValueBase(_ApiMeasurementGenericValueBase):
+    """Internal base model for the MeasurementIntegerValue endpoints."""
 
-    value: float
+    value: int
 
 
-class _ApiMeasurementFloatValueOutBase(
-    _ApiMeasurementFloatValueBase, _ApiMeasurementGenericValueIdMixin
+class _ApiMeasurementIntegerValueOutBase(
+    _ApiMeasurementIntegerValueBase, _ApiMeasurementGenericValueIdMixin
 ):
-    """Output base model for the MeasurementFloatValue endpoint."""
+    """Output base model for the MeasurementIntegerValue endpoint."""
 
     pass
 
@@ -27,14 +27,14 @@ class _ApiMeasurementFloatValueOutBase(
 # ------------------------------------------------------------------------------------ #
 
 
-class ApiMeasurementFloatValueCreateIn(_ApiMeasurementFloatValueBase):
-    """Input model for the MeasurementFloatValue creation endpoint."""
+class ApiMeasurementIntegerValueCreateIn(_ApiMeasurementIntegerValueBase):
+    """Input model for the MeasurementIntegerValue creation endpoint."""
 
     pass
 
 
-class ApiMeasurementFloatValueCreateOut(_ApiMeasurementFloatValueOutBase):
-    """Output model for the MeasurementFloatValue creation endpoint."""
+class ApiMeasurementIntegerValueCreateOut(_ApiMeasurementIntegerValueOutBase):
+    """Output model for the MeasurementIntegerValue creation endpoint."""
 
     pass
 
@@ -44,8 +44,8 @@ class ApiMeasurementFloatValueCreateOut(_ApiMeasurementFloatValueOutBase):
 # ------------------------------------------------------------------------------------ #
 
 
-class ApiMeasurementFloatValueOut(_ApiMeasurementFloatValueOutBase):
-    """Output model for the MeasurementFloatValue retrieval endpoint."""
+class ApiMeasurementIntegerValueOut(_ApiMeasurementIntegerValueOutBase):
+    """Output model for the MeasurementIntegerValue retrieval endpoint."""
 
     pass
 
@@ -55,13 +55,13 @@ class ApiMeasurementFloatValueOut(_ApiMeasurementFloatValueOutBase):
 # ------------------------------------------------------------------------------------ #
 
 
-class ApiMeasurementFloatValueUpdateIn(_ApiMeasurementFloatValueBase):
-    """Input model for the MeasurementFloatValue update endpoint."""
+class ApiMeasurementIntegerValueUpdateIn(_ApiMeasurementIntegerValueBase):
+    """Input model for the MeasurementIntegerValue update endpoint."""
 
     pass
 
 
-class ApiMeasurementFloatValueUpdateOut(_ApiMeasurementFloatValueOutBase):
-    """Output model for the MeasurementFloatValue update endpoint."""
+class ApiMeasurementIntegerValueUpdateOut(_ApiMeasurementIntegerValueOutBase):
+    """Output model for the MeasurementIntegerValue update endpoint."""
 
     pass

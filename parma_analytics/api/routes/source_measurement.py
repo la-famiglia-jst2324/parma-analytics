@@ -4,7 +4,7 @@ from fastapi import APIRouter
 from pydantic import UUID4
 
 # Import your models from the models file
-from parma_analytics.api.models.source_measurement import (
+from parma_analytics.api.schemas.source_measurement import (
     ApiSourceMeasurementCreateIn,
     ApiSourceMeasurementCreateOut,
     ApiSourceMeasurementOut,

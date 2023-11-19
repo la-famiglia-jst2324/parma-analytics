@@ -1,4 +1,4 @@
-from parma_analytics.api.models.measurementGenericValue import (
+from parma_analytics.api.schemas.measurement_generic_value import (
     _ApiMeasurementGenericValueBase,
     _ApiMeasurementGenericValueIdMixin,
 )
@@ -7,19 +7,17 @@ from parma_analytics.api.models.measurementGenericValue import (
 #                                       Internal                                       #
 # ------------------------------------------------------------------------------------ #
 
-## TODO: check if this needs to be removed.
 
-
-class _ApiMeasurementParagraphValueBase(_ApiMeasurementGenericValueBase):
-    """Internal base model for the MeasurementParagraphValue endpoints."""
+class _ApiMeasurementTextValueBase(_ApiMeasurementGenericValueBase):
+    """Internal base model for the MeasurementTextValue endpoints."""
 
     value: str
 
 
-class _ApiMeasurementParagraphValueOutBase(
-    _ApiMeasurementParagraphValueBase, _ApiMeasurementGenericValueIdMixin
+class _ApiMeasurementTextValueOutBase(
+    _ApiMeasurementTextValueBase, _ApiMeasurementGenericValueIdMixin
 ):
-    """Output base model for the MeasurementParagraphValue endpoint."""
+    """Output base model for the MeasurementTextValue endpoint."""
 
     pass
 
@@ -29,14 +27,14 @@ class _ApiMeasurementParagraphValueOutBase(
 # ------------------------------------------------------------------------------------ #
 
 
-class ApiMeasurementParagraphValueCreateIn(_ApiMeasurementParagraphValueBase):
-    """Input model for the MeasurementParagraphValue creation endpoint."""
+class ApiMeasurementTextValueCreateIn(_ApiMeasurementTextValueBase):
+    """Input model for the MeasurementTextValue creation endpoint."""
 
     pass
 
 
-class ApiMeasurementParagraphValueCreateOut(_ApiMeasurementParagraphValueOutBase):
-    """Output model for the MeasurementParagraphValue creation endpoint."""
+class ApiMeasurementTextValueCreateOut(_ApiMeasurementTextValueOutBase):
+    """Output model for the MeasurementTextValue creation endpoint."""
 
     pass
 
@@ -46,8 +44,8 @@ class ApiMeasurementParagraphValueCreateOut(_ApiMeasurementParagraphValueOutBase
 # ------------------------------------------------------------------------------------ #
 
 
-class ApiMeasurementParagraphValueOut(_ApiMeasurementParagraphValueOutBase):
-    """Output model for the MeasurementParagraphValue retrieval endpoint."""
+class ApiMeasurementTextValueOut(_ApiMeasurementTextValueOutBase):
+    """Output model for the MeasurementTextValue retrieval endpoint."""
 
     pass
 
@@ -57,13 +55,13 @@ class ApiMeasurementParagraphValueOut(_ApiMeasurementParagraphValueOutBase):
 # ------------------------------------------------------------------------------------ #
 
 
-class ApiMeasurementParagraphValueUpdateIn(_ApiMeasurementParagraphValueBase):
-    """Input model for the MeasurementParagraphValue update endpoint."""
+class ApiMeasurementTextValueUpdateIn(_ApiMeasurementTextValueBase):
+    """Input model for the MeasurementTextValue update endpoint."""
 
     pass
 
 
-class ApiMeasurementParagraphValueUpdateOut(_ApiMeasurementParagraphValueOutBase):
-    """Output model for the MeasurementParagraphValue update endpoint."""
+class ApiMeasurementTextValueUpdateOut(_ApiMeasurementTextValueOutBase):
+    """Output model for the MeasurementTextValue update endpoint."""
 
     pass
