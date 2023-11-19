@@ -2,9 +2,9 @@
 
 from fastapi import FastAPI
 
-from parma_analytics.db.prod import init_db_models
 from parma_analytics.db.prod.engine import get_engine
 
+from ..db.prod import init_db_models
 from .routes import dummy_router
 
 app = FastAPI()

@@ -1,0 +1,65 @@
+name: Deploy
+permissions: write-all
+on:
+  push:
+    branches: [main]
+  release:
+    types: [published]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+defaults:
+  run:
+    shell: bash -el {0}
+
+env:
+  TF_VAR_db_root_password: ${{ github.event_name == 'release' && secrets.PROD_POSTGRES_PASSWORD || secrets.STAGING_POSTGRES_PASSWORD}}
+
+jobs:
+  deploy:
+    name: Deploy - ${{ matrix.DEPLOYMENT_ENV }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    strategy:
+      matrix:
+        DEPLOYMENT_ENV:
+          ["${{ github.event_name == 'release' && 'prod' || 'staging' }}"]
+    defaults:
+      run:
+        working-directory: ./terraform/${{ matrix.DEPLOYMENT_ENV }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Configure gcloud CLI
+        uses: google-github-actions/setup-gcloud@63496e652100112a8db8a71668b77c67aa1ab071
+        with:
+          version: "416.0.0"
+          service_account_email: ${{ secrets.GCP_SA_EMAIL }}
+          service_account_key: ${{ secrets.GCP_SA_KEY }}
+          export_default_credentials: true
+      - name: Test gcloud cli
+        run: gcloud auth list --filter=status:ACTIVE --format="value(account)"
+      - name: Terraform setup
+        uses: hashicorp/setup-terraform@v3
+        with:
+          terraform_version: 1.5.3
+      - name: Store credentials file
+        run: |
+          mkdir -p ./../.secrets/
+          echo -n "$KEYSTORE" > ./../.secrets/la-famiglia-parma-ai.json
+        env:
+          KEYSTORE: ${{ secrets.GCP_SA_KEY }}
+      - name: Activate service account
+        run: gcloud auth activate-service-account --key-file=./../.secrets/la-famiglia-parma-ai.json
+      - name: Authenticate with GCR
+        run: gcloud auth configure-docker europe-west1-docker.pkg.dev
+      - name: Terraform init
+        run: terraform init
+      - name: Terraform plan
+        run: terraform plan
+      - name: Terraform apply
+        run: terraform apply -auto-approve
