@@ -5,7 +5,7 @@ from fastapi import FastAPI
 from parma_analytics.db.prod.engine import get_engine
 
 from ..db.prod import init_db_models
-from .routes import dummy_router
+from .routes import dummy_router, source_measurement_router
 
 app = FastAPI()
 
@@ -21,7 +21,5 @@ def root():
     return {"welcome": "at parma-analytics"}
 
 
-app.include_router(
-    dummy_router,
-    tags=["dummy"],
-)
+app.include_router(dummy_router, tags=["dummy"])
+app.include_router(source_measurement_router, tags=["source_measurement"])
