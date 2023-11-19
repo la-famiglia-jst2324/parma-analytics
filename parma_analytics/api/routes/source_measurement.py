@@ -1,7 +1,9 @@
 # source_measurement.py
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from pydantic import UUID4
+from sqlalchemy.orm import Session
+from parma_analytics.api.main import get_db
 
 # Import your models from the models file
 from parma_analytics.api.schemas.source_measurement import (
@@ -26,14 +28,14 @@ router = APIRouter()
 
 @router.post("/source-measurement", status_code=201)
 def create_source_measurement(
-    source_measurement: ApiSourceMeasurementCreateIn,
+    source_measurement: ApiSourceMeasurementCreateIn, db: Session = Depends(get_db)
 ) -> ApiSourceMeasurementCreateOut:
     """SourceMeasurement POST endpoint for the API.
 
     Args:
         source_measurement: The SourceMeasurement object to create.
     """
-    created_source_measurement = create_source_measurement_bll(source_measurement)
+    created_source_measurement = create_source_measurement_bll(db, source_measurement)
 
     # hand over to business logic layer and transform the result to the API model again
     return ApiSourceMeasurementCreateOut(created_source_measurement)
@@ -60,7 +62,7 @@ def read_all_source_measurements(
 
 @router.get("/source-measurement/{source_measurement_id}", status_code=200)
 def read_source_measurement(
-    source_measurement_id: UUID4,
+    source_measurement_id: UUID4, db: Session = Depends(get_db)
 ) -> ApiSourceMeasurementOut:
     """SourceMeasurement GET endpoint for the API.
 
@@ -69,7 +71,9 @@ def read_source_measurement(
     """
 
     # fetch from the database layer through the business logic layer
-    retrieved_source_measurement = read_source_measurement_bll(source_measurement_id)
+    retrieved_source_measurement = read_source_measurement_bll(
+        db, source_measurement_id
+    )
 
     return ApiSourceMeasurementOut(retrieved_source_measurement)
 
@@ -78,6 +82,7 @@ def read_source_measurement(
 def update_source_measurement(
     source_measurement_id: UUID4,
     source_measurement: ApiSourceMeasurementUpdateIn,
+    db: Session = Depends(get_db),
 ) -> ApiSourceMeasurementUpdateOut:
     """SourceMeasurement PUT endpoint for the API.
 
@@ -87,19 +92,21 @@ def update_source_measurement(
     """
     # hand over to business logic layer and transform the result to the API model again
     updated_source_measurement = update_source_measurement_bll(
-        source_measurement_id, source_measurement
+        db, source_measurement_id, source_measurement
     )
 
     return ApiSourceMeasurementUpdateOut(updated_source_measurement)
 
 
 @router.delete("/source_measurement/{source_measurement_id}", status_code=204)
-def delete_source_measurement(source_measurement_id: UUID4) -> None:
+def delete_source_measurement(
+    source_measurement_id: UUID4, db: Session = Depends(get_db)
+) -> None:
     """SourceMeasurement DELETE endpoint for the API.
 
     Args:
         source_measurement_id: The ID of the SourceMeasurement.
     """
     # hand over to business logic layer
-    delete_source_measurement_bll(source_measurement_id)
+    delete_source_measurement_bll(db, source_measurement_id)
     pass

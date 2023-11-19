@@ -12,13 +12,11 @@ from parma_analytics.db.prod.source_measurement_orm import (
     delete_source_measurement_orm,
 )
 
-from parma_analytics.db.prod.engine import get_engine
-
-# Dummy, to be changed later
-engine = get_engine()
+from sqlalchemy.orm import Session
 
 
 def create_source_measurement_bll(
+    db: Session,
     source_measurement: ApiSourceMeasurementCreateIn,
 ) -> UUID4:
     """Business logic function for creating a SourceMeasurement.
@@ -29,10 +27,10 @@ def create_source_measurement_bll(
     Returns:
         UUID4: The ID of the created SourceMeasurement.
     """
-    return create_source_measurement_orm(engine, source_measurement)
+    return create_source_measurement_orm(db, source_measurement)
 
 
-def read_source_measurement_bll(source_measurement_id: UUID4):
+def read_source_measurement_bll(db: Session, source_measurement_id: UUID4):
     """Business logic function for reading a SourceMeasurement.
 
     Args:
@@ -41,11 +39,13 @@ def read_source_measurement_bll(source_measurement_id: UUID4):
     Returns:
         The requested SourceMeasurement.
     """
-    return get_source_measurement_orm(engine, source_measurement_id)
+    return get_source_measurement_orm(db, source_measurement_id)
 
 
 def update_source_measurement_bll(
-    source_measurement_id: UUID4, source_measurement: ApiSourceMeasurementUpdateIn
+    db: Session,
+    source_measurement_id: UUID4,
+    source_measurement: ApiSourceMeasurementUpdateIn,
 ):
     """Business logic function for updating a SourceMeasurement.
 
@@ -56,21 +56,19 @@ def update_source_measurement_bll(
     Returns:
         The updated SourceMeasurement.
     """
-    return update_source_measurement_orm(
-        engine, source_measurement_id, source_measurement
-    )
+    return update_source_measurement_orm(db, source_measurement_id, source_measurement)
 
 
-def delete_source_measurement_bll(source_measurement_id: UUID4):
+def delete_source_measurement_bll(db: Session, source_measurement_id: UUID4):
     """Business logic function for deleting a SourceMeasurement.
 
     Args:
         source_measurement_id: The ID of the SourceMeasurement to delete.
     """
-    delete_source_measurement_orm(engine, source_measurement_id)
+    delete_source_measurement_orm(db, source_measurement_id)
 
 
-def list_source_measurements_bll(page: int, page_size: int):
+def list_source_measurements_bll(db: Session, page: int, page_size: int):
     """Business logic function for listing all SourceMeasurements.
 
     Args:
@@ -83,4 +81,4 @@ def list_source_measurements_bll(page: int, page_size: int):
     """
     # Perform any necessary business logic operations here
     # Then, call the function from your data access layer to fetch the list of SourceMeasurements from the database
-    return list_source_measurements_orm(engine, page=page, page_size=page_size)
+    return list_source_measurements_orm(db, page=page, page_size=page_size)

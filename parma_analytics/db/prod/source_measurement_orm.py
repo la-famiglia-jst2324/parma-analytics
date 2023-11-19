@@ -1,5 +1,4 @@
 from typing import Optional
-from sqlalchemy.engine import Engine
 from sqlalchemy.orm.session import Session
 
 from parma_analytics.db.prod.models.source_measurement_db import DbSourceMeasurement
@@ -15,7 +14,7 @@ from parma_analytics.db.prod.utils.paginate import (
 
 
 def create_source_measurement_orm(
-    engine: Engine, source_measurement_data
+    db: Session, source_measurement_data
 ) -> DbSourceMeasurement:
     """Create a source measurement.
 
@@ -26,16 +25,15 @@ def create_source_measurement_orm(
     Returns:
         The created source measurement.
     """
-    with Session(engine) as session:
-        db_source_measurement = DbSourceMeasurement(**source_measurement_data)
-        session.add(db_source_measurement)
-        session.commit()
-        session.refresh(db_source_measurement)
-        return db_source_measurement
+    db_source_measurement = DbSourceMeasurement(**source_measurement_data)
+    db.add(db_source_measurement)
+    db.commit()
+    db.refresh(db_source_measurement)
+    return db_source_measurement
 
 
 def get_source_measurement_orm(
-    engine: Engine, source_measurement_id
+    db: Session, source_measurement_id
 ) -> DbSourceMeasurement | None:
     """Get a source measurement by its ID.
 
@@ -46,13 +44,12 @@ def get_source_measurement_orm(
     Returns:
         The source measurement if it exists, otherwise None.
     """
-    with Session(engine) as session:
-        return session.get(DbSourceMeasurement, source_measurement_id)
+    return db.get(DbSourceMeasurement, source_measurement_id)
 
 
 @paginate(default_page_size=5)
 def list_source_measurements_orm(
-    engine: Engine, *, page: Optional[int], page_size: Optional[int]
+    db: Session, *, page: Optional[int], page_size: Optional[int]
 ) -> ListPaginationResult[DbSourceMeasurement]:
     """List all source measurements.
 
@@ -64,15 +61,15 @@ def list_source_measurements_orm(
     Returns:
         A paginated list of source measurements.
     """
-    with Session(engine) as session:
-        query = session.query(DbSourceMeasurement)
-        if page is not None and page_size is not None:
-            return paginate_query(query, page=page, page_size=page_size)
-        return paginate_query(query, page=100, page_size=100)
+
+    query = db.query(DbSourceMeasurement)
+    if page is not None and page_size is not None:
+        return paginate_query(query, page=page, page_size=page_size)
+    return paginate_query(query, page=100, page_size=100)
 
 
 def update_source_measurement_orm(
-    engine: Engine, source_measurement_id, source_measurement_data
+    db: Session, source_measurement_id, source_measurement_data
 ) -> DbSourceMeasurement:
     """Update a source measurement.
 
@@ -84,17 +81,16 @@ def update_source_measurement_orm(
     Returns:
         The updated source measurement.
     """
-    with Session(engine) as session:
-        db_source_measurement = session.get(DbSourceMeasurement, source_measurement_id)
-        for key, value in source_measurement_data.items():
-            setattr(db_source_measurement, key, value)
-        session.commit()
-        session.refresh(db_source_measurement)
-        return db_source_measurement
+    db_source_measurement = db.get(DbSourceMeasurement, source_measurement_id)
+    for key, value in source_measurement_data.items():
+        setattr(db_source_measurement, key, value)
+    db.commit()
+    db.refresh(db_source_measurement)
+    return db_source_measurement
 
 
 def delete_source_measurement_orm(
-    engine: Engine, source_measurement_id
+    db: Session, source_measurement_id
 ) -> DbSourceMeasurement:
     """Delete a source measurement.
 
@@ -104,9 +100,7 @@ def delete_source_measurement_orm(
     Returns:
         The deleted source measurement.
     """
-
-    with Session(engine) as session:
-        db_source_measurement = session.get(DbSourceMeasurement, source_measurement_id)
-        session.delete(db_source_measurement)
-        session.commit()
-        return db_source_measurement
+    db_source_measurement = db.get(DbSourceMeasurement, source_measurement_id)
+    db.delete(db_source_measurement)
+    db.commit()
+    return db_source_measurement
