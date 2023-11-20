@@ -170,7 +170,9 @@ graph LR
         bl <--> db.prod
     end
 ```
+
 ### `parma-analytics` data model
+
 ```mermaid
 erDiagram
     BUCKET ||--o{ COMPANY_BUCKET_MEMBERSHIP : "N"
@@ -273,7 +275,7 @@ erDiagram
         uuid data_source_id FK
         date timestamp
     }
-    
+
     NOTIFICATION_CHANNEL {
         uuid channel_id PK, FK
         uuid entity_id FK
@@ -322,6 +324,7 @@ erDiagram
     }
 
 ```
+
 ## Getting Started
 
 The following steps will get you started with the project.
