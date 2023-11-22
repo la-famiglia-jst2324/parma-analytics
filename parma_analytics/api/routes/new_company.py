@@ -18,7 +18,7 @@ router = APIRouter()
 def register_new_company(company: ApiNewCompanyCreateIn):
     # Validate or process the company data as needed.
 
-    # Forward the company data to another backend
+    # Forward the company data to another backend.
     try:
         # TODO: change the sourcing url once provided.
         response = requests.post("http://sourcing-backend/api/receive-company", company)
