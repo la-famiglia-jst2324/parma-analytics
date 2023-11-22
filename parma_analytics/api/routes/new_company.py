@@ -10,7 +10,11 @@ from parma_analytics.api.models.new_company import (
 router = APIRouter()
 
 
-@router.post("/new-company", status_code=201)
+@router.post(
+    "/new-company",
+    status_code=201,
+    description="Endpoint to receive a new company. The data is forwarded to the sourcing backend for registering and further processing.",
+)
 def register_new_company(company: ApiNewCompanyCreateIn):
     # Validate or process the company data as needed
 

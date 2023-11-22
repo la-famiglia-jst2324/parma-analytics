@@ -1,5 +1,3 @@
-"""Example of a model for the API."""
-
 from pydantic import BaseModel
 
 # ------------------------------------------------------------------------------------ #
