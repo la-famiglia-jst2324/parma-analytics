@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException
 import requests
+from starlette import status
 
 
 from parma_analytics.api.models.new_company import (
@@ -12,7 +13,7 @@ router = APIRouter()
 
 @router.post(
     "/new-company",
-    status_code=201,
+    status_code=status.HTTP_201_CREATED,
     description="Endpoint to receive a new company. The data is forwarded to the sourcing backend for registering and further processing.",
 )
 def register_new_company(company: ApiNewCompanyCreateIn):
@@ -25,7 +26,7 @@ def register_new_company(company: ApiNewCompanyCreateIn):
         response.raise_for_status()
     except requests.HTTPError as e:
         raise HTTPException(
-            status_code=500,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error forwarding company to the data sourcing modules: {str(e)}",
         )
 
