@@ -5,8 +5,7 @@ from fastapi import FastAPI
 from parma_analytics.db.prod.engine import get_engine
 
 from ..db.prod import init_db_models
-from .routes import dummy_router
-from .routes import crawling_finished_router
+from .routes import dummy_router, crawling_finished_router, new_company_router
 
 app = FastAPI()
 
@@ -30,4 +29,9 @@ app.include_router(
 app.include_router(
     crawling_finished_router,
     tags=["crawling_finished"],
+)
+
+app.include_router(
+    new_company_router,
+    tags=["new_company"],
 )
