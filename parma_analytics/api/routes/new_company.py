@@ -1,7 +1,6 @@
-from fastapi import APIRouter, HTTPException
 import requests
+from fastapi import APIRouter, HTTPException
 from starlette import status
-
 
 from parma_analytics.api.models.new_company import (
     ApiNewCompanyCreateIn,
