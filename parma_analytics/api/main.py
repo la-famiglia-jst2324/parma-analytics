@@ -6,6 +6,7 @@ from parma_analytics.db.prod import init_db_models
 from parma_analytics.db.prod.engine import get_engine
 
 from .routes import dummy_router
+from .routes import crawling_finished_router
 
 app = FastAPI()
 
@@ -24,4 +25,9 @@ def root():
 app.include_router(
     dummy_router,
     tags=["dummy"],
+)
+
+app.include_router(
+    crawling_finished_router,
+    tags=["crawling_finished"],
 )
