@@ -31,6 +31,7 @@ def register_new_company(company: ApiNewCompanyCreateIn):
         )
 
     return ApiNewCompanyCreateOut(
+        id=company.id,
         company_name=company.company_name,
         return_message="New company forwarded to data sourcing successfully",
     )
