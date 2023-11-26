@@ -2,7 +2,7 @@
 
 from fastapi import APIRouter
 
-from parma_analytics.api.schemas.dummy import (
+from parma_analytics.api.models.dummy import (
     ApiDummyCreateIn,
     ApiDummyCreateOut,
     ApiDummyOut,

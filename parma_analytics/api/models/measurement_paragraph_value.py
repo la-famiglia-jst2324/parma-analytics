@@ -1,4 +1,4 @@
-from parma_analytics.api.schemas.measurement_generic_value import (
+from parma_analytics.api.models.measurement_generic_value import (
     _ApiMeasurementGenericValueBase,
     _ApiMeasurementGenericValueIdMixin,
 )
