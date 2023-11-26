@@ -4,6 +4,7 @@ from fastapi.testclient import TestClient
 
 client = TestClient(app)
 
+
 def test_create_trigger_data_sources():
     assert app
     test_data = {
