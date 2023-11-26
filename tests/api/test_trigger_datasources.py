@@ -1,5 +1,6 @@
 from parma_analytics.api import app
 from fastapi.testclient import TestClient
+from starlette import status
 
 
 client = TestClient(app)
@@ -16,7 +17,7 @@ def test_create_trigger_data_sources():
 
     response = client.post("/trigger-datasources/", json=test_data)
 
-    assert response.status_code == 201
+    assert response.status_code == status.HTTP_201_CREATED
     assert response.json() == {
         "return_message": "Trigger data sources created successfully"
     }
