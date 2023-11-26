@@ -21,6 +21,7 @@ def register_new_company(company: ApiNewCompanyCreateIn) -> ApiNewCompanyCreateO
     # Forward the company data to the Data Retrieval Controller backend.
 
     return ApiNewCompanyCreateOut(
+        id=company.id,
         company_name=company.company_name,
         return_message="New company forwarded to data sourcing successfully",
     )
