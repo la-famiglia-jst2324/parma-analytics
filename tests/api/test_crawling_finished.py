@@ -37,3 +37,13 @@ def test_crawling_finished_missing_field(client):
         error["msg"] == "Field required" and error["type"] == "missing"
         for error in response.json()["detail"]
     )
+
+    actual_errors = response.json()["detail"]
+    print("Actual Errors in Response:", actual_errors)
+
+    # Check for the expected error structure
+    expected_error = {
+        "type": "missing",
+        "msg": "Field required"
+    }
+    assert expected_error in actual_errors

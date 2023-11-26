@@ -39,7 +39,14 @@ def test_register_new_company_missing_field(client):
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert "detail" in response.json()
-    assert any(
-        error["msg"] == "JSON decode error" and error["type"] == "json_invalid"
-        for error in response.json()["detail"]
-    )
+    
+    actual_errors = response.json()["detail"]
+    print("Actual Errors in Response:", actual_errors)
+
+    # Check for the expected error structure
+    expected_error = {
+        "type": "json_invalid",
+        "msg": "JSON decode error",
+        "ctx": {"error": "Expecting property name enclosed in double quotes"},
+    }
+    assert expected_error in actual_errors
