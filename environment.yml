@@ -20,6 +20,7 @@ dependencies:
   # Testing
   - pytest >=6 # --import-mode option
   - pytest-cov
+  - httpx
   # Dependencies (core)
   - fastapi >=0.104.0
   - polars >=0.19.0
