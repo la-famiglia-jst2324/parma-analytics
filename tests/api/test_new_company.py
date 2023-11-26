@@ -39,7 +39,7 @@ def test_register_new_company_missing_field(client):
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert "detail" in response.json()
-    
+
     actual_errors = response.json()["detail"]
     print("Actual Errors in Response:", actual_errors)
 
