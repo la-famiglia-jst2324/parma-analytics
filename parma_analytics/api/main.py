@@ -4,7 +4,12 @@ from fastapi import FastAPI
 
 from parma_analytics.db.prod.engine import get_engine
 
-from .routes import crawling_finished_router, dummy_router, new_company_router
+from .routes import (
+    crawling_finished_router,
+    dummy_router,
+    new_company_router,
+    trigger_datasources_router,
+)
 
 app = FastAPI()
 
@@ -32,4 +37,9 @@ app.include_router(
 app.include_router(
     new_company_router,
     tags=["new_company"],
+)
+
+app.include_router(
+    trigger_datasources_router,
+    tags=["trigger_datasources"],
 )
