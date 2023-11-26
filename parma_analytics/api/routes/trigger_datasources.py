@@ -15,7 +15,9 @@ router = APIRouter()
     description="""Endpoint to receive the trigger for the data sources.
         Expects a dictionary of data source ids as keys and the company ids for which they will be triggered as values.""",
 )
-async def create_trigger_data_sources(body: ApiTriggerDataSourcesCreateIn):
+async def create_trigger_data_sources(
+    body: ApiTriggerDataSourcesCreateIn,
+) -> ApiTriggerDataSourcesCreateOut:
     # the dictionary containing the module ids and company ids.
     trigger_data = body.trigger_data
 
