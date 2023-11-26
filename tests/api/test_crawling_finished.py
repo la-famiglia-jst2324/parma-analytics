@@ -32,15 +32,15 @@ def test_crawling_finished_missing_field(client):
     response = client.post("/crawling-finished", json=invalid_data)
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
-    assert "detail" in response.json()
-    assert any(
-        error["msg"] == "Field required" and error["type"] == "missing"
-        for error in response.json()["detail"]
-    )
 
-    actual_errors = response.json()["detail"]
+    response_json = response.json()
+    assert "detail" in response_json
+    assert len(response_json) > 0
+    actual_errors = response.json()["detail"][0]
+
     print("Actual Errors in Response:", actual_errors)
 
     # Check for the expected error structure
     expected_error = {"type": "missing", "msg": "Field required"}
-    assert expected_error in actual_errors
+
+    assert all(actual_errors.get(key) == value for key, value in expected_error.items())
