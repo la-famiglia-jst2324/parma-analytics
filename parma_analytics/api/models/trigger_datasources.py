@@ -1,18 +1,18 @@
 from pydantic import BaseModel
+from typing import Dict, List
 
 # ------------------------------------------------------------------------------------ #
 #                                       Internal                                       #
 # ------------------------------------------------------------------------------------ #
 
 
-class _ApiNewCompanyBase(BaseModel):
-    """Internal base model for the new company endpoints."""
+class _ApiTriggerDataSourcesBase(BaseModel):
+    """Internal base model for the trigger datasources endpoints."""
 
-    id: int
-    company_name: str
+    pass
 
 
-class _ApiNewCompanyOutBase(_ApiNewCompanyBase):
+class _ApiTriggerDataSourcesOutBase(_ApiTriggerDataSourcesBase):
     """Output base model for the several endpoint."""
 
     return_message: str
@@ -23,14 +23,14 @@ class _ApiNewCompanyOutBase(_ApiNewCompanyBase):
 # ------------------------------------------------------------------------------------ #
 
 
-class ApiNewCompanyCreateIn(_ApiNewCompanyBase):
-    """Input model for the NewCompany creation endpoint."""
+class ApiTriggerDataSourcesCreateIn(_ApiTriggerDataSourcesBase):
+    """Input model for the TriggerDataSources creation endpoint."""
 
-    description: str
-    added_by: str
+    # the api accepts a dictionary of data_source_id as key and list of company ids as values.
+    trigger_data: Dict[int, List[int]]
 
 
-class ApiNewCompanyCreateOut(_ApiNewCompanyOutBase):
-    """Output model for the NewCompany creation endpoint."""
+class ApiTriggerDataSourcesCreateOut(_ApiTriggerDataSourcesOutBase):
+    """Output model for the TriggerDataSources creation endpoint."""
 
     pass

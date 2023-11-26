@@ -14,6 +14,7 @@ def client():
 def test_register_new_company(client):
     # Replace this dictionary with your test data
     test_data = {
+        "id": "123",
         "company_name": "Example Company",
         "description": "A sample company",
         "added_by": "John Doe",
@@ -23,6 +24,7 @@ def test_register_new_company(client):
 
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json() == {
+        "id": 123,
         "company_name": "Example Company",
         "return_message": "New company forwarded to data sourcing successfully",
     }
