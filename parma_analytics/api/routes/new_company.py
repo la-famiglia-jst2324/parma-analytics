@@ -15,7 +15,7 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
     description="Endpoint to receive a new company. The data is forwarded to the sourcing backend for registering and further processing.",
 )
-def register_new_company(company: ApiNewCompanyCreateIn):
+def register_new_company(company: ApiNewCompanyCreateIn) -> ApiNewCompanyCreateOut:
     # Validate or process the company data as needed.
 
     # Forward the company data to the Data Retrieval Controller backend.
