@@ -1,6 +1,8 @@
+import pytest
 from parma_analytics.api import app
 from fastapi.testclient import TestClient
 from starlette import status
+
 
 # Fixture to check if the FastAPI app exists
 @pytest.fixture
