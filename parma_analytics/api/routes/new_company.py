@@ -1,7 +1,6 @@
 from fastapi import APIRouter
 from starlette import status
 
-
 from parma_analytics.api.models.new_company import (
     ApiNewCompanyCreateIn,
     ApiNewCompanyCreateOut,
