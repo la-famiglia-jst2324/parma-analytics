@@ -11,7 +11,7 @@ def client():
     return TestClient(app)
 
 
-def test_crawling_finished():
+def test_crawling_finished(client):
     incoming_msg = "Crawling job completed successfully"
 
     test_data = {"incoming_message": incoming_msg}
@@ -25,7 +25,7 @@ def test_crawling_finished():
     }
 
 
-def test_crawling_finished_missing_field():
+def test_crawling_finished_missing_field(client):
     # Test with missing 'incoming_message' field
     invalid_data = {"dummy_json": "empty"}
 

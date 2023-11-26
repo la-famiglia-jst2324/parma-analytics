@@ -11,7 +11,7 @@ def client():
     return TestClient(app)
 
 
-def test_register_new_company():
+def test_register_new_company(client):
     # Replace this dictionary with your test data
     test_data = {
         "company_name": "Example Company",
@@ -28,7 +28,7 @@ def test_register_new_company():
     }
 
 
-def test_register_new_company_missing_field():
+def test_register_new_company_missing_field(client):
     # Test with missing 'company_name' field
     invalid_data = {
         "description": "A sample company",
