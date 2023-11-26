@@ -1,5 +1,4 @@
-from fastapi import APIRouter, HTTPException
-import requests
+from fastapi import APIRouter
 from starlette import status
 
 
@@ -19,16 +18,7 @@ router = APIRouter()
 def register_new_company(company: ApiNewCompanyCreateIn):
     # Validate or process the company data as needed.
 
-    # Forward the company data to another backend.
-    try:
-        # TODO: change the sourcing url once provided.
-        response = requests.post("http://sourcing-backend/api/receive-company", company)
-        response.raise_for_status()
-    except requests.HTTPError as e:
-        raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error forwarding company to the data sourcing modules: {str(e)}",
-        )
+    # Forward the company data to the Data Retrieval Controller backend.
 
     return ApiNewCompanyCreateOut(
         company_name=company.company_name,
