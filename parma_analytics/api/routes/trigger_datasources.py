@@ -19,10 +19,8 @@ async def create_trigger_data_sources(body: ApiTriggerDataSourcesCreateIn):
     # the dictionary containing the module ids and company ids.
     trigger_data = body.trigger_data
 
-    # Later specify the trigger flow here
     print(trigger_data)
 
-    # Return the output model
     return ApiTriggerDataSourcesCreateOut(
         return_message="Trigger data sources created successfully",
     )
