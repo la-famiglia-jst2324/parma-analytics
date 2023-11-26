@@ -1,6 +1,8 @@
-import requests
 from parma_analytics.api import app
+from fastapi.testclient import TestClient
 
+
+client = TestClient(app)
 
 def test_create_trigger_data_sources():
     assert app
@@ -11,7 +13,7 @@ def test_create_trigger_data_sources():
         }
     }
 
-    response = requests.post("/trigger-datasources/", json=test_data)
+    response = client.post("/trigger-datasources/", json=test_data)
 
     assert response.status_code == 201
     assert response.json() == {
