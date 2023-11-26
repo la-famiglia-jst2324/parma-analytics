@@ -47,8 +47,8 @@ def test_register_new_company_missing_field(client):
 
     # Check for the expected error structure
     expected_error = {
-        "type": "json_invalid",
-        "msg": "JSON decode error",
+        "type": "missing",
+        "msg": "Field required",
     }
 
     assert all(actual_errors.get(key) == value for key, value in expected_error.items())
