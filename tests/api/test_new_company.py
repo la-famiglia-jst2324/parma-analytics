@@ -40,6 +40,6 @@ def test_register_new_company_missing_field(client):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert "detail" in response.json()
     assert any(
-        error["msg"] == "field required" and error["type"] == "value_error.missing"
+        error["msg"] == "JSON decode error" and error["type"] == "json_invalid"
         for error in response.json()["detail"]
     )

@@ -34,6 +34,6 @@ def test_crawling_finished_missing_field(client):
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
     assert "detail" in response.json()
     assert any(
-        error["msg"] == "field required" and error["type"] == "value_error.missing"
+        error["msg"] == "Field required" and error["type"] == "missing"
         for error in response.json()["detail"]
     )
