@@ -1,4 +1,4 @@
-from pydantic import BaseModel, UUID4
+from pydantic import BaseModel
 
 # ------------------------------------------------------------------------------------ #
 #                                       Internal                                       #
@@ -8,24 +8,22 @@ from pydantic import BaseModel, UUID4
 class _ApiSourceMeasurementBase(BaseModel):
     """Internal base model for the SourceMeasurement endpoints."""
 
-    source_module_id: UUID4
-    company_id: UUID4
-    type: str
-    measurement_name: str
-
 
 class _ApiSourceMeasurementIdMixin:
     """Mixin for the SourceMeasurement ID."""
 
-    source_measurement_id: UUID4
+    source_measurement_id: int
 
 
 class _ApiSourceMeasurementOutBase(
-    _ApiSourceMeasurementBase, _ApiSourceMeasurementIdMixin
+    _ApiSourceMeasurementIdMixin, _ApiSourceMeasurementBase
 ):
     """Output base model for the SourceMeasurement endpoint."""
 
-    pass
+    source_module_id: int
+    company_id: int
+    type: str
+    measurement_name: str
 
 
 # ------------------------------------------------------------------------------------ #
@@ -50,6 +48,15 @@ class ApiSourceMeasurementCreateOut(_ApiSourceMeasurementOutBase):
 # ------------------------------------------------------------------------------------ #
 
 
+class ApiSourceMeasurementReadIn(
+    _ApiSourceMeasurementIdMixin, _ApiSourceMeasurementBase
+):
+    """Input model for the SourceMeasurement retrieval endpoint."""
+
+    source_measurement_id: int
+    pass
+
+
 class ApiSourceMeasurementOut(_ApiSourceMeasurementOutBase):
     """Output model for the SourceMeasurement retrieval endpoint."""
 
@@ -61,7 +68,7 @@ class ApiSourceMeasurementOut(_ApiSourceMeasurementOutBase):
 # ------------------------------------------------------------------------------------ #
 
 
-class ApiSourceMeasurementUpdateIn(_ApiSourceMeasurementBase):
+class ApiSourceMeasurementUpdateIn(_ApiSourceMeasurementOutBase):
     """Input model for the SourceMeasurement update endpoint."""
 
     pass
@@ -70,4 +77,24 @@ class ApiSourceMeasurementUpdateIn(_ApiSourceMeasurementBase):
 class ApiSourceMeasurementUpdateOut(_ApiSourceMeasurementOutBase):
     """Output model for the SourceMeasurement update endpoint."""
 
+    pass
+
+
+# ------------------------------------------------------------------------------------ #
+#                                     Delete Models                                    #
+# ------------------------------------------------------------------------------------ #
+
+
+class ApiSourceMeasurementDeleteIn(
+    _ApiSourceMeasurementIdMixin, _ApiSourceMeasurementBase
+):
+    """Input model for the SourceMeasurement update endpoint."""
+
+    pass
+
+
+class ApiSourceMeasurementDeleteOut(_ApiSourceMeasurementOutBase):
+    """Output model for the SourceMeasurement update endpoint."""
+
+    notification_message: str
     pass

@@ -1,6 +1,4 @@
-import uuid
-from sqlalchemy import Column, String, ForeignKey
-from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
@@ -11,17 +9,9 @@ Base = declarative_base()
 
 class DbSourceMeasurement(DbBase):
     __tablename__ = "source_measurement"
-    source_measurement_id = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-        unique=True,
-        nullable=False,
-    )
-    source_module_id = Column(
-        UUID(as_uuid=True), ForeignKey("source_module.id"), nullable=False
-    )
-    company_id = Column(UUID(as_uuid=True), ForeignKey("company.id"), nullable=False)
+    source_measurement_id = Column(Integer, primary_key=True, autoincrement=True)
+    source_module_id = Column(Integer, ForeignKey("source_module.id"), nullable=False)
+    company_id = Column(Integer, ForeignKey("company.id"), nullable=False)
     type = Column(String, nullable=False)
     measurement_name = Column(String, nullable=False)
 
@@ -37,17 +27,10 @@ class DbSourceMeasurement(DbBase):
         )
 
 
-# TODO: check with these models when the DB is setup.
 class SourceModule(DbBase):
     __tablename__ = "source_module"
 
-    id = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-        unique=True,
-        nullable=False,
-    )
+    id = Column(Integer, primary_key=True, autoincrement=True)
     # Add other columns as needed
     # ...
 
@@ -60,13 +43,7 @@ class SourceModule(DbBase):
 class Company(DbBase):
     __tablename__ = "company"
 
-    id = Column(
-        UUID(as_uuid=True),
-        primary_key=True,
-        default=uuid.uuid4,
-        unique=True,
-        nullable=False,
-    )
+    id = Column(Integer, primary_key=True, autoincrement=True)
     # Add other columns as needed
     # ...
 

@@ -1,9 +1,10 @@
 # source_measurement_bll.py
-from parma_analytics.api.schemas.source_measurement import (
+from parma_analytics.api.models.source_measurement import (
     ApiSourceMeasurementCreateIn,
+    ApiSourceMeasurementCreateOut,
     ApiSourceMeasurementUpdateIn,
 )
-from pydantic import UUID4
+
 from parma_analytics.db.prod.source_measurement_orm import (
     create_source_measurement_orm,
     get_source_measurement_orm,
@@ -18,22 +19,24 @@ from sqlalchemy.orm import Session
 def create_source_measurement_bll(
     db: Session,
     source_measurement: ApiSourceMeasurementCreateIn,
-) -> UUID4:
+) -> ApiSourceMeasurementCreateOut:
     """Business logic function for creating a SourceMeasurement.
 
     Args:
+        engine: The database engine.
         source_measurement: The SourceMeasurement object to create.
 
     Returns:
-        UUID4: The ID of the created SourceMeasurement.
+        the created source measurement.
     """
     return create_source_measurement_orm(db, source_measurement)
 
 
-def read_source_measurement_bll(db: Session, source_measurement_id: UUID4):
+def read_source_measurement_bll(db: Session, source_measurement_id: int):
     """Business logic function for reading a SourceMeasurement.
 
     Args:
+        engine: The database engine.
         source_measurement_id: The ID of the SourceMeasurement to read.
 
     Returns:
@@ -44,25 +47,26 @@ def read_source_measurement_bll(db: Session, source_measurement_id: UUID4):
 
 def update_source_measurement_bll(
     db: Session,
-    source_measurement_id: UUID4,
     source_measurement: ApiSourceMeasurementUpdateIn,
 ):
     """Business logic function for updating a SourceMeasurement.
 
     Args:
+        engine: The database engine.
         source_measurement_id: The ID of the SourceMeasurement to update.
         source_measurement: The new SourceMeasurement data.
 
     Returns:
         The updated SourceMeasurement.
     """
-    return update_source_measurement_orm(db, source_measurement_id, source_measurement)
+    return update_source_measurement_orm(db, source_measurement)
 
 
-def delete_source_measurement_bll(db: Session, source_measurement_id: UUID4):
+def delete_source_measurement_bll(db: Session, source_measurement_id: int):
     """Business logic function for deleting a SourceMeasurement.
 
     Args:
+        engine: The database engine.
         source_measurement_id: The ID of the SourceMeasurement to delete.
     """
     delete_source_measurement_orm(db, source_measurement_id)

@@ -1,15 +1,17 @@
 from fastapi import APIRouter, Depends
-from pydantic import UUID4
 from sqlalchemy.orm import Session
 from parma_analytics.db.prod.engine import get_db
+from starlette import status
 
-# Import your models from the models file
 from parma_analytics.api.models.source_measurement import (
     ApiSourceMeasurementCreateIn,
     ApiSourceMeasurementCreateOut,
     ApiSourceMeasurementOut,
     ApiSourceMeasurementUpdateIn,
     ApiSourceMeasurementUpdateOut,
+    ApiSourceMeasurementReadIn,
+    ApiSourceMeasurementDeleteIn,
+    ApiSourceMeasurementDeleteOut,
 )
 
 from parma_analytics.bl.source_measurement_bll import (
@@ -24,87 +26,67 @@ from parma_analytics.db.prod.utils.paginate import ListPaginationResult
 router = APIRouter()
 
 
-@router.post("/source-measurement", status_code=201)
-def create_source_measurement(
+@router.post(
+    "/source-measurement",
+    status_code=status.HTTP_201_CREATED,
+    description="Create a new source measurement.",
+)
+async def create_source_measurement(
     source_measurement: ApiSourceMeasurementCreateIn, db: Session = Depends(get_db)
 ) -> ApiSourceMeasurementCreateOut:
-    """SourceMeasurement POST endpoint for the API.
-
-    Args:
-        source_measurement: The SourceMeasurement object to create.
-    """
     created_source_measurement = create_source_measurement_bll(db, source_measurement)
-
-    # hand over to business logic layer and transform the result to the API model again
     return ApiSourceMeasurementCreateOut(created_source_measurement)
 
 
-'''
-@router.get("/source-measurement", status_code=200)
+@router.get(
+    "/source-measurement",
+    status_code=status.HTTP_200_OK,
+    description="List all source measurements with pagination.",
+)
 def read_all_source_measurements(
-    page: int = 5,
+    page: int = 1,
     per_page: int = 10,
-) -> [ApiSourceMeasurementCreateOut]:
-    """SourceMeasurement POST endpoint for the API.
-
-    Args:
-        page: The page number.
-        per_page: The number of items per page.
-    """
-    source_measurement = list_source_measurements_bll(page, per_page)
-
-    # hand over to business logic layer and transform the result to the API model again
-    return [ApiSourceMeasurementCreateOut(source_measurement)]
-'''
+) -> ListPaginationResult[ApiSourceMeasurementOut]:
+    source_measurements = list_source_measurements_bll(page, per_page)
+    return [ApiSourceMeasurementOut(sm) for sm in source_measurements]
 
 
-@router.get("/source-measurement/{source_measurement_id}", status_code=200)
-def read_source_measurement(
-    source_measurement_id: UUID4, db: Session = Depends(get_db)
+@router.get(
+    "/source-measurement/{source_measurement_id}",
+    status_code=status.HTTP_200_OK,
+    description="Get details of a specific source measurement.",
+)
+async def read_source_measurement(
+    body: int, db: Session = Depends(get_db)
 ) -> ApiSourceMeasurementOut:
-    """SourceMeasurement GET endpoint for the API.
+    measurement_id = body
 
-    Args:
-        source_measurement_id: The ID of the SourceMeasurement.
-    """
-
-    # fetch from the database layer through the business logic layer
-    retrieved_source_measurement = read_source_measurement_bll(
-        db, source_measurement_id
-    )
-
+    retrieved_source_measurement = read_source_measurement_bll(db, measurement_id)
     return ApiSourceMeasurementOut(retrieved_source_measurement)
 
 
-@router.put("/source_measurement/{source_measurement_id}", status_code=202)
-def update_source_measurement(
-    source_measurement_id: UUID4,
+@router.put(
+    "/source_measurement/{source_measurement_id}",
+    status_code=status.HTTP_202_ACCEPTED,
+    description="Update details of a specific source measurement.",
+)
+async def update_source_measurement(
     source_measurement: ApiSourceMeasurementUpdateIn,
     db: Session = Depends(get_db),
 ) -> ApiSourceMeasurementUpdateOut:
-    """SourceMeasurement PUT endpoint for the API.
-
-    Args:
-        source_measurement_id: The ID of the SourceMeasurement.
-        source_measurement: The SourceMeasurement object to update.
-    """
-    # hand over to business logic layer and transform the result to the API model again
-    updated_source_measurement = update_source_measurement_bll(
-        db, source_measurement_id, source_measurement
-    )
-
+    updated_source_measurement = update_source_measurement_bll(db, source_measurement)
     return ApiSourceMeasurementUpdateOut(updated_source_measurement)
 
 
-@router.delete("/source_measurement/{source_measurement_id}", status_code=204)
-def delete_source_measurement(
-    source_measurement_id: UUID4, db: Session = Depends(get_db)
-) -> None:
-    """SourceMeasurement DELETE endpoint for the API.
-
-    Args:
-        source_measurement_id: The ID of the SourceMeasurement.
-    """
-    # hand over to business logic layer
-    delete_source_measurement_bll(db, source_measurement_id)
-    pass
+@router.delete(
+    "/source_measurement/{source_measurement_id}",
+    status_code=status.HTTP_200_OK,
+    description="Delete a specific source measurement.",
+)
+async def delete_source_measurement(
+    body: ApiSourceMeasurementDeleteIn, db: Session = Depends(get_db)
+) -> ApiSourceMeasurementDeleteOut:
+    delete_source_measurement_bll(db, body.source_measurement_id)
+    return ApiSourceMeasurementDeleteOut(
+        notification_message=f"Source measurement {body.source_measurement_id} has been deleted."
+    )

@@ -69,7 +69,7 @@ def list_source_measurements_orm(
 
 
 def update_source_measurement_orm(
-    db: Session, source_measurement_id, source_measurement_data
+    db: Session, source_measurement_data
 ) -> DbSourceMeasurement:
     """Update a source measurement.
 
@@ -81,7 +81,9 @@ def update_source_measurement_orm(
     Returns:
         The updated source measurement.
     """
-    db_source_measurement = db.get(DbSourceMeasurement, source_measurement_id)
+    db_source_measurement = db.get(
+        DbSourceMeasurement, source_measurement_data.source_measurement_id
+    )
     for key, value in source_measurement_data.items():
         setattr(db_source_measurement, key, value)
     db.commit()
