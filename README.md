@@ -14,6 +14,7 @@ ParmaAI analytics repository providing data processing and inference.
 #### Overall Architecture
 
 ```mermaid
+
 graph TD
 
         %% Subgraphs
@@ -44,6 +45,7 @@ graph TD
 
     subgraph AnalyticsBackendContainer[Analytics Backend]
         AnalyticsRestBackend[("Python Backend")]
+        NormalizationService
         NotificationContainer
     end
 
@@ -52,22 +54,18 @@ graph TD
         Email
     end
 
+    subgraph NormalizationService[Normalization Module]
+    end
+
     subgraph DataSourcingLayer[Data Sourcing Layer]
-        DataSourcingContainer
-        DataRetrievalModules
+        DataMiningModules
     end
 
-    subgraph DataSourcingContainer[Data Sourcing Backend]
-        DataRetrievalController[("Data Retrieval Controller")]
-        NormalizationService[("Normalization Service")]
-        MonitoringAndLoggingSystem[("Monitoring and Logging System")]
-    end
-
-    subgraph DataRetrievalModules[Data Retrieval Modules]
-        Module1[("E.G. Hackernews Module")]
-        Module2[("Linkedin Module")]
-        Module3[("Reddit Module (Apify)")]
-        ModuleN[("Nth Module")]
+    subgraph DataMiningModules[Data Mining Modules]
+        Module1[("Reddit")]
+        Module2[("GitHub")]
+        Module3[("Clearbit")]
+        ModuleN[("People Data Labs")]
     end
 
 
@@ -76,25 +74,21 @@ graph TD
     FrontendContainer -->|REST| ApiRestBackend
     ApiRestBackend -->|SQL Framework| ProductionDatabase
     ProductionDatabase -->|Replicate| AnalyticsDatabase
-    AnalyticsDev["Analytics<br>(Developers)"] --> AnalyticsDatabase
+    %%AnalyticsDev["Analytics<br>(Developers)"] --> AnalyticsDatabase
     AnalyticsRestBackend -->|SQL Framework| ProductionDatabase
+    AnalyticsRestBackend -->|SQL Framework| CrawlingDatabase
     AnalyticsRestBackend --> NotificationContainer
     NotificationContainer --> ExternalNotificationProvider["External Notification Provider"]
-    DataRetrievalController -->|SQL Framework| CrawlingDatabase
-    ApiRestBackend -->|Trigger Run - REST| DataRetrievalController
-    AnalyticsRestBackend -->|Trigger Run - REST| DataRetrievalController
-    DataRetrievalController -->|Initiate| DataRetrievalModules
-    DataRetrievalModules -->|Raw Data| DataRetrievalController
-    DataRetrievalController -->|Raw Data| NormalizationService
-    NormalizationService -->|Send Normalized Data - REST| AnalyticsRestBackend
-    DataRetrievalModules --> MonitoringAndLoggingSystem
-    MonitoringAndLoggingSystem -->|Send Monitoring Data - REST| AnalyticsRestBackend
+    AnalyticsRestBackend -->|Trigger Run| DataMiningModules
+    DataMiningModules -->|Notify| AnalyticsRestBackend
 
-        %% Link Styles
+    DataMiningModules -->|Raw Data| CrawlingDatabase
+    AnalyticsRestBackend -->|Raw Data| NormalizationService
+    NormalizationService -->|Normalized Data| AnalyticsRestBackend
+
+
+%% Link Styles
     linkStyle default stroke:#9E9D91,stroke-width:2px;
-    %%linkStyle 5 stroke:#black,stroke-width:3px;
-    %%linkStyle 9 stroke:#black,stroke-width:3px;
-    %%linkStyle 10 stroke:#black,stroke-width:3px;
 ```
 
 #### Process Flows
@@ -103,28 +97,28 @@ The parma ai backend consists of the following process flow:
 
 ```mermaid
 graph LR
-    subgraph parma-mining
-        A[Data Mining] --> B[Data Preprocessing]
-    end
-    subgraph parma-mining-db
-        B --> C[NoSQL Mining Database]
-    end
-    subgraph parma-analytics
-        C --> D[Data Processing]
-        D --> F[Data Analytics]
-        F --> G[Data Inference]
-        D --> H[Data Visualization]
-        D --> I[Data Reporting / Alerting]
-        H --> I
-    end
-    subgraph parma-prod-db
-        D --> E[Data Storage]
-        G --> E
-    end
-    subgraph parma-web
-        E --> J[REST API]
-        J --> K[Frontend]
-    end
+   subgraph parma-mining
+      A[Data Mining] --> B[Data Preprocessing]
+   end
+   subgraph parma-mining-db
+      B --> C[NoSQL Mining Database]
+   end
+   subgraph parma-analytics
+      C --> D[Data Processing]
+      D --> F[Data Analytics]
+      F --> G[Data Inference]
+      D --> H[Data Visualization]
+      D --> I[Data Reporting / Alerting]
+      H --> I
+   end
+   subgraph parma-prod-db
+      D --> E[Data Storage]
+      G --> E
+   end
+   subgraph parma-web
+      E --> J[REST API]
+      J --> K[Frontend]
+   end
 
 ```
 
@@ -132,184 +126,184 @@ graph LR
 
 ```mermaid
 graph LR
-    subgraph parma_analytics
-        subgraph .
-            subgraph api
-                models
-                routes
+   subgraph parma_analytics
+      subgraph .
+         subgraph api
+            models
+            routes
+         end
+         subgraph db.mining
+         end
+         subgraph etl
+         end
+         subgraph analytics
+            subgraph inference
             end
-            subgraph db.mining
+            subgraph visualization
             end
-            subgraph etl
+         end
+         subgraph reporting
+            subgraph slack
             end
-            subgraph analytics
-                subgraph inference
-                end
-                subgraph visualization
-                end
+            subgraph gmail
             end
-            subgraph reporting
-                subgraph slack
-                end
-                subgraph gmail
-                end
-            end
-            subgraph db.prod
-            end
-            api -.-> db.mining
-            db.mining -.-> etl
-            etl -.-> analytics
-            analytics -.-> reporting
-            analytics -.-> db.prod
-        end
-        bl[bl=business logic] <--> api
-        bl <--> db.mining
-        bl <--> etl
-        bl <--> analytics
-        bl <--> reporting
-        bl <--> db.prod
-    end
+         end
+         subgraph db.prod
+         end
+         api -.-> db.mining
+         db.mining -.-> etl
+         etl -.-> analytics
+         analytics -.-> reporting
+         analytics -.-> db.prod
+      end
+      bl[bl=business logic] <--> api
+      bl <--> db.mining
+      bl <--> etl
+      bl <--> analytics
+      bl <--> reporting
+      bl <--> db.prod
+   end
 ```
 
 ### `parma-analytics` data model
 
 ```mermaid
 erDiagram
-    BUCKET ||--o{ COMPANY_BUCKET_MEMBERSHIP : "includes"
-    BUCKET ||--o{ BUCKET_ACCESS : "grants"
-    COMPANY ||--o{ COMPANY_BUCKET_MEMBERSHIP : "has"
-    COMPANY ||--o{ NOTIFICATION_SUBSCRIPTION : "has"
-    COMPANY ||--o{ REPORT_SUBSCRIPTION : "has"
-    COMPANY ||--o{ COMPANY_ATTACHMENT : "has"
-    COMPANY ||--o{ NOTIFICATION : "generates"
-    COMPANY ||--o{ COMPANY_DATA_SOURCE : "has"
-    COMPANY ||--|| DATA_SOURCE_MEASUREMENT_NEWS_SUBSCRIPTION :"subscribes"
-    DATA_SOURCE ||--o{ COMPANY_DATA_SOURCE : "provided_to"
-    DATA_SOURCE ||--o{ SOURCE_MEASUREMENT : "produces"
-    DATA_SOURCE ||--o{ NOTIFICATION : "triggers"
-    DATA_SOURCE ||--|| USER_IMPORTANT_MEASUREMENT_PREFERENCE : "saves"
-    NOTIFICATION_SUBSCRIPTION ||--o{ NOTIFICATION_CHANNEL : "delivers_via"
-    REPORT ||--o{ COMPANY : "contains"
-    REPORT_SUBSCRIPTION ||--o{ NOTIFICATION_CHANNEL : "informs_via"
-    USER ||--o{ USER_IMPORTANT_MEASUREMENT_PREFERENCE : "chooses"
-    USER ||--o{ NOTIFICATION_SUBSCRIPTION : "subscribes_to"
-    USER ||--|| REPORT_SUBSCRIPTION : "subscribes_to"
-    USER ||--o{ COMPANY : "subscribes"
-    USER ||--o{ BUCKET_ACCESS : "has"
-    USER ||--|| DATA_SOURCE_MEASUREMENT_NEWS_SUBSCRIPTION :"subscribes"
-    USER ||--o{ COMPANY_ATTACHMENT : "uploads"
-    SOURCE_MEASUREMENT ||--o{ MEASUREMENT_TEXT_VALUE : "includes"
-    SOURCE_MEASUREMENT ||--o{ MEASUREMENT_INT_VALUE : "includes"
-    BUCKET {
-        int id PK
-        string title
-        string description
-        boolean is_public
-        int owner_id FK
-        string created_at
-    }
-    BUCKET_ACCESS{
-        int id PK,FK
-        int invitee_id PK,FK
-        tbd  permission
-    }
-    COMPANY {
-        int id PK
-        string name
-        string description
-        int added_by FK
-    }
-    COMPANY_ATTACHMENT {
-        int id PK
-        int company_id FK
-        string file_type
-        string file_url
-        int user_id FK
-        string title
-        date created_at
-    }
-    COMPANY_BUCKET_MEMBERSHIP{
-        int bucket_id PK,FK
-        int company_id PK,FK
-    }
-    COMPANY_DATA_SOURCE {
-        int data_source_id PK, FK
-        int company_id PK, FK
-        string frequency
-        boolean is_data_source_active
-        string health_status
-    }
-    DATA_SOURCE {
-        int source_module_id PK
-        string source_name
-        boolean is_active
-        string default_frequency
-        string health_status
-    }
-    DATA_SOURCE_MEASUREMENT_NEWS_SUBSCRIPTION{
-        int id PK
-        int user_id FK
-        int company_id FK
-    }
-    NOTIFICATION {
-        int id PK
-        string message
-        int company_id FK
-        int data_source_id FK
-        date timestamp
-    }
-    NOTIFICATION_CHANNEL {
-        int channel_id PK, FK
-        int entity_id FK
-        string entity_type
-        string channel_type
-        string destination
-    }
-    NOTIFICATION_SUBSCRIPTION {
-        int user_id FK, PK
-        int company_id FK, PK
-        int channel_id FK, PK
-    }
-    REPORT{
-        int id PK
-        string name
-        date timestamp
-        blob content
-        int company_id FK
-    }
-    REPORT_SUBSCRIPTION {
-        int user_id FK, PK
-        int company_id FK, PK
-        int channel_id FK, PK
-    }
-    SOURCE_MEASUREMENT {
-        int source_measurement_id PK
-        int source_module_id FK
-        string type
-        string measurement_name
-    }
-    USER {
-        int id PK
-        string name
-        string role
-    }
-    USER_IMPORTANT_MEASUREMENT_PREFERENCE {
-        int data_source_id PK, FK
-        int user_id PK, FK
-        string important_field_name
-    }
-    MEASUREMENT_TEXT_VALUE {
-        id measurement_value_id PK
-        id source_measurement_id FK
-        timestamp timestamp
-        string value
-    }
-    MEASUREMENT_INT_VALUE {
-        id measurement_value_id PK
-        id source_measurement_id FK
-        timestamp timestamp
-        int value
-    }
+   BUCKET ||--o{ COMPANY_BUCKET_MEMBERSHIP : "includes"
+   BUCKET ||--o{ BUCKET_ACCESS : "grants"
+   COMPANY ||--o{ COMPANY_BUCKET_MEMBERSHIP : "has"
+   COMPANY ||--o{ NOTIFICATION_SUBSCRIPTION : "has"
+   COMPANY ||--o{ REPORT_SUBSCRIPTION : "has"
+   COMPANY ||--o{ COMPANY_ATTACHMENT : "has"
+   COMPANY ||--o{ NOTIFICATION : "generates"
+   COMPANY ||--o{ COMPANY_DATA_SOURCE : "has"
+   COMPANY ||--|| DATA_SOURCE_MEASUREMENT_NEWS_SUBSCRIPTION :"subscribes"
+   DATA_SOURCE ||--o{ COMPANY_DATA_SOURCE : "provided_to"
+   DATA_SOURCE ||--o{ SOURCE_MEASUREMENT : "produces"
+   DATA_SOURCE ||--o{ NOTIFICATION : "triggers"
+   DATA_SOURCE ||--|| USER_IMPORTANT_MEASUREMENT_PREFERENCE : "saves"
+   NOTIFICATION_SUBSCRIPTION ||--o{ NOTIFICATION_CHANNEL : "delivers_via"
+   REPORT ||--o{ COMPANY : "contains"
+   REPORT_SUBSCRIPTION ||--o{ NOTIFICATION_CHANNEL : "informs_via"
+   USER ||--o{ USER_IMPORTANT_MEASUREMENT_PREFERENCE : "chooses"
+   USER ||--o{ NOTIFICATION_SUBSCRIPTION : "subscribes_to"
+   USER ||--|| REPORT_SUBSCRIPTION : "subscribes_to"
+   USER ||--o{ COMPANY : "subscribes"
+   USER ||--o{ BUCKET_ACCESS : "has"
+   USER ||--|| DATA_SOURCE_MEASUREMENT_NEWS_SUBSCRIPTION :"subscribes"
+   USER ||--o{ COMPANY_ATTACHMENT : "uploads"
+   SOURCE_MEASUREMENT ||--o{ MEASUREMENT_TEXT_VALUE : "includes"
+   SOURCE_MEASUREMENT ||--o{ MEASUREMENT_INT_VALUE : "includes"
+   BUCKET {
+      int id PK
+      string title
+      string description
+      boolean is_public
+      int owner_id FK
+      string created_at
+   }
+   BUCKET_ACCESS{
+      int id PK,FK
+      int invitee_id PK,FK
+      tbd  permission
+   }
+   COMPANY {
+      int id PK
+      string name
+      string description
+      int added_by FK
+   }
+   COMPANY_ATTACHMENT {
+      int id PK
+      int company_id FK
+      string file_type
+      string file_url
+      int user_id FK
+      string title
+      date created_at
+   }
+   COMPANY_BUCKET_MEMBERSHIP{
+      int bucket_id PK,FK
+      int company_id PK,FK
+   }
+   COMPANY_DATA_SOURCE {
+      int data_source_id PK, FK
+      int company_id PK, FK
+      string frequency
+      boolean is_data_source_active
+      string health_status
+   }
+   DATA_SOURCE {
+      int source_module_id PK
+      string source_name
+      boolean is_active
+      string default_frequency
+      string health_status
+   }
+   DATA_SOURCE_MEASUREMENT_NEWS_SUBSCRIPTION{
+      int id PK
+      int user_id FK
+      int company_id FK
+   }
+   NOTIFICATION {
+      int id PK
+      string message
+      int company_id FK
+      int data_source_id FK
+      date timestamp
+   }
+   NOTIFICATION_CHANNEL {
+      int channel_id PK, FK
+      int entity_id FK
+      string entity_type
+      string channel_type
+      string destination
+   }
+   NOTIFICATION_SUBSCRIPTION {
+      int user_id FK, PK
+      int company_id FK, PK
+      int channel_id FK, PK
+   }
+   REPORT{
+      int id PK
+      string name
+      date timestamp
+      blob content
+      int company_id FK
+   }
+   REPORT_SUBSCRIPTION {
+      int user_id FK, PK
+      int company_id FK, PK
+      int channel_id FK, PK
+   }
+   SOURCE_MEASUREMENT {
+      int source_measurement_id PK
+      int source_module_id FK
+      string type
+      string measurement_name
+   }
+   USER {
+      int id PK
+      string name
+      string role
+   }
+   USER_IMPORTANT_MEASUREMENT_PREFERENCE {
+      int data_source_id PK, FK
+      int user_id PK, FK
+      string important_field_name
+   }
+   MEASUREMENT_TEXT_VALUE {
+      id measurement_value_id PK
+      id source_measurement_id FK
+      timestamp timestamp
+      string value
+   }
+   MEASUREMENT_INT_VALUE {
+      id measurement_value_id PK
+      id source_measurement_id FK
+      timestamp timestamp
+      int value
+   }
 ```
 
 ## Getting Started
