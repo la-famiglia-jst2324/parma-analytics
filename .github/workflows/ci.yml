@@ -81,6 +81,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Set Firebase Config
+        uses: actions/checkout@v2
         env:
           FIREBASE_TYPE: ${{ secrets.FIREBASE_TYPE }}
           FIREBASE_PROJECT_ID: ${{ secrets.FIREBASE_PROJECT_ID }}
