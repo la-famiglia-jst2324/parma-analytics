@@ -2,17 +2,19 @@
 
 from fastapi import FastAPI
 
-from parma_analytics.db.prod import init_db_models
 from parma_analytics.db.prod.engine import get_engine
 
-from .routes import dummy_router
-from .routes import crawling_finished_router
+from .routes import (
+    crawling_finished_router,
+    dummy_router,
+    new_company_router,
+    trigger_datasources_router,
+)
 
 app = FastAPI()
 
 # initialize database layer
 app.state.engine = get_engine()
-init_db_models(app.state.engine)
 
 
 # root endpoint
@@ -30,4 +32,14 @@ app.include_router(
 app.include_router(
     crawling_finished_router,
     tags=["crawling_finished"],
+)
+
+app.include_router(
+    new_company_router,
+    tags=["new_company"],
+)
+
+app.include_router(
+    trigger_datasources_router,
+    tags=["trigger_datasources"],
 )

@@ -575,7 +575,3 @@ $RECYCLE.BIN/
 # [CUSTOMIZATIONS]
 .data
 .vscode
-.secrets/
-.image.name
-**/.terraform/
-**/*.tfstate.backup
