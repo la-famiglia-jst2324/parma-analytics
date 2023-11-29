@@ -4,10 +4,9 @@ from fastapi import FastAPI
 
 from parma_analytics.db.prod.engine import get_engine
 
-from ..db.prod import init_db_models
 from .routes import (
-    dummy_router,
     crawling_finished_router,
+    dummy_router,
     new_company_router,
     trigger_datasources_router,
     source_measurement_router,
@@ -17,7 +16,6 @@ app = FastAPI()
 
 # initialize database layer
 app.state.engine = get_engine()
-init_db_models(app.state.engine)
 
 
 # root endpoint
