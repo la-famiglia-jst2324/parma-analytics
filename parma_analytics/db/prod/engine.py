@@ -2,9 +2,12 @@
 
 import os
 from urllib.parse import quote
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 
 from sqlalchemy.engine import create_engine
-from sqlalchemy.orm import sessionmaker
+
+Base = declarative_base()
 
 engine = None
 
@@ -24,6 +27,8 @@ def get_engine():
     return engine
 
 
+engine = get_engine()
+Base.metadata.create_all(bind=engine)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

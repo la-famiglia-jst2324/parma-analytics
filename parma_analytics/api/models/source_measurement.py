@@ -1,4 +1,5 @@
 from pydantic import BaseModel
+from typing import Optional
 
 # ------------------------------------------------------------------------------------ #
 #                                       Internal                                       #
@@ -12,7 +13,7 @@ class _ApiSourceMeasurementBase(BaseModel):
 class _ApiSourceMeasurementIdMixin:
     """Mixin for the SourceMeasurement ID."""
 
-    source_measurement_id: int
+    id: int
 
 
 class _ApiSourceMeasurementOutBase(
@@ -20,10 +21,12 @@ class _ApiSourceMeasurementOutBase(
 ):
     """Output base model for the SourceMeasurement endpoint."""
 
-    source_module_id: int
-    company_id: int
     type: str
     measurement_name: str
+    source_module_id: int
+    company_id: int
+    created_at: str
+    modified_at: str
 
 
 # ------------------------------------------------------------------------------------ #
@@ -34,12 +37,18 @@ class _ApiSourceMeasurementOutBase(
 class ApiSourceMeasurementCreateIn(_ApiSourceMeasurementBase):
     """Input model for the SourceMeasurement creation endpoint."""
 
-    pass
+    type: str
+    measurement_name: str
+    source_module_id: int
+    company_id: int
 
 
-class ApiSourceMeasurementCreateOut(_ApiSourceMeasurementOutBase):
+class ApiSourceMeasurementCreateOut(
+    _ApiSourceMeasurementIdMixin, _ApiSourceMeasurementBase
+):
     """Output model for the SourceMeasurement creation endpoint."""
 
+    creation_msg: str
     pass
 
 
@@ -53,7 +62,6 @@ class ApiSourceMeasurementReadIn(
 ):
     """Input model for the SourceMeasurement retrieval endpoint."""
 
-    source_measurement_id: int
     pass
 
 
@@ -68,10 +76,13 @@ class ApiSourceMeasurementOut(_ApiSourceMeasurementOutBase):
 # ------------------------------------------------------------------------------------ #
 
 
-class ApiSourceMeasurementUpdateIn(_ApiSourceMeasurementOutBase):
+class ApiSourceMeasurementUpdateIn(_ApiSourceMeasurementBase):
     """Input model for the SourceMeasurement update endpoint."""
 
-    pass
+    type: Optional[str] = None
+    measurement_name: Optional[str] = None
+    source_module_id: Optional[int] = None
+    company_id: Optional[int] = None
 
 
 class ApiSourceMeasurementUpdateOut(_ApiSourceMeasurementOutBase):
@@ -93,8 +104,8 @@ class ApiSourceMeasurementDeleteIn(
     pass
 
 
-class ApiSourceMeasurementDeleteOut(_ApiSourceMeasurementOutBase):
+class ApiSourceMeasurementDeleteOut(_ApiSourceMeasurementBase):
     """Output model for the SourceMeasurement update endpoint."""
 
-    notification_message: str
+    deletion_msg: str
     pass
