@@ -23,7 +23,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: micromamba installation
-        uses: mamba-org/setup-micromamba@da9b4fa3cd810fa222215d6062647d3e717e7662
+        uses: mamba-org/setup-micromamba@bdff0b7f317300a7c04a9050b17168c9a96a2a9a
       - name: add micromamba to GITHUB_PATH
         run: echo "${HOME}/micromamba-bin" >> "$GITHUB_PATH"
       - name: Install Python 3.11
@@ -51,7 +51,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: conda env setup
-        uses: mamba-org/setup-micromamba@da9b4fa3cd810fa222215d6062647d3e717e7662
+        uses: mamba-org/setup-micromamba@bdff0b7f317300a7c04a9050b17168c9a96a2a9a
         with:
           environment-file: environment.yml
           cache-environment: true
