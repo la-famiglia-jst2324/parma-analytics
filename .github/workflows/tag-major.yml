@@ -18,7 +18,7 @@ jobs:
           echo "major=$MAJOR" >> $GITHUB_OUTPUT
       - name: Delete existing tag
         continue-on-error: true
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             await github.rest.git.deleteRef({
@@ -27,7 +27,7 @@ jobs:
               ref: `tags/v${{ steps.version.outputs.major }}`,
             });
       - name: Create tag
-        uses: actions/github-script@v6
+        uses: actions/github-script@v7
         with:
           script: |
             const newTag = "v${{ steps.version.outputs.major }}";
