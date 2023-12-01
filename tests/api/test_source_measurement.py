@@ -17,8 +17,8 @@ def mock_get_db():
     return db
 
 
-@patch("parma-analytics.db.prod.engine.get_db", new_callable=mock_get_db)
-@patch("parma-analytics.bl.list_source_measurements_bll")
+@patch("parma_analytics.db.prod.engine.get_db", new_callable=mock_get_db)
+@patch("parma_analytics.bl.list_source_measurements_bll")
 def test_create_source_measurement(mock_bll, mock_get_db, client):
     mock_bll.return_value = 1  # Mock the return value of the business logic function
     response = client.post(
@@ -37,8 +37,8 @@ def test_create_source_measurement(mock_bll, mock_get_db, client):
     mock_bll.assert_called_once()
 
 
-@patch("parma-analytics.db.prod.engine.get_db", new_callable=mock_get_db)
-@patch("parma-analytics.bl.list_source_measurements_bll")
+@patch("parma_analytics.db.prod.engine.get_db", new_callable=mock_get_db)
+@patch("parma_analytics.bl.list_source_measurements_bll")
 def test_read_all_source_measurements(mock_bll, mock_get_db, client):
     mock_bll.return_value = []  # Mock the return value of the business logic function
     response = client.get("/source-measurement")
