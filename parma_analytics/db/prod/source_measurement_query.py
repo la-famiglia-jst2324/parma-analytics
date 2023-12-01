@@ -1,7 +1,7 @@
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel, field_validator
 
 
 class SourceMeasurement(BaseModel):
@@ -13,7 +13,7 @@ class SourceMeasurement(BaseModel):
     created_at: str
     modified_at: str
 
-    @validator("created_at", "modified_at", pre=True)
+    @field_validator("created_at", "modified_at", pre=True)
     def format_datetime(cls, value):
         return value.strftime("%Y-%m-%d %H:%M:%S")
 
