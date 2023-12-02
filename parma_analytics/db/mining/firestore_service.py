@@ -15,7 +15,6 @@ class FirestoreService:
             )
             if firebase_admin_cert is None:
                 raise ValueError("Firebase admin certificate not found")
-            firebase_admin_cert = str(firebase_admin_cert)
             firebase_admin_cert_json = json.loads(firebase_admin_cert)
             self.cred = credentials.Certificate(firebase_admin_cert_json)
             firebase_admin.initialize_app(self.cred)
