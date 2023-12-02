@@ -78,21 +78,3 @@ class FirestoreService:
             doc_ref.set(raw_data_content)
         except FirebaseError as e:
             print(f"Error adding new raw data: {e}")
-
-    def add_new_normalized_data(
-        self,
-        data_source: str,
-        company: str,
-        page_id: str,
-        normalized_data_content: Dict[str, Any],
-    ) -> None:
-        try:
-            doc_ref = (
-                self.db.collection(data_source)
-                .document(company)
-                .collection(page_id)
-                .document("normalized_data")
-            )
-            doc_ref.set(normalized_data_content)
-        except FirebaseError as e:
-            print(f"Error adding new normalized data: {e}")
