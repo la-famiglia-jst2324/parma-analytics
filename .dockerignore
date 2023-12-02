@@ -575,3 +575,4 @@ $RECYCLE.BIN/
 # [CUSTOMIZATIONS]
 .data
 .vscode
+.secrets/
