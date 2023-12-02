@@ -1,15 +1,23 @@
-from typing import List, Dict, Any
+import json
+import os
+from pickle import NONE
 import firebase_admin
 from firebase_admin import credentials, firestore
 from firebase_admin.exceptions import FirebaseError
+from typing import List, Dict, Any
 
 
 class FirestoreService:
     def __init__(self) -> None:
         try:
-            self.cred = credentials.Certificate(
-                "../../../.secrets/la-famiglia-parma-ai.json"
+            firebase_admin_cert = os.environ.get(
+                "STAGING_FIREBASE_ADMINSDK_CERTIFICATE"
             )
+            if firebase_admin_cert is None:
+                raise ValueError("Firebase admin certificate not found")
+            firebase_admin_cert = str(firebase_admin_cert)
+            firebase_admin_cert_json = json.loads(firebase_admin_cert)
+            self.cred = credentials.Certificate(firebase_admin_cert_json)
             firebase_admin.initialize_app(self.cred)
             self.db = firestore.client()
         except FirebaseError as e:
