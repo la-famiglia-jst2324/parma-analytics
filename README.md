@@ -426,6 +426,7 @@ erDiagram
     }
     USER {
         uuid id PK
+        string auth_id UK
         string name
         string role
     }
