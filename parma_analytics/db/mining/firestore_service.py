@@ -10,9 +10,7 @@ from typing import List, Dict, Any
 class FirestoreService:
     def __init__(self) -> None:
         try:
-            firebase_admin_cert = os.environ.get(
-                "STAGING_FIREBASE_ADMINSDK_CERTIFICATE"
-            )
+            firebase_admin_cert = os.environ.get("FIREBASE_ADMINSDK_CERTIFICATE")
             if firebase_admin_cert is None:
                 raise ValueError("Firebase admin certificate not found")
             firebase_admin_cert_json = json.loads(firebase_admin_cert)
@@ -23,7 +21,7 @@ class FirestoreService:
             print(f"Error initializing Firebase: {e}")
             # Depending on the use case, you might want to re-raise the exception or handle it differently
 
-    def add_new_data_source(
+    def add_new_data_source_and_company(
         self, data_source: str, company: str, page_id: Dict[str, Any]
     ) -> None:
         try:
