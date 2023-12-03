@@ -9,6 +9,7 @@ from .routes import (
     dummy_router,
     new_company_router,
     trigger_datasources_router,
+    schedule_router,
 )
 
 app = FastAPI()
@@ -42,4 +43,9 @@ app.include_router(
 app.include_router(
     trigger_datasources_router,
     tags=["trigger_datasources"],
+)
+
+app.include_router(
+    schedule_router,
+    tags=["schedule_mining_modules"],
 )
