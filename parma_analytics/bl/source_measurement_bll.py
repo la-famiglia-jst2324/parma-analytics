@@ -21,7 +21,7 @@ from sqlalchemy.orm import Session
 def create_source_measurement_bll(
     db: Session,
     source_measurement: ApiSourceMeasurementCreateIn,
-) -> SourceMeasurement:
+) -> int:
     """Business logic function for creating a SourceMeasurement.
 
     Args:
