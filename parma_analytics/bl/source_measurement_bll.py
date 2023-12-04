@@ -6,6 +6,7 @@ from parma_analytics.api.models.source_measurement import (
 )
 
 from parma_analytics.db.prod.source_measurement_query import (
+    MeasurementPaginationResult,
     SourceMeasurement,
     create_source_measurement_query,
     get_source_measurement_query,
@@ -33,7 +34,9 @@ def create_source_measurement_bll(
     return create_source_measurement_query(db, source_measurement)
 
 
-def read_source_measurement_bll(db: Session, source_measurement_id: int) -> SourceMeasurement:
+def read_source_measurement_bll(
+    db: Session, source_measurement_id: int
+) -> SourceMeasurement:
     """Business logic function for reading a SourceMeasurement.
 
     Args:
@@ -74,7 +77,9 @@ def delete_source_measurement_bll(db: Session, source_measurement_id: int) -> No
     delete_source_measurement_query(db, source_measurement_id)
 
 
-def list_source_measurements_bll(db: Session, page: int, page_size: int) -> list[SourceMeasurement]:
+def list_source_measurements_bll(
+    db: Session, page: int, page_size: int
+) -> MeasurementPaginationResult:
     """Business logic function for listing all SourceMeasurements.
 
     Args:

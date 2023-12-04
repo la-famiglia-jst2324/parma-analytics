@@ -34,7 +34,7 @@ engine = get_engine()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def get_db() -> Iterator[Session] :
+def get_db() -> Iterator[Session]:
     db = SessionLocal()
     try:
         yield db

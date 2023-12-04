@@ -1,4 +1,3 @@
-from typing import List
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from parma_analytics.db.prod.engine import get_db
@@ -7,6 +6,7 @@ from starlette import status
 from parma_analytics.api.models.source_measurement import (
     ApiSourceMeasurementCreateIn,
     ApiSourceMeasurementCreateOut,
+    ApiSourceMeasurementListOut,
     ApiSourceMeasurementOut,
     ApiSourceMeasurementUpdateIn,
     ApiSourceMeasurementUpdateOut,
@@ -45,15 +45,21 @@ async def create_source_measurement(
 @router.get(
     "/source-measurement",
     status_code=status.HTTP_200_OK,
-    description="List all source measurements with pagination.",
+    description="List all source measurements with pagination. Additionally returns the total number of pages.",
 )
 def read_all_source_measurements(
     db: Session = Depends(get_db),
     page: int = 1,
     per_page: int = 10,
-) -> List[ApiSourceMeasurementOut]:
+) -> ApiSourceMeasurementListOut:
     source_measurements = list_source_measurements_bll(db, page, per_page)
-    return [ApiSourceMeasurementOut(**dict(sm)) for sm in source_measurements]
+    measurements_out = [
+        ApiSourceMeasurementOut(**dict(sm))
+        for sm in source_measurements.measurements_list
+    ]
+    return ApiSourceMeasurementListOut(
+        measurements_list=measurements_out, num_pages=source_measurements.num_pages
+    )
 
 
 @router.get(

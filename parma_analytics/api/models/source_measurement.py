@@ -71,6 +71,13 @@ class ApiSourceMeasurementOut(_ApiSourceMeasurementOutBase):
     pass
 
 
+class ApiSourceMeasurementListOut(_ApiSourceMeasurementBase):
+    """Output model for the SourceMeasurement retrieval endpoint."""
+
+    measurements_list: list[ApiSourceMeasurementOut]
+    num_pages: int
+
+
 # ------------------------------------------------------------------------------------ #
 #                                     Update Models                                    #
 # ------------------------------------------------------------------------------------ #
