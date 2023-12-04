@@ -1,7 +1,10 @@
 """Engine utilities."""
 
 import os
+from typing import Iterator
 from urllib.parse import quote
+from requests import Session
+from sqlalchemy import Engine
 from sqlalchemy.orm import sessionmaker
 from sqlalchemy.ext.declarative import declarative_base
 
@@ -12,7 +15,7 @@ Base = declarative_base()
 engine = None
 
 
-def get_engine():
+def get_engine() -> Engine:
     """Get the database engine."""
     db_host = quote(os.environ.get("POSTGRES_HOST", "localhost"))
     db_port = os.environ.get("POSTGRES_PORT", 5432)
@@ -28,11 +31,10 @@ def get_engine():
 
 
 engine = get_engine()
-Base.metadata.create_all(bind=engine)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
-def get_db():
+def get_db() -> Iterator[Session] :
     db = SessionLocal()
     try:
         yield db

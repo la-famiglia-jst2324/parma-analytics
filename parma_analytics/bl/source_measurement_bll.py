@@ -6,6 +6,7 @@ from parma_analytics.api.models.source_measurement import (
 )
 
 from parma_analytics.db.prod.source_measurement_query import (
+    SourceMeasurement,
     create_source_measurement_query,
     get_source_measurement_query,
     list_source_measurements_query,
@@ -19,7 +20,7 @@ from sqlalchemy.orm import Session
 def create_source_measurement_bll(
     db: Session,
     source_measurement: ApiSourceMeasurementCreateIn,
-) -> ApiSourceMeasurementCreateOut:
+) -> SourceMeasurement:
     """Business logic function for creating a SourceMeasurement.
 
     Args:
@@ -32,7 +33,7 @@ def create_source_measurement_bll(
     return create_source_measurement_query(db, source_measurement)
 
 
-def read_source_measurement_bll(db: Session, source_measurement_id: int):
+def read_source_measurement_bll(db: Session, source_measurement_id: int) -> SourceMeasurement:
     """Business logic function for reading a SourceMeasurement.
 
     Args:
@@ -49,7 +50,7 @@ def update_source_measurement_bll(
     db: Session,
     id: int,
     source_measurement: ApiSourceMeasurementUpdateIn,
-):
+) -> SourceMeasurement:
     """Business logic function for updating a SourceMeasurement.
 
     Args:
@@ -63,7 +64,7 @@ def update_source_measurement_bll(
     return update_source_measurement_query(db, id, source_measurement)
 
 
-def delete_source_measurement_bll(db: Session, source_measurement_id: int):
+def delete_source_measurement_bll(db: Session, source_measurement_id: int) -> None:
     """Business logic function for deleting a SourceMeasurement.
 
     Args:
@@ -73,7 +74,7 @@ def delete_source_measurement_bll(db: Session, source_measurement_id: int):
     delete_source_measurement_query(db, source_measurement_id)
 
 
-def list_source_measurements_bll(db: Session, page: int, page_size: int):
+def list_source_measurements_bll(db: Session, page: int, page_size: int) -> list[SourceMeasurement]:
     """Business logic function for listing all SourceMeasurements.
 
     Args:

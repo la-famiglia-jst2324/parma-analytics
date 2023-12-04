@@ -14,19 +14,16 @@ class SourceMeasurement(BaseModel):
     modified_at: str
 
     @validator("created_at", "modified_at", pre=True)
-    def format_datetime(cls, value):
+    def format_datetime(cls, value) -> str:
         return value.strftime("%Y-%m-%d %H:%M:%S")
 
 
-def create_source_measurement_query(db: Session, source_measurement_data):
-    print(source_measurement_data)
+def create_source_measurement_query(db: Session, source_measurement_data) -> int:
     source_measurement_data = mapping_list(source_measurement_data)
-    print(source_measurement_data)
     query = text(
         """INSERT INTO source_measurement (type, measurement_name, source_module_id, company_id, created_at, modified_at)
                     VALUES (:type, :measurement_name, :source_module_id, :company_id, NOW(), NOW()) RETURNING *"""
     )
-    print(query)
     result = db.execute(query, source_measurement_data)
     db.commit()
     new_source_measurement = result.fetchone()
@@ -34,7 +31,7 @@ def create_source_measurement_query(db: Session, source_measurement_data):
     return new_source_measurement_dict["id"]
 
 
-def get_source_measurement_query(db: Session, source_measurement_id):
+def get_source_measurement_query(db: Session, source_measurement_id) -> SourceMeasurement:
     query = text(
         """SELECT id, type, measurement_name, source_module_id, company_id, created_at, modified_at
                  FROM source_measurement WHERE id = :id"""
@@ -45,7 +42,7 @@ def get_source_measurement_query(db: Session, source_measurement_id):
     return SourceMeasurement(**source_measurement_dict)
 
 
-def list_source_measurements_query(db: Session, *, page: int, page_size: int):
+def list_source_measurements_query(db: Session, *, page: int, page_size: int) -> list[SourceMeasurement]:
     query = text("""SELECT * FROM source_measurement LIMIT :limit OFFSET :offset""")
     result = db.execute(query, {"limit": page_size, "offset": (page - 1) * page_size})
     source_measurements = result.fetchall()
@@ -56,7 +53,7 @@ def list_source_measurements_query(db: Session, *, page: int, page_size: int):
     return source_measurement_models
 
 
-def update_source_measurement_query(db: Session, id: int, source_measurement_data):
+def update_source_measurement_query(db: Session, id: int, source_measurement_data) -> SourceMeasurement:
     source_measurement_data = mapping_list(source_measurement_data)
     # create a list of "column = :value" strings for each item in source_measurement_data
     set_clause = ", ".join(f"{key} = :{key}" for key in source_measurement_data.keys())
@@ -71,7 +68,7 @@ def update_source_measurement_query(db: Session, id: int, source_measurement_dat
     return SourceMeasurement(**updated_measurement_dict)
 
 
-def delete_source_measurement_query(db: Session, source_measurement_id):
+def delete_source_measurement_query(db: Session, source_measurement_id) -> None:
     query = text("""DELETE FROM source_measurement WHERE id = :id""")
     db.execute(query, {"id": source_measurement_id})
     db.commit()
