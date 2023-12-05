@@ -13,6 +13,7 @@ class DataSource(Base):
     source_name = Column(String)
     is_active = Column(Boolean)
     default_frequency = Column(Enum(Frequency))
+    frequency_pattern = Column(String, nullable=True)
     health_status = Column(Enum(HealthStatus))
     description = Column(String, nullable=True)
     created_at = Column(DateTime)
