@@ -7,6 +7,7 @@ from sqlalchemy.orm import Session
 import logging
 
 from parma_analytics.db.prod.models.data_source import DataSource
+from parma_analytics.db.prod.models.enums.frequency import Frequency
 from parma_analytics.db.prod.models.enums.schedule_type import ScheduleType
 from parma_analytics.db.prod.models.enums.task_status import TaskStatus
 from parma_analytics.db.prod.models.scheduled_tasks import ScheduledTasks
@@ -66,8 +67,8 @@ class ScheduleManager:
                 logger.debug(f"Task {task.task_id} status set from PENDING to FAILED.")
             elif task.status == TaskStatus.PROCESSING:
                 data_source = task.data_source
-                if datetime.now() >= task.locked_at + timedelta(
-                    minutes=data_source.maximum_expected_run_time
+                if self.is_time_to_run(
+                    task.locked_at, data_source.maximum_expected_run_time
                 ):
                     task.status = TaskStatus.FAILED
                     logger.debug(
@@ -110,8 +111,8 @@ class ScheduleManager:
             self._reschedule_task(task)
         elif task.status == TaskStatus.PROCESSING:
             # Check if the task has exceeded the maximum expected run time using locked_at
-            if datetime.now() >= task.started_at + timedelta(
-                minutes=task.data_source.maximum_expected_run_time
+            if self.is_time_to_run(
+                task.started_at, task.data_source.maximum_expected_run_time
             ):
                 logger.debug(
                     f"Scheduled Task {task.task_id} status equals to PROCESSING and has exceeded the maximum run time."
@@ -141,17 +142,15 @@ class ScheduleManager:
         elif latest_task.status in [
             TaskStatus.SUCCESS,
             TaskStatus.FAILED,
-        ] and datetime.now() >= latest_task.started_at + timedelta(
-            minutes=source.default_frequency
-        ):
+        ] and self.is_time_to_run(latest_task.started_at, source.default_frequency):
             logger.debug(
                 f"Latest scheduled task {latest_task.task_id} found for data source {source.id}, and it's status "
                 f"equals to {latest_task.status} and has exceeded the default frequency."
             )
             self._create_new_task(source)
         elif latest_task.status == TaskStatus.PROCESSING:
-            if datetime.now() >= latest_task.locked_at + timedelta(
-                minutes=latest_task.data_source.maximum_expected_run_time
+            if self.is_time_to_run(
+                latest_task.locked_at, source.maximum_expected_run_time
             ):
                 logger.debug(
                     f"Latest scheduled task {latest_task.task_id} found for data source {source.id}, and it's status "
@@ -189,3 +188,19 @@ class ScheduleManager:
     def trigger_mining_module(self, task: ScheduledTasks) -> None:
         logger.info(f"Triggering mining module for task {task.task_id}")
         # TODO Trigger the Analytics Backend API
+
+    def is_time_to_run(self, start_date_time: datetime, second_param) -> bool:
+        if isinstance(second_param, Frequency):
+            # Handle the case where second_param is Frequency
+            if second_param == Frequency.DAILY:
+                time_delta = timedelta(days=1)
+            elif second_param == Frequency.WEEKLY:
+                time_delta = timedelta(days=7)
+            # TODO: implement other frequencies (CRON)
+        elif isinstance(second_param, int):
+            # Handle the case where second_param is maximum_expected_runtime (minutes)
+            time_delta = timedelta(minutes=second_param)
+        else:
+            raise ValueError("Invalid second parameter type")
+
+        return datetime.now() >= start_date_time + time_delta
