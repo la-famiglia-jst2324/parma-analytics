@@ -28,7 +28,7 @@ def create_source_measurement_bll(
         source_measurement: The SourceMeasurement object to create.
 
     Returns:
-        the created source measurement.
+        The created source measurement.
     """
     return create_source_measurement_query(db, source_measurement)
 
