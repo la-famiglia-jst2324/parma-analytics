@@ -14,9 +14,9 @@ graph LR;
                 ut1(RAW_DATA1)
                 ut2(RAW_DATA2)
             end
-            subgraph normalized_data
-                ut3(NORMLAIZED_DATA1)
-                ut4(NORMLAIZED_DATA2)
+            subgraph normalization_schema
+                ut3(SCHEMA_1)
+                ut4(SCHEMA_2)
             end
         end
         subgraph trigger/
@@ -43,13 +43,13 @@ stateDiagram-v2
         mining --> trigger
         datasource --> DATASOURCE_NAME1
         DATASOURCE_NAME1 --> raw_data
-        DATASOURCE_NAME1 --> normalized_data
+        DATASOURCE_NAME1 --> normalization_schema
 
             raw_data --> RAW_DATA1
             raw_data --> RAW_DATA2
 
-            normalized_data --> NORMLAIZED_DATA1
-            normalized_data --> NORMLAIZED_DATA2
+            normalization_schema --> SCHEMA1
+            normalization_schema --> SCHEMA2
 
         trigger --> TRIGGER1
         trigger --> TRIGGER2
@@ -68,11 +68,9 @@ erDiagram
         string status "success | failure"
         map data "actually mined json"
     }
-    "parma/mining/datasource/NAME/normalized_data/DOCUMENT_ID" {
+    "parma/mining/datasource/NAME/normalization_schema/DOCUMENT_ID" {
         uuid DOCUMENT_ID "PK"
-        ref __raw_data "FK"
-        datetime __normalized_at
-        map data ""
+        map schema ""
     }
     "parma/mining/trigger/DOCUMENT_ID" {
         uuid DOCUMENT_ID "PK"

@@ -74,7 +74,7 @@ def resolve_document_template_from_path(
 
 
 def validate_document(
-    engine: firestore_types.Client, fields: dict[str, DocField], values: dict[str, Any]
+    fields: dict[str, DocField], values: dict[str, Any]
 ) -> dict[str, Any]:
     """Validates a document for firestore and raises ValueError if invalid.
 
@@ -88,34 +88,25 @@ def validate_document(
         val: Any = values.get(field.name)
 
         # validate types
-        if field.type == "string":
-            if not isinstance(val, str):
-                raise ValueError(f"Expected type {field.type} but got {type(val)}")
-        elif field.type == "number":
-            if not isinstance(val, int) or not isinstance(val, float):
-                raise ValueError(f"Expected type {field.type} but got {type(val)}")
-        elif field.type == "boolean":
-            if not isinstance(val, bool):
-                raise ValueError(f"Expected type {field.type} but got {type(val)}")
-        elif field.type == "timestamp":
-            if not isinstance(val, datetime):
-                raise ValueError(f"Expected type {field.type} but got {type(val)}")
-        elif field.type == "array":
-            if not isinstance(val, list):
-                raise ValueError(f"Expected type {field.type} but got {type(val)}")
-        elif field.type == "map":
-            if not isinstance(val, dict):
-                raise ValueError(f"Expected type {field.type} but got {type(val)}")
-        elif field.type == "null":
-            if val is not None:
-                raise ValueError(f"Expected type {field.type} but got {type(val)}")
-        elif field.type == "geopoint":
-            raise NotImplementedError("Not implemented")
-        elif field.type == "reference":
-            if not isinstance(val, str):
-                raise ValueError(f"Expected type {field.type} but got {type(val)}")
-        else:
-            raise ValueError(f"Unknown type: {field.type}")
+        str_types = {
+            "string": str,
+            "number": int,
+            "boolean": bool,
+            "timestamp": datetime,
+            "array": list,
+            "map": dict,
+            "null": None,
+            "geopoint": None,
+            "reference": str,
+        }
+
+        if str_types.get(field.type) is None and not field.required:
+            continue
+
+        if not isinstance(val, str_types.get(field.type)):  # type: ignore
+            raise ValueError(
+                f"Field `{field_name}`: Expected type {field.type} but got {type(val)}"
+            )
 
         payload[field.name] = val
 
@@ -125,14 +116,36 @@ def validate_document(
 def save_document(
     fs_doc: firestore_types.DocumentReference, payload: dict[str, Any]
 ) -> firestore_types.DocumentReference:
-    """Save a document to firestore.
+    """Save a document to firestore. Fields are unvalidated.
 
     Args:
         fs_doc: The firestore document.
         payload: The document payload.
+
+    Returns:
+        The firestore document.
     """
     fs_doc.set(payload)
     return fs_doc
+
+
+def save_validated_document(
+    fs_doc: firestore_types.DocumentReference,
+    fields: dict[str, DocField],
+    payload: dict[str, Any],
+) -> firestore_types.DocumentReference:
+    """Save a document to firestore. Fields are validated.
+
+    Args:
+        fs_doc: The firestore document.
+        fields: The document fields.
+        payload: The document payload.
+
+    Returns:
+        The firestore document.
+    """
+    payload = validate_document(fields, payload)
+    return save_document(fs_doc, payload)
 
 
 def save_document_from_template(
@@ -145,12 +158,45 @@ def save_document_from_template(
     Args:
         engine: The database engine.
         path: The document path. (e.g. "mining/datasource/raw_data/2340923741209")
-        payload: The document payload.
+        instance: The document instance.
+
+    Returns:
+        The firestore document.
     """
     doc_template = resolve_document_template_from_path(engine, path)
     fs_doc: firestore_types.DocumentReference = resolve_document_from_path(engine, path)
-    payload = validate_document(engine, doc_template.fields, instance.values)
-    return save_document(fs_doc, payload)
+    return save_validated_document(fs_doc, doc_template.fields, instance.values)
+
+
+def read_document(
+    fs_doc: firestore_types.DocumentReference,
+) -> firestore_types.DocumentSnapshot:
+    """Read a document from firestore.
+
+    Args:
+        fs_doc: The firestore document.
+
+    Returns:
+        The document payload.
+    """
+    return fs_doc.get()
+
+
+def read_document_from_path(
+    engine: firestore_types.Client, path: str
+) -> firestore_types.DocumentSnapshot:
+    """Read a document from firestore.
+
+    Args:
+        engine: The database engine.
+        path: The document path. (e.g. "mining/datasource/raw_data/2340923741209")
+
+    Returns:
+        The document payload.
+    """
+    resolve_document_template_from_path(engine, path)
+    fs_doc: firestore_types.DocumentReference = resolve_document_from_path(engine, path)
+    return read_document(fs_doc)
 
 
 # ------------------------------------------------------------------------------------ #
