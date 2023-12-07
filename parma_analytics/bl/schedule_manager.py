@@ -1,10 +1,12 @@
-from datetime import datetime, timedelta
-from typing import Optional
+"""Scheduler for providing scheduling functionality interfacing with the database."""
 
-from sqlalchemy.exc import SQLAlchemyError
-from sqlalchemy import or_
-from sqlalchemy.orm import Session
 import logging
+from datetime import datetime, timedelta
+from typing import Any
+
+from sqlalchemy import Engine, or_
+from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy.orm import Session
 
 from parma_analytics.db.prod.models.data_source import DataSource
 from parma_analytics.db.prod.models.enums.frequency import Frequency
@@ -16,10 +18,23 @@ logger = logging.getLogger(__name__)
 
 
 class ScheduleManager:
-    def __init__(self, db: Session):
-        self.db = db
+    """Context managing class for scheduling tasks."""
+
+    # --------------------------- Context manager functions -------------------------- #
+
+    def __init__(self, engine: Engine):
+        self.session = Session(engine, autocommit=False, autoflush=False)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args: tuple[Any, ...], **kwargs: dict[str, Any]):
+        self.session.close()
+
+    # ------------------------------- Public functions ------------------------------- #
 
     def schedule_tasks(self) -> None:
+        """Main function to maintain task scheduling."""
         logger.info("Starting task scheduling...")
 
         # Determine if there are any failed tasks and update their status accordingly
@@ -48,10 +63,34 @@ class ScheduleManager:
 
         logger.info("Task scheduling completed.")
 
+    def trigger_mining_module(self, task: ScheduledTasks) -> None:
+        """Dispatching function to trigger the mining module."""
+        logger.info(f"Triggering mining module for task {task.task_id}")
+        # TODO Trigger the Analytics Backend API
+
+    def is_time_to_run(self, start_date_time: datetime, second_param) -> bool:
+        """Check if it is time to run the task."""
+        if isinstance(second_param, Frequency):
+            # Handle the case where second_param is Frequency
+            if second_param == Frequency.DAILY:
+                time_delta = timedelta(days=1)
+            elif second_param == Frequency.WEEKLY:
+                time_delta = timedelta(days=7)
+            # TODO: implement other frequencies (CRON)
+        elif isinstance(second_param, int):
+            # Handle the case where second_param is maximum_expected_runtime (minutes)
+            time_delta = timedelta(minutes=second_param)
+        else:
+            raise ValueError("Invalid second parameter type")
+
+        return datetime.now() >= start_date_time + time_delta
+
+    # ------------------------------ Internal functions ------------------------------ #
+
     def _update_failed_tasks(self) -> None:
         logger.info("Updating status of failed tasks...")
         tasks: list[ScheduledTasks] = (
-            self.db.query(ScheduledTasks)
+            self.session.query(ScheduledTasks)
             .filter(
                 ScheduledTasks.attempts >= 3,
                 ScheduledTasks.status == TaskStatus.PENDING,
@@ -75,12 +114,12 @@ class ScheduleManager:
                         f"Task {task.task_id} status set from PROCESSING to FAILED."
                     )
 
-            self.db.commit()
+            self.session.commit()
 
     def _process_scheduled_tasks(self) -> None:
         logger.info("Processing scheduled tasks...")
         tasks: list[ScheduledTasks] = (
-            self.db.query(ScheduledTasks)
+            self.session.query(ScheduledTasks)
             .filter(
                 ScheduledTasks.schedule_type == ScheduleType.ON_DEMAND,
                 or_(
@@ -98,7 +137,7 @@ class ScheduleManager:
     def _process_data_sources(self) -> None:
         logger.info("Processing active data sources...")
         sources: list[DataSource] = (
-            self.db.query(DataSource).filter(DataSource.is_active == True).all()
+            self.session.query(DataSource).filter(DataSource.is_active is True).all()
         )
 
         for source in sources:
@@ -120,8 +159,8 @@ class ScheduleManager:
                 self._reschedule_task(task)
 
     def _handle_data_source(self, source: DataSource) -> None:
-        latest_task: Optional[ScheduledTasks] = (
-            self.db.query(ScheduledTasks)
+        latest_task: ScheduledTasks | None = (
+            self.session.query(ScheduledTasks)
             .filter(
                 ScheduledTasks.data_source_id == source.id,
                 ScheduledTasks.schedule_type == ScheduleType.REGULAR,
@@ -166,8 +205,8 @@ class ScheduleManager:
             attempts=0,
             schedule_type=ScheduleType.REGULAR,
         )
-        self.db.add(new_task)
-        self.db.commit()
+        self.session.add(new_task)
+        self.session.commit()
         logger.info(f"Created a new task {new_task.task_id}, data source {source.id}")
 
         # Trigger the mining module
@@ -177,30 +216,10 @@ class ScheduleManager:
         # Release the lock
         task.status = TaskStatus.PENDING
         task.locked_at = None
-        self.db.commit()
+        self.session.commit()
         logger.info(
             f"Rescheduled task {task.task_id}, data source {task.data_source.id}"
         )
 
         # Trigger the mining module
         self.trigger_mining_module(task)
-
-    def trigger_mining_module(self, task: ScheduledTasks) -> None:
-        logger.info(f"Triggering mining module for task {task.task_id}")
-        # TODO Trigger the Analytics Backend API
-
-    def is_time_to_run(self, start_date_time: datetime, second_param) -> bool:
-        if isinstance(second_param, Frequency):
-            # Handle the case where second_param is Frequency
-            if second_param == Frequency.DAILY:
-                time_delta = timedelta(days=1)
-            elif second_param == Frequency.WEEKLY:
-                time_delta = timedelta(days=7)
-            # TODO: implement other frequencies (CRON)
-        elif isinstance(second_param, int):
-            # Handle the case where second_param is maximum_expected_runtime (minutes)
-            time_delta = timedelta(minutes=second_param)
-        else:
-            raise ValueError("Invalid second parameter type")
-
-        return datetime.now() >= start_date_time + time_delta

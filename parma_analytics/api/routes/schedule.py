@@ -3,8 +3,6 @@
 import logging
 
 from fastapi import APIRouter, BackgroundTasks, Response, status
-from sqlalchemy import Engine
-from sqlalchemy.orm import Session
 
 from parma_analytics.bl.schedule_manager import ScheduleManager
 from parma_analytics.db.prod.engine import get_engine
@@ -25,7 +23,5 @@ async def schedule(background_tasks: BackgroundTasks) -> Response:
 
 
 def schedule_tasks() -> None:
-    engine: Engine = get_engine()
-    with Session(engine, autocommit=False, autoflush=False) as db:
-        schedule_manager = ScheduleManager(db)
+    with ScheduleManager(get_engine()) as schedule_manager:
         schedule_manager.schedule_tasks()
