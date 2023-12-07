@@ -1,8 +1,10 @@
+"""Support for scheduling the data mining modules."""
+
 import logging
 
-from fastapi import APIRouter, status, BackgroundTasks, Response
+from fastapi import APIRouter, BackgroundTasks, Response, status
 from sqlalchemy import Engine
-from sqlalchemy.orm import sessionmaker, Session
+from sqlalchemy.orm import Session
 
 from parma_analytics.bl.schedule_manager import ScheduleManager
 from parma_analytics.db.prod.engine import get_engine
@@ -24,8 +26,6 @@ async def schedule(background_tasks: BackgroundTasks) -> Response:
 
 def schedule_tasks() -> None:
     engine: Engine = get_engine()
-    SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-    db: Session = SessionLocal()
-
-    schedule_manager = ScheduleManager(db)
-    schedule_manager.schedule_tasks()
+    with Session(engine, autocommit=False, autoflush=False) as db:
+        schedule_manager = ScheduleManager(db)
+        schedule_manager.schedule_tasks()
