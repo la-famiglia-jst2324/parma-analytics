@@ -1,6 +1,7 @@
 """Example of a model for the API."""
 
 from pydantic import BaseModel
+from datetime import datetime
 
 # ------------------------------------------------------------------------------------ #
 #                                       Internal                                       #
@@ -10,12 +11,14 @@ from pydantic import BaseModel
 class _ApiFeedRawDataBase(BaseModel):
     """Internal base model for the raw data endpoints."""
 
+    source_name: str
     raw_data: str
 
 
 class _ApiFeedRawDataOutBase(_ApiFeedRawDataBase):
     """Output base model for the several endpoint."""
 
+    timestamp: datetime
     return_message: str
 
 
