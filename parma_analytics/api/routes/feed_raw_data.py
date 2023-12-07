@@ -16,6 +16,9 @@ router = APIRouter()
     description=""" Endpoint to receive raw data from data mining modules """,
 )
 def feed_raw_data(body: ApiFeedRawDataCreateIn) -> ApiFeedRawDataCreateOut:
+    # TODO: Write data to the firestore db
+    # TODO: Error handling
+
     return ApiFeedRawDataCreateOut(
         return_message="Raw data received",
         source_name=body.source_name,
