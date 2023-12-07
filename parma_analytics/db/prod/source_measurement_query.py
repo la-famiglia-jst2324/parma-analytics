@@ -61,6 +61,7 @@ def list_source_measurements_query(
 
     # Calculate the total number of pages
     num_pages = (total_records + page_size - 1) // page_size
+    page = max(1, min(page, num_pages))
 
     query = text("""SELECT * FROM source_measurement LIMIT :limit OFFSET :offset""")
     result = db.execute(query, {"limit": page_size, "offset": (page - 1) * page_size})
