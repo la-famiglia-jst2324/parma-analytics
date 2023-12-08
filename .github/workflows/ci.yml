@@ -57,12 +57,6 @@ jobs:
           cache-environment: true
       - name: Install package
         run: python -m pip install --no-build-isolation --no-deps --disable-pip-version-check -e .
-      - name: Store credentials file
-        run: |
-          mkdir -p ./.secrets/
-          echo -n "$KEYSTORE" > ./.secrets/la-famiglia-parma-ai.json
-        env:
-          KEYSTORE: ${{ secrets.GCP_SA_KEY }}
       - name: Run unit tests
         run: python -m pytest --cov-report=xml
         env:
