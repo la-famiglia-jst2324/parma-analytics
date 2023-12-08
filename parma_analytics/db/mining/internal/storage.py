@@ -100,7 +100,7 @@ def validate_document(
             "reference": str,
         }
 
-        if str_types.get(field.type) is None and not field.required:
+        if val is None and (str_types.get(field.type) is None or not field.required):
             continue
 
         if not isinstance(val, str_types.get(field.type)):  # type: ignore
