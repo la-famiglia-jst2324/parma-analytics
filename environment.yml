@@ -29,6 +29,11 @@ dependencies:
   - typer >=0.9.0
   - uvicorn[standard]
   - requests
+  - sendgrid
+  - python-dotenv
+  - slack_sdk
+  - pip:
+      - firebase-admin==6.2.0
   # Dependencies (db)
   - sqlalchemy >=2.0
   - psycopg2 >=2.9
