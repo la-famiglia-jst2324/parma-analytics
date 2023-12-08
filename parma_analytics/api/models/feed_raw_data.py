@@ -2,6 +2,7 @@
 
 from pydantic import BaseModel
 from datetime import datetime
+from typing import Any
 
 # ------------------------------------------------------------------------------------ #
 #                                       Internal                                       #
@@ -12,7 +13,7 @@ class _ApiFeedRawDataBase(BaseModel):
     """Internal base model for the raw data endpoints."""
 
     source_name: str
-    raw_data: dict
+    raw_data: dict[str, Any]
 
 
 class _ApiFeedRawDataOutBase(_ApiFeedRawDataBase):
