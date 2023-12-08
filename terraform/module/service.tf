@@ -70,6 +70,10 @@ resource "google_cloud_run_service" "parma_analytics_cloud_run" {
   }
 }
 
+/* ---------------------------- Cloud Run domain mapping ---------------------------- */
+
+# initial setup of DNS mapping in cloud console
+
 /* --------------------------------------- IAM -------------------------------------- */
 
 data "google_iam_policy" "noauth" {
