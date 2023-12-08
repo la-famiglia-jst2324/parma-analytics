@@ -12,7 +12,7 @@ class _ApiFeedRawDataBase(BaseModel):
     """Internal base model for the raw data endpoints."""
 
     source_name: str
-    raw_data: str
+    raw_data: dict
 
 
 class _ApiFeedRawDataOutBase(_ApiFeedRawDataBase):
