@@ -1,5 +1,7 @@
 """Firebase module to handle firebase app creation."""
 
+import json
+import os
 from pathlib import Path
 
 import firebase_admin
@@ -30,7 +32,10 @@ def get_app() -> firebase_admin.App:
 
 
 def _init_firebase() -> firebase_admin.App:
-    fb_certificate = credentials.Certificate(CREDENTIALS_PATH)
+    env_var = os.environ.get("FIREBASE_ADMINSDK_CERTIFICATE")
+    fb_certificate = credentials.Certificate(
+        json.loads(env_var) if env_var else CREDENTIALS_PATH
+    )
     return firebase_admin.initialize_app(fb_certificate)
 
 

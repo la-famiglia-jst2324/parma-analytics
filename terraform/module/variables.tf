@@ -18,3 +18,9 @@ variable "db_root_password" {
   type        = string
   sensitive   = true
 }
+
+variable "firebase_adminsdk_certificate" {
+  description = "value"
+  type        = string
+  sensitive   = true
+}

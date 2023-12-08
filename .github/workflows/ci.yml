@@ -57,6 +57,12 @@ jobs:
           cache-environment: true
       - name: Install package
         run: python -m pip install --no-build-isolation --no-deps --disable-pip-version-check -e .
+      - name: Store credentials file
+        run: |
+          mkdir -p ./.secrets/
+          echo -n "$KEYSTORE" > ./.secrets/la-famiglia-parma-ai.json
+        env:
+          KEYSTORE: ${{ secrets. }}
       - name: Run unit tests
         run: python -m pytest --cov-report=xml
         env:
@@ -65,6 +71,7 @@ jobs:
           POSTGRES_USER: parma-prod-db
           POSTGRES_PASSWORD: parma-prod-db
           POSTGRES_DB: parma-prod-db
+          FIREBASE_ADMINSDK_CERTIFICATE: ${{ secrets.STAGING_FIREBASE_ADMINSDK_CERTIFICATE}}
       - name: Get Cover
         uses: orgoro/coverage@v3.1
         if: github.event_name == 'pull_request'
