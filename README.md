@@ -10,79 +10,67 @@ ParmaAI analytics repository providing data processing and inference.
 
 ## `parma-ai` architecture
 
+The parma analytics backend is the heart of the system connecting the data mining processes with the frontend stack while being responsible for analytics and inference.
+
 ### system's architecture
 
 The parma ai backend consists of the following process flow:
 
-```mermaid
-graph LR
-    subgraph parma-mining
-        A[Data Mining] --> B[Data Preprocessing]
-    end
-    subgraph parma-mining-db
-        B --> C[NoSQL Mining Database]
-    end
-    subgraph parma-analytics
-        C --> D[Data Processing]
-        D --> F[Data Analytics]
-        F --> G[Data Inference]
-        D --> H[Data Visualization]
-        D --> I[Data Reporting / Alerting]
-        H --> I
-    end
-    subgraph parma-prod-db
-        D --> E[Data Storage]
-        G --> E
-    end
-    subgraph parma-web
-        E --> J[REST API]
-        J --> K[Frontend]
-    end
+![systems_architecture](docs/systems_architecture.svg)
 
-```
-
-### `parma-analytics` architecture
+#### Detailed architecture
 
 ```mermaid
 graph LR
-    subgraph parma_analytics
-        subgraph .
-            subgraph api
-                models
-                routes
-            end
-            subgraph db.mining
-            end
-            subgraph etl
-            end
-            subgraph analytics
-                subgraph inference
-                end
-                subgraph visualization
-                end
-            end
-            subgraph reporting
-                subgraph slack
-                end
-                subgraph gmail
-                end
-            end
-            subgraph db.prod
-            end
-            api -.-> db.mining
-            db.mining -.-> etl
-            etl -.-> analytics
-            analytics -.-> reporting
-            analytics -.-> db.prod
+    subgraph "parma-scheduler (Google Cloud Scheduler)"
+        S(Cloud Scheduler)
+    end
+    subgraph "parma-mining (Serverless / GCP Cloud Run)"
+        M1[Data Mining] --> M2[Data Preprocessing]
+    end
+    subgraph "parma-analytics (Serverless / GCP Cloud Run)"
+        subgraph "parma-mining-db (NoSQL/Firebase)"
+            FB1[NoSQL Mining Database]
         end
-        bl[bl=business logic] <--> api
-        bl <--> db.mining
-        bl <--> etl
-        bl <--> analytics
-        bl <--> reporting
-        bl <--> db.prod
+        M2 --> A0[Analytics REST API]
+        A0 -->|persist raw data| A1[Raw Data Storage Adapter]
+        A1 <--> FB1
+        subgraph "data_processing (Python)"
+            A2(Normalization)
+        end
+        A0 -->|handover to data processing| A2
+        A2 --> A3["SQL Storage Adapter"]
+        subgraph "analytics and reporting (Python)"
+            AR1[Data Analytics] --> AR2[Data Inference]
+            AR2 --> AR3[Data Visualization]
+            AR3 --> AR4[Data Reporting / Alerting]
+        end
+        AR3 -->|persist reporting results| A1
+        A2 -->|trigger analytics run| AR1
+        A0 -->|manage sourcing schedules| A4(Sourcing scheduler)
+        A3 <--> A4
     end
+    S -->|trigger mining run| A0
+    A4 -->|trigger mining run| M1
+    subgraph "Notifications (Firebase)"
+        AR4 -->|send notifications| N1[Slack]
+        AR4 -->|send notifications| N2[Gmail]
+    end
+    subgraph "parma-prod-db (GCP Cloud SQL)"
+        P[Postgres SQL]
+    end
+    A3 <--> P
+    subgraph "parma-web (Vercel)"
+        W1[Prisma database adapter] <--> W2[REST API]
+        W2 <--> W3[Frontend]
+    end
+    P <--> W1
+
 ```
+
+## How to add new data sources
+
+[ADDING_DATASOURCES.md](./docs/ADDING_DATASOURCES.md)
 
 ## Getting Started
 

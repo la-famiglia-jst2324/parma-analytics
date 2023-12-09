@@ -9,6 +9,7 @@ from .routes import (
     dummy_router,
     new_company_router,
     trigger_datasources_router,
+    feed_raw_data_router,
     schedule_router,
 )
 
@@ -43,6 +44,11 @@ app.include_router(
 app.include_router(
     trigger_datasources_router,
     tags=["trigger_datasources"],
+)
+
+app.include_router(
+    feed_raw_data_router,
+    tags=["feed_raw_data"],
 )
 
 app.include_router(
