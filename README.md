@@ -16,6 +16,10 @@ The parma analytics backend is the heart of the system connecting the data minin
 
 The parma ai backend consists of the following process flow:
 
+![systems_architecture](docs/systems_architecture.svg)
+
+#### Detailed architecture
+
 ```mermaid
 graph LR
     subgraph "parma-scheduler (Google Cloud Scheduler)"
@@ -63,6 +67,10 @@ graph LR
     P <--> W1
 
 ```
+
+## How to add new data sources
+
+[ADDING_DATASOURCES.md](./docs/ADDING_DATASOURCES.md)
 
 ## Getting Started
 
