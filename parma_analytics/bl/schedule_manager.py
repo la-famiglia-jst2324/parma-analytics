@@ -47,7 +47,7 @@ class ScheduleManager:
 
         # Process on-demand scheduled tasks
         try:
-            self._process_scheduled_tasks()
+            self._process_ondemand_scheduled_tasks()
         except SQLAlchemyError as e:
             logger.error(f"SQLAlchemyError in processing scheduled tasks: {e}")
         except Exception as e:
@@ -96,27 +96,37 @@ class ScheduleManager:
                 ScheduledTasks.status == TaskStatus.PENDING,
                 ScheduledTasks.status == TaskStatus.PROCESSING,
             )
+            .with_for_update()
             .all()
         )
 
         for task in tasks:
-            logger.debug(f"Processing task {task.task_id}...")
-            if task.status == TaskStatus.PENDING:
-                task.status = TaskStatus.FAILED
-                logger.debug(f"Task {task.task_id} status set from PENDING to FAILED.")
-            elif task.status == TaskStatus.PROCESSING:
-                data_source = task.data_source
-                if self.is_time_to_run(
-                    task.locked_at, data_source.maximum_expected_run_time
-                ):
+            self.session.begin_nested()
+            try:
+                self.session.refresh(task)
+                logger.debug(f"Processing task {task.task_id}...")
+                if task.status == TaskStatus.PENDING:
                     task.status = TaskStatus.FAILED
                     logger.debug(
-                        f"Task {task.task_id} status set from PROCESSING to FAILED."
+                        f"Task {task.task_id} status set from PENDING to FAILED."
                     )
+                elif task.status == TaskStatus.PROCESSING:
+                    data_source = task.data_source
+                    if self.is_time_to_run(
+                        task.locked_at, data_source.maximum_expected_run_time
+                    ):
+                        task.status = TaskStatus.FAILED
+                        logger.debug(
+                            f"Task {task.task_id} status set from PROCESSING to FAILED."
+                        )
 
-            self.session.commit()
+                self.session.commit()
+            except SQLAlchemyError as e:
+                logger.error(f"SQLAlchemyError in updating failed tasks: {e}")
+                self.session.rollback()
+                raise e
 
-    def _process_scheduled_tasks(self) -> None:
+    def _process_ondemand_scheduled_tasks(self) -> None:
         logger.info("Processing scheduled tasks...")
         tasks: list[ScheduledTasks] = (
             self.session.query(ScheduledTasks)
@@ -127,12 +137,19 @@ class ScheduleManager:
                     ScheduledTasks.status == TaskStatus.PROCESSING,
                 ),
             )
+            .with_for_update()
             .all()
         )
 
         for task in tasks:
             logger.debug(f"Processing scheduled task {task.task_id}.")
-            self._handle_task(task)
+            self.session.begin_nested()
+            try:
+                self.session.refresh(task)
+                self._handle_ondemand_task(task)
+            except SQLAlchemyError as e:
+                logger.error(f"SQLAlchemyError in processing scheduled tasks: {e}")
+                self.session.rollback()
 
     def _process_data_sources(self) -> None:
         logger.info("Processing active data sources...")
@@ -144,7 +161,7 @@ class ScheduleManager:
             logger.debug(f"Processing active data source {source.id}.")
             self._handle_data_source(source)
 
-    def _handle_task(self, task: ScheduledTasks) -> None:
+    def _handle_ondemand_task(self, task: ScheduledTasks) -> None:
         if task.status == TaskStatus.PENDING:
             logger.debug(f"Scheduled Task {task.task_id} status equals to PENDING.")
             self._reschedule_task(task)
@@ -166,36 +183,42 @@ class ScheduleManager:
                 ScheduledTasks.schedule_type == ScheduleType.REGULAR,
             )
             .order_by(ScheduledTasks.started_at.desc())
+            .with_for_update()
             .first()
         )
 
-        if not latest_task:
-            logger.debug(f"No scheduled task found for data source {source.id}")
-            self._create_new_task(source)
-        elif latest_task.status == TaskStatus.PENDING:
-            logger.debug(
-                f"Latest scheduled task {latest_task.task_id} found for data source {source.id}, and it's status "
-                f"equals to PENDING."
-            )
-            self._reschedule_task(latest_task)
-        elif latest_task.status in [
-            TaskStatus.SUCCESS,
-            TaskStatus.FAILED,
-        ] and self.is_time_to_run(latest_task.started_at, source.default_frequency):
-            logger.debug(
-                f"Latest scheduled task {latest_task.task_id} found for data source {source.id}, and it's status "
-                f"equals to {latest_task.status} and has exceeded the default frequency."
-            )
-            self._create_new_task(source)
-        elif latest_task.status == TaskStatus.PROCESSING:
-            if self.is_time_to_run(
-                latest_task.locked_at, source.maximum_expected_run_time
-            ):
+        try:
+            self.session.refresh(source)
+            if not latest_task:
+                logger.debug(f"No scheduled task found for data source {source.id}")
+                self._create_new_task(source)
+            elif latest_task.status == TaskStatus.PENDING:
                 logger.debug(
                     f"Latest scheduled task {latest_task.task_id} found for data source {source.id}, and it's status "
-                    f"equals to PROCESSING and has exceeded the maximum run time."
+                    f"equals to PENDING."
                 )
                 self._reschedule_task(latest_task)
+            elif latest_task.status in [
+                TaskStatus.SUCCESS,
+                TaskStatus.FAILED,
+            ] and self.is_time_to_run(latest_task.started_at, source.default_frequency):
+                logger.debug(
+                    f"Latest scheduled task {latest_task.task_id} found for data source {source.id}, and it's status "
+                    f"equals to {latest_task.status} and has exceeded the default frequency."
+                )
+                self._create_new_task(source)
+            elif latest_task.status == TaskStatus.PROCESSING:
+                if self.is_time_to_run(
+                    latest_task.locked_at, source.maximum_expected_run_time
+                ):
+                    logger.debug(
+                        f"Latest scheduled task {latest_task.task_id} found for data source {source.id}, and it's status "
+                        f"equals to PROCESSING and has exceeded the maximum run time."
+                    )
+                    self._reschedule_task(latest_task)
+        except SQLAlchemyError as e:
+            logger.error(f"SQLAlchemyError in processing data sources: {e}")
+            self.session.rollback()
 
     def _create_new_task(self, source: DataSource) -> None:
         new_task = ScheduledTasks(
