@@ -8,11 +8,13 @@ from sqlalchemy import Engine, or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
-from parma_analytics.db.prod.models.data_source import DataSource
-from parma_analytics.db.prod.models.enums.frequency import Frequency
-from parma_analytics.db.prod.models.enums.schedule_type import ScheduleType
-from parma_analytics.db.prod.models.enums.task_status import TaskStatus
-from parma_analytics.db.prod.models.scheduled_tasks import ScheduledTasks
+from parma_analytics.db.prod.models.types import (
+    ScheduledTasks,
+    Frequency,
+    TaskStatus,
+    ScheduleType,
+    DataSource,
+)
 
 logger = logging.getLogger(__name__)
 
