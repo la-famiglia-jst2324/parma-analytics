@@ -20,7 +20,7 @@ variable "db_root_password" {
 }
 
 variable "firebase_adminsdk_certificate" {
-  description = "value"
+  description = "Certificate for the firebase admin sdk"
   type        = string
   sensitive   = true
 }
