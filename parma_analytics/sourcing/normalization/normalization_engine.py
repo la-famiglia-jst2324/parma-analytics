@@ -1,52 +1,73 @@
-import json
-from typing import Any, Dict, List
+from typing import Any, Dict
 
 
-def transform_date(date_string):
-    # Implement date transformation logic
-    pass
+def build_lookup_dict(mapping_schema: Dict[str, Any]) -> Dict[str, Dict[str, str]]:
+    lookup_dict = {}
+    for mapping in mapping_schema["Mappings"]:
+        source_field = mapping["source_field"]
+        lookup_dict[source_field] = {
+            "type": mapping["type"],
+            "source_measurement_id": mapping["source_measurement_id"],
+        }
+
+        # Handle nested mappings
+        if mapping["type"] == "nested":
+            for nested_mapping in mapping.get("NestedMappings", []):
+                nested_field = nested_mapping["source_field"]
+                lookup_dict[nested_field] = {
+                    "type": nested_mapping["type"],
+                    "source_measurement_id": nested_mapping["source_measurement_id"],
+                }
+    return lookup_dict
 
 
-def transform_text(text):
-    # Implement text transformation logic
-    pass
-
-
-def read_mapping_schema(data_source: str) -> Dict[str, Any]:
-    # Get dummy mapping
-    with open("dummy_file_path", "r") as file:
-        return json.load(file)
-
-
-def process_data_point(data_point, mapping):
+def process_data_point(value, company_id, timestamp, mapping):
     normalized_data = {}
-    for field, field_mapping in mapping.items():
-        if field_mapping["DataType"] == "date":
-            normalized_data[field_mapping["MeasurementName"]] = transform_date(
-                data_point[field]
-            )
-        elif field_mapping["DataType"] == "text":
-            normalized_data[field_mapping["MeasurementName"]] = transform_text(
-                data_point[field]
-            )
-        # Add more conditions for other data types
+
+    normalized_data["source_measurement_id"] = mapping["source_measurement_id"]
+    normalized_data["timeStamp"] = timestamp
+    normalized_data["company_id"] = company_id
+    normalized_data["value"] = value
+    normalized_data["type"] = mapping["type"]
+
     return normalized_data
 
 
-def process_nested_data(nested_data, nested_mapping):
-    # Implement logic to handle nested data
-    pass
-
-
 def normalize_data(raw_data, mapping_schema):
+    lookup_dict = build_lookup_dict(mapping_schema)
     normalized_results = []
-    for data_point in raw_data:
-        if "NestedMappings" in mapping_schema:
-            nested_results = process_nested_data(
-                data_point, mapping_schema["NestedMappings"]
-            )
-            normalized_results.extend(nested_results)
-        else:
-            normalized_data = process_data_point(data_point, mapping_schema)
-            normalized_results.append(normalized_data)
+    for company in raw_data:
+        company_id = company["company_id"]
+        timestamp = company["timestamp"]
+        for data in company["data"]:
+            for key, value in data.items():
+                mapping_info = lookup_dict[key]
+                data_type = mapping_info["type"]
+                if data_type == "nested":
+                    if isinstance(value, list):
+                        for nested_data in value:
+                            for nested_key, nested_value in nested_data.items():
+                                nested_mapping_info = lookup_dict[nested_key]
+                                normalized_data = process_data_point(
+                                    nested_value,
+                                    company_id,
+                                    timestamp,
+                                    nested_mapping_info,
+                                )
+                                normalized_results.append(normalized_data)
+                    else:
+                        for nested_key, nested_value in value.items():
+                            nested_mapping_info = lookup_dict[nested_key]
+                            normalized_data = process_data_point(
+                                nested_value, company_id, timestamp, nested_mapping_info
+                            )
+                            normalized_results.append(normalized_data)
+
+                else:
+                    normalized_data = process_data_point(
+                        value, company_id, timestamp, mapping_info
+                    )
+                    normalized_results.append(normalized_data)
+
+    print(normalized_results)
     return normalized_results
