@@ -29,11 +29,12 @@ provider "google" {
 }
 
 module "main" {
-  source           = "../module"
-  env              = "staging"
-  project          = local.project
-  region           = local.region
-  db_root_password = var.db_root_password
-  base_domain      = var.base_domain
-  api_subdomain    = "staging."
+  source                        = "../module"
+  env                           = "staging"
+  project                       = local.project
+  region                        = local.region
+  db_root_password              = var.db_root_password
+  base_domain                   = var.base_domain
+  api_subdomain                 = "staging."
+  firebase_adminsdk_certificate = var.firebase_adminsdk_certificate
 }
