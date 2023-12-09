@@ -17,6 +17,7 @@ dependencies:
   # Development
   - types-pyyaml
   - google-cloud-sdk
+  - ipykernel
   # Testing
   - pytest >=6 # --import-mode option
   - pytest-cov
@@ -32,3 +33,5 @@ dependencies:
   # Dependencies (db)
   - sqlalchemy >=2.0
   - psycopg2 >=2.9
+  - pip:
+      - firebase-admin==6.2.0
