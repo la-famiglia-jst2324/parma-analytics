@@ -63,12 +63,13 @@ def process_data_point(
 
 
 def normalize_data(
-    raw_data: List[Dict[str, Any]], mapping_schema: Dict[str, Any]
+    raw_data: Dict[str, Any], mapping_schema: Dict[str, Any]
 ) -> List[NormalizedData]:
-    """Normalizes raw data according to the provided mapping schema.
+    """Normalizes raw data according to the provided mapping schema for one company at a
+    time.
 
     Args:
-    raw_data (List[Dict[str, Any]]): The raw data to be normalized.
+    raw_data (Dict[str, Any]): The raw data to be normalized.
     mapping_schema (Dict[str, Any]): The mapping schema for normalization.
 
     Returns:
@@ -77,46 +78,34 @@ def normalize_data(
     lookup_dict = build_lookup_dict(mapping_schema)
     normalized_results = []
 
-    for company in raw_data:
-        company_id = company.get("company_id")
-        timestamp = company.get("timestamp")
+    company_id = str(raw_data.get("company_id", ""))
+    timestamp = str(raw_data.get("timestamp", ""))
 
-        for data_item in company.get("data", []):
-            for key, value in data_item.items():
-                if key in lookup_dict:
-                    mapping_info = lookup_dict[key]
-                    data_type = mapping_info["type"]
+    for data_item in raw_data.get("data", []):
+        for key, value in data_item.items():
+            mapping_info = lookup_dict.get(key)
+            if not mapping_info:
+                print(f"Warning: Key '{key}' not found in lookup dictionary")
+                continue
 
-                    if data_type == "nested":
-                        if isinstance(value, list):
-                            for nested_data in value:
-                                for nested_key, nested_value in nested_data.items():
-                                    if nested_key in lookup_dict:
-                                        nested_mapping_info = lookup_dict[nested_key]
-                                        normalized_data = process_data_point(
-                                            nested_value,
-                                            str(company_id),
-                                            str(timestamp),
-                                            nested_mapping_info,
-                                        )
-                                        normalized_results.append(normalized_data)
-                        elif isinstance(value, dict):
-                            for nested_key, nested_value in value.items():
-                                if nested_key in lookup_dict:
-                                    nested_mapping_info = lookup_dict[nested_key]
-                                    normalized_data = process_data_point(
-                                        nested_value,
-                                        str(company_id),
-                                        str(timestamp),
-                                        nested_mapping_info,
-                                    )
-                                    normalized_results.append(normalized_data)
-                    else:
-                        normalized_data = process_data_point(
-                            value, str(company_id), str(timestamp), mapping_info
-                        )
-                        normalized_results.append(normalized_data)
-                else:
-                    print(f"Warning: Key '{key}' not found in lookup dictionary")
-
+            data_type = mapping_info["type"]
+            if data_type == "nested":
+                nested_values = value if isinstance(value, list) else [value]
+                for nested_data in nested_values:
+                    for nested_key, nested_value in nested_data.items():
+                        nested_mapping_info = lookup_dict.get(nested_key)
+                        if nested_mapping_info:
+                            normalized_data = process_data_point(
+                                nested_value,
+                                company_id,
+                                timestamp,
+                                nested_mapping_info,
+                            )
+                            normalized_results.append(normalized_data)
+            else:
+                normalized_data = process_data_point(
+                    value, company_id, timestamp, mapping_info
+                )
+                normalized_results.append(normalized_data)
+    print(normalized_results)
     return normalized_results
