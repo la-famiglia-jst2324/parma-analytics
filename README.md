@@ -146,6 +146,10 @@ The following steps will get you started with the project.
    make test
    ```
 
+## Sendgrid
+
+- Add the [environment variables](https://www.notion.so/Sendgrid-environment-variables-07b749c85d894d51bb07c8b5375aa533) in your local.
+
 ## PR workflow
 
 1. **Create a new branch**
