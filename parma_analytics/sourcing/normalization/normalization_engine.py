@@ -107,5 +107,4 @@ def normalize_data(
                     value, company_id, timestamp, mapping_info
                 )
                 normalized_results.append(normalized_data)
-    print(normalized_results)
     return normalized_results
