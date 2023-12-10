@@ -17,6 +17,7 @@ dependencies:
   # Development
   - types-pyyaml
   - google-cloud-sdk
+  - pydantic
   # Testing
   - pytest >=6 # --import-mode option
   - pytest-cov
