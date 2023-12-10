@@ -10,7 +10,7 @@ class SourceMeasurement(BaseModel):
     type: str
     measurement_name: str
     source_module_id: int
-    company_id: int
+    parent_measurement_id: int
     created_at: str
     modified_at: str
 
