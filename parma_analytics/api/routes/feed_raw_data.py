@@ -8,8 +8,6 @@ from parma_analytics.api.models.feed_raw_data import (
 )
 from parma_analytics.db.mining.models import RawDataIn
 from parma_analytics.db.mining.service import (
-    read_raw_data_by_id,
-    read_raw_data_by_company,
     store_raw_data,
 )
 
