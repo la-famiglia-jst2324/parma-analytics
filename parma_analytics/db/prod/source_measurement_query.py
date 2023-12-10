@@ -28,7 +28,7 @@ class MeasurementPaginationResult:
 def create_source_measurement_query(db: Session, source_measurement_data) -> int:
     source_measurement_data = mapping_list(source_measurement_data)
     query = text(
-        """INSERT INTO source_measurement (type, measurement_name, source_module_id, company_id, created_at, modified_at)
+        """INSERT INTO source_measurement (type, measurement_name, source_module_id, parent_measurement_id, created_at, modified_at)
                     VALUES (:type, :measurement_name, :source_module_id, :company_id, NOW(), NOW()) RETURNING *"""
     )
     result = db.execute(query, source_measurement_data)
@@ -42,7 +42,7 @@ def get_source_measurement_query(
     db: Session, source_measurement_id
 ) -> SourceMeasurement:
     query = text(
-        """SELECT id, type, measurement_name, source_module_id, company_id, created_at, modified_at
+        """SELECT id, type, measurement_name, source_module_id, parent_measurement_id, created_at, modified_at
                  FROM source_measurement WHERE id = :id"""
     )
     result = db.execute(query, {"id": source_measurement_id})
