@@ -28,8 +28,8 @@ class MeasurementPaginationResult:
 def create_source_measurement_query(db: Session, source_measurement_data) -> int:
     source_measurement_data = mapping_list(source_measurement_data)
     # Ensure parent_measurement_id is in the dictionary
-    if 'parent_measurement_id' not in source_measurement_data:
-        source_measurement_data['parent_measurement_id'] = None
+    if "parent_measurement_id" not in source_measurement_data:
+        source_measurement_data["parent_measurement_id"] = None
 
     query = text(
         """INSERT INTO source_measurement (type, measurement_name, source_module_id, parent_measurement_id, created_at, modified_at)
