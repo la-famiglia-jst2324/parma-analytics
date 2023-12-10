@@ -29,7 +29,7 @@ def create_source_measurement_query(db: Session, source_measurement_data) -> int
     source_measurement_data = mapping_list(source_measurement_data)
     query = text(
         """INSERT INTO source_measurement (type, measurement_name, source_module_id, parent_measurement_id, created_at, modified_at)
-                    VALUES (:type, :measurement_name, :source_module_id, :company_id, NOW(), NOW()) RETURNING *"""
+                    VALUES (:type, :measurement_name, :source_module_id, :parent_measurement_id, NOW(), NOW()) RETURNING *"""
     )
     result = db.execute(query, source_measurement_data)
     db.commit()
