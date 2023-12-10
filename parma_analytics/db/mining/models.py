@@ -37,6 +37,7 @@ class RawDataIn(BaseModel):
 
     mining_trigger: str
     status: Literal["success", "error"]
+    company_id: str
     data: dict[str, Any]
 
 

@@ -199,6 +199,15 @@ def read_document_from_path(
     return read_document(fs_doc)
 
 
+def filter_documents_from_path(
+    engine: firestore_types.Client, path: str, filter_name: str, value: str
+) -> list[firestore_types.DocumentSnapshot]:
+    current_collection = _resolve_from_path(engine, path, False)
+    return current_collection.where(
+        filter=firestore_types.FieldFilter(filter_name, "==", value)
+    ).get()
+
+
 # ------------------------------------------------------------------------------------ #
 #                                       Internal                                       #
 # ------------------------------------------------------------------------------------ #
