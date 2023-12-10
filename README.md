@@ -10,221 +10,67 @@ ParmaAI analytics repository providing data processing and inference.
 
 ## `parma-ai` architecture
 
+The parma analytics backend is the heart of the system connecting the data mining processes with the frontend stack while being responsible for analytics and inference.
+
 ### system's architecture
 
 The parma ai backend consists of the following process flow:
 
-```mermaid
-graph LR
-    subgraph parma-mining
-        A[Data Mining] --> B[Data Preprocessing]
-    end
-    subgraph parma-mining-db
-        B --> C[NoSQL Mining Database]
-    end
-    subgraph parma-analytics
-        C --> D[Data Processing]
-        D --> F[Data Analytics]
-        F --> G[Data Inference]
-        D --> H[Data Visualization]
-        D --> I[Data Reporting / Alerting]
-        H --> I
-    end
-    subgraph parma-prod-db
-        D --> E[Data Storage]
-        G --> E
-    end
-    subgraph parma-web
-        E --> J[REST API]
-        J --> K[Frontend]
-    end
+![systems_architecture](docs/systems_architecture.svg)
 
-```
-
-### `parma-analytics` architecture
+#### Detailed architecture
 
 ```mermaid
 graph LR
-    subgraph parma_analytics
-        subgraph .
-            subgraph api
-                models
-                routes
-            end
-            subgraph db.mining
-            end
-            subgraph etl
-            end
-            subgraph analytics
-                subgraph inference
-                end
-                subgraph visualization
-                end
-            end
-            subgraph reporting
-                subgraph slack
-                end
-                subgraph gmail
-                end
-            end
-            subgraph db.prod
-            end
-            api -.-> db.mining
-            db.mining -.-> etl
-            etl -.-> analytics
-            analytics -.-> reporting
-            analytics -.-> db.prod
+    subgraph "parma-scheduler (Google Cloud Scheduler)"
+        S(Cloud Scheduler)
+    end
+    subgraph "parma-mining (Serverless / GCP Cloud Run)"
+        M1[Data Mining] --> M2[Data Preprocessing]
+    end
+    subgraph "parma-analytics (Serverless / GCP Cloud Run)"
+        subgraph "parma-mining-db (NoSQL/Firebase)"
+            FB1[NoSQL Mining Database]
         end
-        bl[bl=business logic] <--> api
-        bl <--> db.mining
-        bl <--> etl
-        bl <--> analytics
-        bl <--> reporting
-        bl <--> db.prod
+        M2 --> A0[Analytics REST API]
+        A0 -->|persist raw data| A1[Raw Data Storage Adapter]
+        A1 <--> FB1
+        subgraph "data_processing (Python)"
+            A2(Normalization)
+        end
+        A0 -->|handover to data processing| A2
+        A2 --> A3["SQL Storage Adapter"]
+        subgraph "analytics and reporting (Python)"
+            AR1[Data Analytics] --> AR2[Data Inference]
+            AR2 --> AR3[Data Visualization]
+            AR3 --> AR4[Data Reporting / Alerting]
+        end
+        AR3 -->|persist reporting results| A1
+        A2 -->|trigger analytics run| AR1
+        A0 -->|manage sourcing schedules| A4(Sourcing scheduler)
+        A3 <--> A4
     end
+    S -->|trigger mining run| A0
+    A4 -->|trigger mining run| M1
+    subgraph "Notifications (Firebase)"
+        AR4 -->|send notifications| N1[Slack]
+        AR4 -->|send notifications| N2[Gmail]
+    end
+    subgraph "parma-prod-db (GCP Cloud SQL)"
+        P[Postgres SQL]
+    end
+    A3 <--> P
+    subgraph "parma-web (Vercel)"
+        W1[Prisma database adapter] <--> W2[REST API]
+        W2 <--> W3[Frontend]
+    end
+    P <--> W1
+
 ```
 
-### `parma-analytics` data model
+## How to add new data sources
 
-```mermaid
-erDiagram
-    BUCKET ||--o{ COMPANY_BUCKET_MEMBERSHIP : ""
-    BUCKET ||--o{ BUCKET_ACCESS : ""
-    COMPANY ||--o{ COMPANY_BUCKET_MEMBERSHIP : ""
-    COMPANY ||--o{ NOTIFICATION_SUBSCRIPTION : "has"
-    COMPANY ||--o{ REPORT_SUBSCRIPTION : ""
-    COMPANY ||--o{ COMPANY_ATTACHMENT : "has"
-    COMPANY ||--o{ NOTIFICATION : ""
-    COMPANY ||--o{ COMPANY_DATA_SOURCE : ""
-    COMPANY ||--|| DATA_SOURCE_MEASUREMENT_NEWS_SUBSCRIPTION :""
-    DATA_SOURCE ||--o{ COMPANY_DATA_SOURCE : ""
-    DATA_SOURCE ||--o{ SOURCE_MEASUREMENT : ""
-    DATA_SOURCE ||--o{ NOTIFICATION : ""
-    DATA_SOURCE ||--|| USER_IMPORTANT_MEASUREMENT_PREFERENCE : ""
-    NOTIFICATION_SUBSCRIPTION ||--o{ NOTIFICATION_CHANNEL : ""
-    REPORT ||--o{ COMPANY : "contains"
-    REPORT_SUBSCRIPTION ||--o{ NOTIFICATION_CHANNEL : ""
-    USER ||--o{ USER_IMPORTANT_MEASUREMENT_PREFERENCE : "chooses"
-    USER ||--o{ NOTIFICATION_SUBSCRIPTION : ""
-    USER ||--|| REPORT_SUBSCRIPTION : ""
-    USER ||--o{ COMPANY : "subscribes"
-    USER ||--o{ BUCKET_ACCESS : "has"
-    USER ||--|| DATA_SOURCE_MEASUREMENT_NEWS_SUBSCRIPTION :""
-    USER ||--o{ COMPANY_ATTACHMENT : "attaches"
-    SOURCE_MEASUREMENT ||--o{ MEASUREMENT_TEXT_VALUE : ""
-    SOURCE_MEASUREMENT ||--o{ MEASUREMENT_INT_VALUE : ""
-    BUCKET {
-        uuid id PK
-        string title
-        string description
-        boolean is_public
-        uuid owner_id FK
-        string created_at
-    }
-    BUCKET_ACCESS{
-        uuid id PK,FK
-        uuid invitee_id PK,FK
-        tbd  permission
-    }
-    COMPANY {
-        uuid id PK
-        string name
-        string description
-        uuid added_by FK
-    }
-    COMPANY_ATTACHMENT {
-        uuid id PK
-        uuid company_id FK
-        string file_type
-        string file_url
-        uuid user_id FK
-        string title
-        date created_at
-    }
-    COMPANY_BUCKET_MEMBERSHIP{
-        uuid bucket_id PK,FK
-        uuid company_id PK,FK
-    }
-    COMPANY_DATA_SOURCE {
-        uuid data_source_id PK, FK
-        uuid company_id PK, FK
-        string frequency
-        boolean is_data_source_active
-        string health_status
-    }
-    DATA_SOURCE {
-        uuid source_module_id PK
-        string source_name
-        boolean is_active
-        string default_frequency
-        string health_status
-    }
-    DATA_SOURCE_MEASUREMENT_NEWS_SUBSCRIPTION{
-        uuid id PK
-        uuid user_id FK
-        uuid company_id FK
-    }
-    NOTIFICATION {
-        uuid id PK
-        string message
-        uuid company_id FK
-        uuid data_source_id FK
-        date timestamp
-    }
-    NOTIFICATION_CHANNEL {
-        uuid channel_id PK, FK
-        uuid entity_id FK
-        string entity_type
-        string channel_type
-        string destination
-    }
-    NOTIFICATION_SUBSCRIPTION {
-        uuid user_id FK, PK
-        uuid company_id FK, PK
-        uuid channel_id FK, PK
-    }
-    REPORT{
-        uuid id PK
-        string name
-        date timestamp
-        blob content
-        uuid company_id FK
-    }
-    REPORT_SUBSCRIPTION {
-        uuid user_id FK, PK
-        uuid company_id FK, PK
-        uuid channel_id FK, PK
-    }
-    SOURCE_MEASUREMENT {
-        uuid source_measurement_id PK
-        uuid source_module_id FK
-        string type
-        string measurement_name
-    }
-    USER {
-        uuid id PK
-        string auth_id UK
-        string name
-        string role
-    }
-    USER_IMPORTANT_MEASUREMENT_PREFERENCE {
-        uuid data_source_id PK, FK
-        uuid user_id PK, FK
-        string important_field_name
-    }
-    MEASUREMENT_TEXT_VALUE {
-        id measurement_value_id PK
-        id source_measurement_id FK
-        timestamp timestamp
-        string value
-    }
-    MEASUREMENT_INT_VALUE {
-        id measurement_value_id PK
-        id source_measurement_id FK
-        timestamp timestamp
-        int value
-    }
-```
+[ADDING_DATASOURCES.md](./docs/ADDING_DATASOURCES.md)
 
 ## Getting Started
 
