@@ -40,7 +40,7 @@ class ApiSourceMeasurementCreateIn(_ApiSourceMeasurementBase):
     type: str
     measurement_name: str
     source_module_id: int
-    parent_measurement_id: int
+    parent_measurement_id: Optional[int] = None
 
 
 class ApiSourceMeasurementCreateOut(
