@@ -202,6 +202,17 @@ def read_document_from_path(
 def filter_documents_from_path(
     engine: firestore_types.Client, path: str, filter_name: str, value: str
 ) -> list[firestore_types.DocumentSnapshot]:
+    """Filter a collection from firestore.
+
+    Args:
+        engine: The database engine.
+        path: The document path. (e.g. "mining/datasource/raw_data")
+        filter_name: The name of the field that you want to filter accordingly (e.g. company_id)
+        value: Actual value for the filter
+
+    Returns:
+        List of documents
+    """
     current_collection = _resolve_from_path(engine, path, False)
     return current_collection.where(
         filter=firestore_types.FieldFilter(filter_name, "==", value)
