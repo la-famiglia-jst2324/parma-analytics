@@ -19,6 +19,12 @@ variable "db_root_password" {
   sensitive   = true
 }
 
+variable "firebase_adminsdk_certificate" {
+  description = "Certificate for the firebase admin sdk"
+  type        = string
+  sensitive   = true
+}
+
 variable "base_domain" {
   description = "Base domain for the project"
   type        = string
