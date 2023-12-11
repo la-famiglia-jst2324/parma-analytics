@@ -1,42 +1,39 @@
 from datetime import datetime
 from typing import Any
 
-from parma_analytics.db.mining.models import RawData, NormalizaionSchema
+from parma_analytics.db.mining.models import RawData, NormalizationSchema
 from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
 
 
-def build_lookup_dict(mapping_schema: NormalizaionSchema) -> dict[str, dict[str, str]]:
-    """Constructs a lookup dictionary from a mapping schema.
+def build_lookup_dict(mapping_schema: dict[str, Any]) -> dict[str, dict[str, str]]:
+    """Constructs a recursive lookup dictionary from a mapping schema.
 
     Args:
-    mapping_schema (dict[str, Any]): The mapping schema containing the fields and their types.
+    mapping_schema (dict): The mapping schema containing the fields and their types.
 
     Returns:
     dict[str, dict[str, str]]: A dictionary for looking up the types and source measurement IDs by source field.
     """
-    lookup_dict = {}
-    try:
-        for mapping in mapping_schema.get("Mappings", []):
-            source_field = mapping.get("source_field")
-            if source_field:
-                lookup_dict[source_field] = {
-                    "type": mapping.get("type"),
-                    "source_measurement_id": mapping.get("source_measurement_id"),
-                }
+    lookup_dict: dict[str, dict[str, str]] = {}
 
-                # Handle nested mappings
-                if mapping.get("type") == "nested":
-                    for nested_mapping in mapping.get("NestedMappings", []):
-                        nested_field = nested_mapping.get("source_field")
-                        if nested_field:
-                            lookup_dict[nested_field] = {
-                                "type": nested_mapping.get("type"),
-                                "source_measurement_id": nested_mapping.get(
-                                    "source_measurement_id"
-                                ),
-                            }
-    except KeyError as e:
-        print(f"Error processing mapping schema: missing key {e}")
+    def add_mappings(mappings: list, parent_dict: dict):
+        try:
+            for mapping in mappings:
+                source_field = mapping.get("SourceField")
+                if source_field:
+                    parent_dict[source_field] = {
+                        "type": mapping.get("DataType"),
+                        "source_measurement_id": mapping.get("source_measurement_id"),
+                    }
+
+                    # Handle nested mappings recursively
+                    if mapping.get("DataType") == "nested":
+                        nested_mappings = mapping.get("NestedMappings", [])
+                        add_mappings(nested_mappings, parent_dict)
+        except KeyError as e:
+            print(f"Error processing mapping schema: missing key {e}")
+
+    add_mappings(mapping_schema.get("Mappings", []), lookup_dict)
     return lookup_dict
 
 
@@ -63,26 +60,72 @@ def process_data_point(
     )
 
 
+def normalize_nested_data(
+    nested_data: Any, company_id: str, timestamp: str, lookup_dict: dict[str, Any]
+) -> list[NormalizedData]:
+    """Recursively normalizes nested data according to the provided mapping schema.
+
+    This function processes each nested item (which could itself be a nested structure) and normalizes it into
+    instances of NormalizedData. It handles multiple levels of nested data by recursively calling itself when
+    encountering further nested structures.
+
+    Args:
+    nested_data (Any): The nested data to be normalized. It can be a list of dicts (representing multiple nested items) or a single dict (representing one nested item).
+    company_id (str): The ID of the company associated with the data.
+    timestamp (str): The timestamp when the data was retrieved or processed.
+    lookup_dict (Dict[str, Any]): A dictionary containing the mapping information for data normalization.
+
+    Returns:
+    List[NormalizedData]: A list of NormalizedData instances representing the normalized nested data.
+    """
+    normalized_results: list[NormalizedData] = []
+    if isinstance(nested_data, dict):
+        nested_data = [nested_data]
+
+    for item in nested_data:
+        for key, value in item.items():
+            nested_mapping_info = lookup_dict.get(key)
+            if nested_mapping_info:
+                data_type = nested_mapping_info["type"]
+                if data_type == "nested":
+                    nested_results = normalize_nested_data(
+                        value, company_id, timestamp, lookup_dict
+                    )
+                    normalized_results.extend(nested_results)
+                else:
+                    normalized_data = process_data_point(
+                        value, company_id, timestamp, nested_mapping_info
+                    )
+                    normalized_results.append(normalized_data)
+    return normalized_results
+
+
 def normalize_data(
-    raw_data: RawData, mapping_schema: NormalizaionSchema
+    raw_data: RawData, mapping_schema: NormalizationSchema
 ) -> list[NormalizedData]:
     """Normalizes raw data according to the provided mapping schema for one company at a
     time.
 
     Args:
-    raw_data (dict[str, Any]): The raw data to be normalized.
+    raw_data RawData: The raw data to be normalized.
     mapping_schema (dict[str, Any]): The mapping schema for normalization.
 
     Returns:
     list[NormalizedData]: The listof normalized data points.
     """
-    lookup_dict = build_lookup_dict(mapping_schema)
+    lookup_dict = build_lookup_dict(mapping_schema.schema)
     normalized_results = []
 
-    company_id = str(raw_data.get("company_id", ""))
-    timestamp = str(raw_data.get("timestamp", ""))
+    timestamp = str(raw_data.create_time)
+    company_id = str(raw_data.company_id)
 
-    for data_item in raw_data.get("data", []):
+    data = raw_data.data["data"]
+
+    if isinstance(data, dict):
+        data = [data]
+
+    for data_item in data:
+        print(data_item)
         for key, value in data_item.items():
             mapping_info = lookup_dict.get(key)
             if not mapping_info:
@@ -91,21 +134,15 @@ def normalize_data(
 
             data_type = mapping_info["type"]
             if data_type == "nested":
-                nested_values = value if isinstance(value, list) else [value]
-                for nested_data in nested_values:
-                    for nested_key, nested_value in nested_data.items():
-                        nested_mapping_info = lookup_dict.get(nested_key)
-                        if nested_mapping_info:
-                            normalized_data = process_data_point(
-                                nested_value,
-                                company_id,
-                                timestamp,
-                                nested_mapping_info,
-                            )
-                            normalized_results.append(normalized_data)
+                nested_results = normalize_nested_data(
+                    value, company_id, timestamp, lookup_dict
+                )
+                normalized_results.extend(nested_results)
             else:
                 normalized_data = process_data_point(
                     value, company_id, timestamp, mapping_info
                 )
                 normalized_results.append(normalized_data)
+    print(normalized_results)
+    print(len(normalized_results))
     return normalized_results
