@@ -119,30 +119,22 @@ def normalize_data(
     timestamp = str(raw_data.create_time)
     company_id = str(raw_data.company_id)
 
-    data = raw_data.data["data"]
+    data = raw_data.data
+    for key, value in data.items():
+        mapping_info = lookup_dict.get(key)
+        if not mapping_info:
+            print(f"Warning: Key '{key}' not found in lookup dictionary")
+            continue
 
-    if isinstance(data, dict):
-        data = [data]
-
-    for data_item in data:
-        print(data_item)
-        for key, value in data_item.items():
-            mapping_info = lookup_dict.get(key)
-            if not mapping_info:
-                print(f"Warning: Key '{key}' not found in lookup dictionary")
-                continue
-
-            data_type = mapping_info["type"]
-            if data_type == "nested":
-                nested_results = normalize_nested_data(
-                    value, company_id, timestamp, lookup_dict
-                )
-                normalized_results.extend(nested_results)
-            else:
-                normalized_data = process_data_point(
-                    value, company_id, timestamp, mapping_info
-                )
-                normalized_results.append(normalized_data)
-    print(normalized_results)
-    print(len(normalized_results))
+        data_type = mapping_info["type"]
+        if data_type == "nested":
+            nested_results = normalize_nested_data(
+                value, company_id, timestamp, lookup_dict
+            )
+            normalized_results.extend(nested_results)
+        else:
+            normalized_data = process_data_point(
+                value, company_id, timestamp, mapping_info
+            )
+            normalized_results.append(normalized_data)
     return normalized_results

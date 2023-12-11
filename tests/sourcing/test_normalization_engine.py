@@ -183,7 +183,6 @@ def raw_data() -> RawData:
             }
         ],
     }
-    raw_data_dict = {"data": raw_data}
 
     return RawData(
         id="123",  # Example ID
@@ -193,7 +192,7 @@ def raw_data() -> RawData:
         company_id="1234",
         mining_trigger="example_trigger",
         status="success",
-        data=raw_data_dict,
+        data=raw_data,
     )
 
 
