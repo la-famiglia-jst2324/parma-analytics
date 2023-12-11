@@ -1,5 +1,5 @@
 """Scheduler for providing scheduling functionality interfacing with the database."""
-
+import asyncio
 import logging
 from datetime import datetime, timedelta
 from typing import Any
@@ -65,9 +65,9 @@ class ScheduleManager:
 
         logger.info("Task scheduling completed.")
 
-    def trigger_mining_module(self, task: ScheduledTasks) -> None:
+    async def trigger_mining_module(self, task_ids_to_trigger: list[int]) -> None:
         """Dispatching function to trigger the mining module."""
-        logger.info(f"Triggering mining module for task {task.task_id}")
+        logger.info(f"Triggering mining module for task ids {task_ids_to_trigger}")
         # TODO Trigger the Analytics Backend API
 
     def is_time_to_run(self, start_date_time: datetime, second_param) -> bool:
@@ -95,18 +95,22 @@ class ScheduleManager:
             self.session.query(ScheduledTasks)
             .filter(
                 ScheduledTasks.attempts >= 3,
-                ScheduledTasks.status == TaskStatus.PENDING,
-                ScheduledTasks.status == TaskStatus.PROCESSING,
+                or_(
+                    ScheduledTasks.status == TaskStatus.PENDING,
+                    ScheduledTasks.status == TaskStatus.PROCESSING,
+                ),
             )
             .with_for_update()
             .all()
         )
 
+        logger.info(f"Found {len(tasks)} failed tasks.")
+
         for task in tasks:
             self.session.begin_nested()
             try:
                 self.session.refresh(task)
-                logger.debug(f"Processing task {task.task_id}...")
+                logger.debug(f"-- Processing task {task.task_id}...")
                 if task.status == TaskStatus.PENDING:
                     task.status = TaskStatus.FAILED
                     logger.debug(
@@ -122,11 +126,12 @@ class ScheduleManager:
                             f"Task {task.task_id} status set from PROCESSING to FAILED."
                         )
 
-                self.session.commit()
             except SQLAlchemyError as e:
                 logger.error(f"SQLAlchemyError in updating failed tasks: {e}")
                 self.session.rollback()
-                raise e
+
+        # In order to release the lock for all the rows that were locked in the previous query
+        self.session.commit()
 
     def _process_ondemand_scheduled_tasks(self) -> None:
         logger.info("Processing scheduled tasks...")
@@ -143,30 +148,57 @@ class ScheduleManager:
             .all()
         )
 
+        logger.info(f"Found {len(tasks)} on-demand scheduled tasks.")
+
+        task_ids_to_trigger = []
         for task in tasks:
-            logger.debug(f"Processing scheduled task {task.task_id}.")
+            logger.debug(f"Processing on-deman scheduled task {task.task_id}.")
             self.session.begin_nested()
             try:
-                self.session.refresh(task)
-                self._handle_ondemand_task(task)
+                task_id = self._handle_ondemand_task(task)
+                if task_id is not None:
+                    task_ids_to_trigger.append(task_id)
             except SQLAlchemyError as e:
                 logger.error(f"SQLAlchemyError in processing scheduled tasks: {e}")
                 self.session.rollback()
 
+        # In order to release the lock for all the rows that were locked in the previous query
+        self.session.commit()
+        # Trigger the mining module
+        if len(task_ids_to_trigger) > 0:
+            asyncio.run(self.trigger_mining_module(task_ids_to_trigger))
+        else:
+            logger.debug("No on-demand scheduled tasks to trigger.")
+
     def _process_data_sources(self) -> None:
         logger.info("Processing active data sources...")
         sources: list[DataSource] = (
-            self.session.query(DataSource).filter(DataSource.is_active is True).all()
+            self.session.query(DataSource).filter(DataSource.is_active == True).all()
         )
 
+        logger.info(f"Found {len(sources)} active data sources.")
+
+        task_ids_to_trigger = []
         for source in sources:
             logger.debug(f"Processing active data source {source.id}.")
-            self._handle_data_source(source)
+            self.session.begin_nested()
+            task_id = self._handle_data_source(source)
+            if task_id is not None:
+                task_ids_to_trigger.append(task_id)
 
-    def _handle_ondemand_task(self, task: ScheduledTasks) -> None:
+        # In order to release the lock for all the rows that were locked in the previous query
+        self.session.commit()
+        # Trigger the mining module
+        if len(task_ids_to_trigger) > 0:
+            asyncio.run(self.trigger_mining_module(task_ids_to_trigger))
+        else:
+            logger.debug("No active data sources to trigger.")
+
+    def _handle_ondemand_task(self, task: ScheduledTasks) -> int | None:
+        self.session.refresh(task)
         if task.status == TaskStatus.PENDING:
             logger.debug(f"Scheduled Task {task.task_id} status equals to PENDING.")
-            self._reschedule_task(task)
+            return self._reschedule_task(task)
         elif task.status == TaskStatus.PROCESSING:
             # Check if the task has exceeded the maximum expected run time using locked_at
             if self.is_time_to_run(
@@ -175,9 +207,12 @@ class ScheduleManager:
                 logger.debug(
                     f"Scheduled Task {task.task_id} status equals to PROCESSING and has exceeded the maximum run time."
                 )
-                self._reschedule_task(task)
+                return self._reschedule_task(task)
 
-    def _handle_data_source(self, source: DataSource) -> None:
+        return None
+
+    def _handle_data_source(self, source: DataSource) -> int | None:
+        logger.debug(f"Processing data source {source.id}...")
         latest_task: ScheduledTasks | None = (
             self.session.query(ScheduledTasks)
             .filter(
@@ -188,18 +223,21 @@ class ScheduleManager:
             .with_for_update()
             .first()
         )
+        logger.debug(f"Latest scheduled task found for data source {source.id}.")
 
         try:
             self.session.refresh(source)
             if not latest_task:
                 logger.debug(f"No scheduled task found for data source {source.id}")
-                self._create_new_task(source)
-            elif latest_task.status == TaskStatus.PENDING:
+                return self._create_new_task(source)
+
+            self.session.refresh(latest_task)
+            if latest_task.status == TaskStatus.PENDING:
                 logger.debug(
                     f"Latest scheduled task {latest_task.task_id} found for data source {source.id}, and it's status "
                     f"equals to PENDING."
                 )
-                self._reschedule_task(latest_task)
+                return self._reschedule_task(latest_task)
             elif latest_task.status in [
                 TaskStatus.SUCCESS,
                 TaskStatus.FAILED,
@@ -208,7 +246,7 @@ class ScheduleManager:
                     f"Latest scheduled task {latest_task.task_id} found for data source {source.id}, and it's status "
                     f"equals to {latest_task.status} and has exceeded the default frequency."
                 )
-                self._create_new_task(source)
+                return self._create_new_task(source)
             elif latest_task.status == TaskStatus.PROCESSING:
                 if self.is_time_to_run(
                     latest_task.locked_at, source.maximum_expected_run_time
@@ -217,12 +255,14 @@ class ScheduleManager:
                         f"Latest scheduled task {latest_task.task_id} found for data source {source.id}, and it's status "
                         f"equals to PROCESSING and has exceeded the maximum run time."
                     )
-                    self._reschedule_task(latest_task)
+                    return self._reschedule_task(latest_task)
         except SQLAlchemyError as e:
             logger.error(f"SQLAlchemyError in processing data sources: {e}")
             self.session.rollback()
 
-    def _create_new_task(self, source: DataSource) -> None:
+        return None
+
+    def _create_new_task(self, source: DataSource) -> int:
         new_task = ScheduledTasks(
             data_source_id=source.id,
             started_at=datetime.now(),
@@ -233,11 +273,9 @@ class ScheduleManager:
         self.session.add(new_task)
         self.session.commit()
         logger.info(f"Created a new task {new_task.task_id}, data source {source.id}")
+        return new_task.task_id
 
-        # Trigger the mining module
-        self.trigger_mining_module(new_task)
-
-    def _reschedule_task(self, task: ScheduledTasks) -> None:
+    def _reschedule_task(self, task: ScheduledTasks) -> int:
         # Release the lock
         task.status = TaskStatus.PENDING
         task.locked_at = None
@@ -245,6 +283,4 @@ class ScheduleManager:
         logger.info(
             f"Rescheduled task {task.task_id}, data source {task.data_source.id}"
         )
-
-        # Trigger the mining module
-        self.trigger_mining_module(task)
+        return task.task_id
