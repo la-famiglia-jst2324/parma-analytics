@@ -37,6 +37,7 @@ class RawDataIn(BaseModel):
 
     mining_trigger: str
     status: Literal["success", "error"]
+    company_id: str
     data: dict[str, Any]
 
 
@@ -52,7 +53,7 @@ class NormalizationSchemaIn(BaseModel):
     schema: dict[str, Any]
 
 
-class NormalizaionSchema(_FirestoreBase, NormalizationSchemaIn):
+class NormalizationSchema(_FirestoreBase, NormalizationSchemaIn):
     """Raw data read from firestore."""
 
     pass
