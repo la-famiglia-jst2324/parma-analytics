@@ -8,7 +8,6 @@ from .routes import (
     crawling_finished_router,
     dummy_router,
     new_company_router,
-    trigger_datasources_router,
     feed_raw_data_router,
     source_measurement_router,
     schedule_router,
@@ -40,11 +39,6 @@ app.include_router(
 app.include_router(
     new_company_router,
     tags=["new_company"],
-)
-
-app.include_router(
-    trigger_datasources_router,
-    tags=["trigger_datasources"],
 )
 
 app.include_router(
