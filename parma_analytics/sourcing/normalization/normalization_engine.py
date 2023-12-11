@@ -9,10 +9,10 @@ def build_lookup_dict(mapping_schema: dict[str, Any]) -> dict[str, dict[str, str
     """Constructs a recursive lookup dictionary from a mapping schema.
 
     Args:
-    mapping_schema (dict): The mapping schema containing the fields and their types.
+        mapping_schema: The mapping schema containing the fields and their types.
 
     Returns:
-    dict[str, dict[str, str]]: A dictionary for looking up the types and source measurement IDs by source field.
+        A dictionary for looking up the types and source measurement IDs by source field.
     """
     lookup_dict: dict[str, dict[str, str]] = {}
 
@@ -43,13 +43,13 @@ def process_data_point(
     """Processes a single data point according to its mapping.
 
     Args:
-    value (Any): The value of the data point.
-    company_id (str): The ID of the company.
-    timestamp (str): The timestamp of the data.
-    mapping (dict[str, Any]): The mapping information for this data point.
+        value: The value of the data point.
+        company_id: The ID of the company.
+        timestamp: The timestamp of the data.
+        mapping: The mapping information for this data point.
 
     Returns:
-    NormalizedData: A normalized data point.
+        A normalized data point.
     """
     return NormalizedData(
         source_measurement_id=mapping.get("source_measurement_id"),
@@ -70,13 +70,14 @@ def normalize_nested_data(
     encountering further nested structures.
 
     Args:
-    nested_data (Any): The nested data to be normalized. It can be a list of dicts (representing multiple nested items) or a single dict (representing one nested item).
-    company_id (str): The ID of the company associated with the data.
-    timestamp (str): The timestamp when the data was retrieved or processed.
-    lookup_dict (Dict[str, Any]): A dictionary containing the mapping information for data normalization.
+        nested_data: The nested data to be normalized. It can be a list of dicts (representing multiple nested items)
+        or a single dict (representing one nested item).
+        company_id: The ID of the company associated with the data.
+        timestamp: The timestamp when the data was retrieved or processed.
+        lookup_dict: A dictionary containing the mapping information for data normalization.
 
     Returns:
-    List[NormalizedData]: A list of NormalizedData instances representing the normalized nested data.
+        A list of NormalizedData instances representing the normalized nested data.
     """
     normalized_results: list[NormalizedData] = []
     if isinstance(nested_data, dict):
@@ -107,11 +108,11 @@ def normalize_data(
     time.
 
     Args:
-    raw_data RawData: The raw data to be normalized.
-    mapping_schema (dict[str, Any]): The mapping schema for normalization.
+        raw_data: The raw data to be normalized.
+        mapping_schema: The mapping schema for normalization.
 
     Returns:
-    list[NormalizedData]: The listof normalized data points.
+        The list of normalized data points.
     """
     lookup_dict = build_lookup_dict(mapping_schema.schema)
     normalized_results = []
