@@ -8,6 +8,7 @@ from sqlalchemy import Engine, or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from parma_analytics.bl.trigger_datasources import trigger_datasources
 from parma_analytics.db.prod.models.types import (
     ScheduledTasks,
     Frequency,
@@ -68,7 +69,7 @@ class ScheduleManager:
     async def trigger_mining_module(self, task_ids_to_trigger: list[int]) -> None:
         """Dispatching function to trigger the mining module."""
         logger.info(f"Triggering mining module for task ids {task_ids_to_trigger}")
-        # TODO Trigger the Analytics Backend API
+        await trigger_datasources(task_ids_to_trigger)
 
     def is_time_to_run(self, start_date_time: datetime, second_param) -> bool:
         """Check if it is time to run the task."""
