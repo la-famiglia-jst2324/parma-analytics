@@ -130,21 +130,17 @@ class MiningModuleManager:
 
         json_payload = None
         if data_source.source_name == "parma-mining-github":
-            # TODO: What is company name for?
-            # TODO: What is the github_handle for?
             github_payload = {
                 "companies": {
-                    cds.company.name: ["github_handle_1", "github_handle_2"]
+                    cds.company.name: [f"${cds.company.name}", "github_handle_1"]
                     for cds in company_data_sources
                 }
             }
             json_payload = json.dumps(github_payload)
         elif data_source.source_name == "parma-mining-peopledatalabs":
-            # TODO: What is the "type" field for?
-            # TODO: What is the identifier for a company?
             people_payload: dict = {
                 "companies": {
-                    cds.company.name: ["identifier_1", "identifier_2"]
+                    cds.company.name: [f"${cds.company.name}"]
                     for cds in company_data_sources
                 },
                 "type": "name",  # or "website"
@@ -154,7 +150,7 @@ class MiningModuleManager:
             reddit_payload = [cds.company.name for cds in company_data_sources]
             json_payload = json.dumps(reddit_payload)
         elif data_source.source_name == "parma-mining-affinity":
-            # json_payload None indicates that, get request is to be made
+            # json_payload = None indicates that, get request is to be made
             pass
         elif data_source.source_name == "parma-mining-linkedin":
             # TODO: Will be implemented when the linkedin module is ready
