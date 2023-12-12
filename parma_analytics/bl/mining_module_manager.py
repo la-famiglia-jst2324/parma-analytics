@@ -46,8 +46,7 @@ class MiningModuleManager:
                     continue
 
                 data_source = task.data_source
-                payload = self.construct_payload(data_source)
-                json_payload = json.dumps(payload)
+                json_payload = self.construct_payload(data_source)
 
                 invocation_endpoint = data_source.invocation_endpoint
                 trigger_task = asyncio.create_task(
@@ -82,32 +81,62 @@ class MiningModuleManager:
 
         return None
 
-    def construct_payload(self, data_source: DataSource) -> dict:
+    def construct_payload(self, data_source: DataSource) -> str | None:
         company_data_sources = (
             self.session.query(CompanyDataSource)
             .filter(CompanyDataSource.data_source_id == data_source.id)
             .all()
         )
 
-        payload = {}
-        if data_source.source_name == "Github":
-            payload = {
+        json_payload = None
+        if data_source.source_name == "parma-mining-github":
+            # TODO: What is company name for?
+            # TODO: What is the github_handle for?
+            github_payload = {
                 "companies": {
-                    cds.company.name: ["sample_repo"] for cds in company_data_sources
+                    cds.company.name: ["github_handle_1", "github_handle_2"]
+                    for cds in company_data_sources
                 }
             }
-        # TODO: add other data sources here
+            json_payload = json.dumps(github_payload)
+        elif data_source.source_name == "parma-mining-peopledatalabs":
+            # TODO: What is the "type" field for?
+            # TODO: What is the identifier for a company?
+            people_payload: dict = {
+                "companies": {
+                    cds.company.name: ["identifier_1", "identifier_2"]
+                    for cds in company_data_sources
+                },
+                "type": "name",  # or "website"
+            }
+            json_payload = json.dumps(people_payload)
+        elif data_source.source_name == "parma-mining-reddit":
+            reddit_payload = [cds.company.name for cds in company_data_sources]
+            json_payload = json.dumps(reddit_payload)
+        elif data_source.source_name == "parma-mining-affinity":
+            # json_payload None indicates that, get request is to be made
+            pass
+        elif data_source.source_name == "parma-mining-linkedin":
+            # TODO: Will be implemented when the linkedin module is ready
+            pass
+        elif data_source.source_name == "parma-mining-clearbit":
+            # TODO: Will be implemented when the clearbit module is ready
+            pass
 
-        return payload
+        return json_payload
 
-    async def trigger(self, invocation_endpoint: str, json_payload: str) -> None:
+    async def trigger(self, invocation_endpoint: str, json_payload: str | None) -> None:
         try:
             logger.debug(f"Sending request to {invocation_endpoint}")
             async with httpx.AsyncClient() as client:
                 headers = {"Content-Type": "application/json"}
-                response = await client.post(
-                    invocation_endpoint, headers=headers, content=json_payload
-                )
+                response = None
+                if json_payload is None:
+                    response = await client.get(invocation_endpoint, headers=headers)
+                else:
+                    response = await client.post(
+                        invocation_endpoint, headers=headers, content=json_payload
+                    )
                 response.raise_for_status()
         except httpx.RequestError as exc:
             logger.error(f"An error occurred while requesting {exc.request.url!r}.")
