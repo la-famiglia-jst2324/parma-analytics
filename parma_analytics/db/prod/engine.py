@@ -6,11 +6,9 @@ from urllib.parse import quote
 from requests import Session
 from sqlalchemy import Engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
 from dotenv import load_dotenv
 from sqlalchemy.engine import create_engine
 
-Base = declarative_base()
 
 engine = None
 load_dotenv()
