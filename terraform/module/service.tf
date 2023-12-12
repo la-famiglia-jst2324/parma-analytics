@@ -55,6 +55,11 @@ resource "google_cloud_run_service" "parma_analytics_cloud_run" {
           name  = "POSTGRES_DB"
           value = google_sql_database.parma_db.name
         }
+
+        env {
+          name  = "FIREBASE_ADMINSDK_CERTIFICATE"
+          value = var.firebase_adminsdk_certificate
+        }
       }
     }
   }
@@ -64,6 +69,10 @@ resource "google_cloud_run_service" "parma_analytics_cloud_run" {
     latest_revision = true
   }
 }
+
+/* ---------------------------- Cloud Run domain mapping ---------------------------- */
+
+# initial setup of DNS mapping in cloud console
 
 /* --------------------------------------- IAM -------------------------------------- */
 

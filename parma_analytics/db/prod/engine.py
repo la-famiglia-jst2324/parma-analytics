@@ -1,12 +1,21 @@
 """Engine utilities."""
 
 import os
+from typing import Iterator
 from urllib.parse import quote
+from requests import Session
+from sqlalchemy import Engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.ext.declarative import declarative_base
 
 from sqlalchemy.engine import create_engine
 
+Base = declarative_base()
 
-def get_engine():
+engine = None
+
+
+def get_engine() -> Engine:
     """Get the database engine."""
     db_host = quote(os.environ.get("POSTGRES_HOST", "localhost"))
     db_port = os.environ.get("POSTGRES_PORT", 5432)
@@ -17,4 +26,17 @@ def get_engine():
     db_url = (
         f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
     )
-    return create_engine(db_url, client_encoding="utf8")
+    engine = create_engine(db_url, client_encoding="utf8")
+    return engine
+
+
+engine = get_engine()
+SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+def get_session() -> Iterator[Session]:
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()

@@ -575,3 +575,5 @@ $RECYCLE.BIN/
 # [CUSTOMIZATIONS]
 .data
 .vscode
+.secrets/
+terraform/.secrets/

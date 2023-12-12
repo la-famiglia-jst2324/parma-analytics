@@ -29,9 +29,12 @@ provider "google" {
 }
 
 module "main" {
-  source           = "../module"
-  env              = "prod"
-  project          = local.project
-  region           = local.region
-  db_root_password = var.db_root_password
+  source                        = "../module"
+  env                           = "prod"
+  project                       = local.project
+  region                        = local.region
+  db_root_password              = var.db_root_password
+  base_domain                   = var.base_domain
+  api_subdomain                 = ""
+  firebase_adminsdk_certificate = var.firebase_adminsdk_certificate
 }

@@ -10,16 +10,21 @@ ParmaAI analytics repository providing data processing and inference.
 
 ## `parma-ai` architecture
 
-### System's architecture
+The parma analytics backend is the heart of the system connecting the data mining processes with the frontend stack while being responsible for analytics and inference.
 
-#### Overall Architecture
+### system's architecture
+
+The parma ai backend consists of the following process flow:
+
+![systems_architecture](docs/systems_architecture.svg)
+
+#### Detailed architecture
 
 ```mermaid
 
 graph TD
 
         %% Subgraphs
-
     subgraph FrontendContainer[FRONTEND]
         Frontend[("Next.js<br>TypeScript")]
     end
@@ -62,6 +67,9 @@ graph TD
         DataMiningModules
     end
 
+    subgraph GoogleCloudScheduler[Google Cloud Scheduler]
+    end
+
     subgraph DataMiningModules[Data Mining Modules]
         Module1[("Reddit")]
         Module2[("GitHub")]
@@ -69,27 +77,73 @@ graph TD
         ModuleN[("People Data Labs")]
     end
 
-
         %% Links
     Users --> FrontendContainer
     FrontendContainer -->|REST| ApiRestBackend
     ApiRestBackend -->|SQL Framework| ProductionDatabase
     ProductionDatabase -->|Replicate| AnalyticsDatabase
-    %%AnalyticsDev["Analytics<br>(Developers)"] --> AnalyticsDatabase
     AnalyticsRestBackend -->|SQL Framework| ProductionDatabase
     AnalyticsRestBackend -->|SQL Framework| CrawlingDatabase
     AnalyticsRestBackend --> NotificationContainer
     NotificationContainer --> ExternalNotificationProvider["External Notification Provider"]
     AnalyticsRestBackend -->|Trigger Run| DataMiningModules
-    DataMiningModules -->|Notify| AnalyticsRestBackend
-
-    DataMiningModules -->|Raw Data| CrawlingDatabase
+    DataMiningModules -->|Notify Finished / Send Raw Data| AnalyticsRestBackend
+    GoogleCloudScheduler -->|Trigger Periodically| AnalyticsRestBackend
     AnalyticsRestBackend -->|Raw Data| NormalizationService
     NormalizationService -->|Normalized Data| AnalyticsRestBackend
 
+        %% Link Styles
+    linkStyle default stroke: #9E9D91, stroke-width: 2px;
+```
 
-%% Link Styles
-    linkStyle default stroke:#9E9D91,stroke-width:2px;
+#### Data flow diagram
+
+```mermaid
+graph LR
+    subgraph "parma-scheduler (Google Cloud Scheduler)"
+        S(Cloud Scheduler)
+    end
+    subgraph "parma-mining (Serverless / GCP Cloud Run)"
+        M1[Data Mining] --> M2[Data Preprocessing]
+    end
+    subgraph "parma-analytics (Serverless / GCP Cloud Run)"
+        subgraph "parma-mining-db (NoSQL/Firebase)"
+            FB1[NoSQL Mining Database]
+        end
+        M2 --> A0[Analytics REST API]
+        A0 -->|persist raw data| A1[Raw Data Storage Adapter]
+        A1 <--> FB1
+        subgraph "data_processing (Python)"
+            A2(Normalization)
+        end
+        A0 -->|handover to data processing| A2
+        A2 --> A3["SQL Storage Adapter"]
+        subgraph "analytics and reporting (Python)"
+            AR1[Data Analytics] --> AR2[Data Inference]
+            AR2 --> AR3[Data Visualization]
+            AR3 --> AR4[Data Reporting / Alerting]
+        end
+        AR3 -->|persist reporting results| A1
+        A2 -->|trigger analytics run| AR1
+        A0 -->|manage sourcing schedules| A4(Sourcing scheduler)
+        A3 <--> A4
+    end
+    S -->|trigger mining run| A0
+    A4 -->|trigger mining run| M1
+    subgraph "Notifications (Firebase)"
+        AR4 -->|send notifications| N1[Slack]
+        AR4 -->|send notifications| N2[Gmail]
+    end
+    subgraph "parma-prod-db (GCP Cloud SQL)"
+        P[Postgres SQL]
+    end
+    A3 <--> P
+    subgraph "parma-web (Vercel)"
+        W1[Prisma database adapter] <--> W2[REST API]
+        W2 <--> W3[Frontend]
+    end
+    P <--> W1
+
 ```
 
 #### Process Flows
@@ -448,6 +502,10 @@ erDiagram
         int value
     }
 ```
+
+## How to add new data sources
+
+[ADDING_DATASOURCES.md](./docs/ADDING_DATASOURCES.md)
 
 ## Getting Started
 
