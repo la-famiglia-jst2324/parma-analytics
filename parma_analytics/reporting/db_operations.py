@@ -42,6 +42,8 @@ def fetch_notification_destinations(
 
 def fetch_company_id_from_bucket(bucket_id: int) -> int:
     db: Session = next(get_session())
-    query = text("SELECT company_id FROM bucket WHERE id = :bucket_id")
+    query = text(
+        "SELECT company_id FROM company_bucket_membership WHERE id = :bucket_id"
+    )
     result = db.execute(query, {"bucket_id": bucket_id})
     return result.fetchone()[0]
