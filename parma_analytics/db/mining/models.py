@@ -53,7 +53,7 @@ class NormalizationSchemaIn(BaseModel):
     schema: dict[str, Any]
 
 
-class NormalizaionSchema(_FirestoreBase, NormalizationSchemaIn):
+class NormalizationSchema(_FirestoreBase, NormalizationSchemaIn):
     """Raw data read from firestore."""
 
     pass
