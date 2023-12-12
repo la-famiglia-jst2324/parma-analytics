@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 from datetime import datetime
 
@@ -6,7 +7,12 @@ import httpx
 from sqlalchemy.orm import Session
 
 from parma_analytics.db.prod.engine import get_engine
-from parma_analytics.db.prod.models.types import ScheduledTasks, TaskStatus
+from parma_analytics.db.prod.models.types import (
+    ScheduledTasks,
+    TaskStatus,
+    CompanyDataSource,
+    DataSource,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -42,12 +48,16 @@ async def trigger_datasources(task_ids: list[int]) -> None:
 
             # Get the data source
             data_source = task.data_source
-
-            invocation_endpoint: str = data_source.invocation_endpoint
-
+            # Construct the payload based on the data source
+            companies_data = construct_payload(session, data_source)
+            # Convert the data to JSON format
+            json_payload = json.dumps(companies_data)
             # TODO: Use the additional_params & version as well
 
-            trigger_task = asyncio.create_task(trigger(invocation_endpoint))
+            invocation_endpoint: str = data_source.invocation_endpoint
+            trigger_task = asyncio.create_task(
+                trigger(invocation_endpoint, json_payload)
+            )
             trigger_tasks.append(trigger_task)
 
         except Exception as e:
@@ -60,6 +70,27 @@ async def trigger_datasources(task_ids: list[int]) -> None:
 
     # Wait for all the tasks to complete
     await asyncio.gather(*trigger_tasks)
+
+
+def construct_payload(session: Session, data_source: DataSource):
+    """Function to construct the payload based on the data source."""
+
+    company_data_sources = (
+        session.query(CompanyDataSource)
+        .filter(CompanyDataSource.data_source_id == data_source.id)
+        .all()
+    )
+
+    # Payload construction logic
+    companies_data = {}
+    if data_source.source_name == "Github":
+        companies_data = {
+            "companies": {
+                cds.company.name: ["sample_repo"] for cds in company_data_sources
+            }
+        }
+
+    return companies_data
 
 
 def schedule_task(session: Session, task: ScheduledTasks) -> ScheduledTasks | None:
@@ -81,14 +112,16 @@ def schedule_task(session: Session, task: ScheduledTasks) -> ScheduledTasks | No
     return None
 
 
-async def trigger(invocation_endpoint: str) -> None:
+async def trigger(invocation_endpoint: str, json_payload: str) -> None:
     """Function to send request to the data source."""
     try:
         logger.debug(f"Sending request to {invocation_endpoint}")
         with httpx.Client() as client:
             # TODO: Add authentication
-            # TODO: Add payload (??)
-            response = client.get(invocation_endpoint)
+            headers = {"Content-Type": "application/json"}
+            response = client.post(
+                invocation_endpoint, headers=headers, content=json_payload
+            )
             # Check if the response is successful (status code 200-299)
             response.raise_for_status()
             # TODO: Handle the response
