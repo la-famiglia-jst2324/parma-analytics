@@ -84,6 +84,9 @@ class MiningModuleManager:
 
                 data_source = task.data_source
                 json_payload = self.construct_payload(data_source)
+                logger.debug(
+                    f"Payload for data source {data_source.id}: {json_payload}"
+                )
 
                 invocation_endpoint = data_source.invocation_endpoint
                 trigger_task = asyncio.create_task(
@@ -129,35 +132,20 @@ class MiningModuleManager:
         )
 
         json_payload = None
-        if data_source.source_name == "parma-mining-github":
+        if data_source.source_name == "affinity":
+            # For the Affinity module, we only have  GET /companies with no body
+            pass
+        else:
             github_payload = {
                 "companies": {
-                    cds.company.name: [f"${cds.company.name}", "github_handle_1"]
+                    cds.company.name: {
+                        "domain": [cds.company.name],
+                        "name": [cds.company.name],
+                    }
                     for cds in company_data_sources
                 }
             }
             json_payload = json.dumps(github_payload)
-        elif data_source.source_name == "parma-mining-peopledatalabs":
-            people_payload: dict = {
-                "companies": {
-                    cds.company.name: [f"${cds.company.name}"]
-                    for cds in company_data_sources
-                },
-                "type": "name",  # or "website"
-            }
-            json_payload = json.dumps(people_payload)
-        elif data_source.source_name == "parma-mining-reddit":
-            reddit_payload = [cds.company.name for cds in company_data_sources]
-            json_payload = json.dumps(reddit_payload)
-        elif data_source.source_name == "parma-mining-affinity":
-            # json_payload = None indicates that, get request is to be made
-            pass
-        elif data_source.source_name == "parma-mining-linkedin":
-            # TODO: Will be implemented when the linkedin module is ready
-            pass
-        elif data_source.source_name == "parma-mining-clearbit":
-            # TODO: Will be implemented when the clearbit module is ready
-            pass
 
         return json_payload
 
@@ -165,18 +153,25 @@ class MiningModuleManager:
         """Trigger the mining module for the given invocation endpoint and payload."""
         try:
             logger.debug(f"Sending request to {invocation_endpoint}")
-            async with httpx.AsyncClient() as client:
+            async with httpx.AsyncClient(verify=False) as client:
                 headers = {"Content-Type": "application/json"}
                 response = None
                 if json_payload is None:
-                    response = await client.get(invocation_endpoint, headers=headers)
+                    response = await client.get(
+                        invocation_endpoint, headers=headers, timeout=None
+                    )
                 else:
                     response = await client.post(
-                        invocation_endpoint, headers=headers, content=json_payload
+                        invocation_endpoint,
+                        headers=headers,
+                        content=json_payload,
+                        timeout=None,
                     )
                 response.raise_for_status()
         except httpx.RequestError as exc:
-            logger.error(f"An error occurred while requesting {exc.request.url!r}.")
+            logger.error(
+                f"An error occurred while requesting {exc.request.url!r}. Err: {exc}"
+            )
         except httpx.HTTPStatusError as exc:
             logger.error(
                 f"Error response {exc.response.status_code} while requesting {exc.request.url!r}."
