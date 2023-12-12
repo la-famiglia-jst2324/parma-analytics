@@ -36,7 +36,7 @@ def feed_raw_data(body: ApiFeedRawDataCreateIn) -> ApiFeedRawDataCreateOut:
 
     mapping_schemas = read_normalization_schema_by_datasource(body.source_name)
 
-    if not mapping_schemas:
+    if not mapping_schemas or len(mapping_schemas) == 0:
         return_message += "However normalization schema cannot be found"
         latest_mapping_schema = NormalizationSchema(schema=None)
     else:
