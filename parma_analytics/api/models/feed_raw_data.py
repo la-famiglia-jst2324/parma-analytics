@@ -13,6 +13,7 @@ class _ApiFeedRawDataBase(BaseModel):
     """Internal base model for the raw data endpoints."""
 
     source_name: str
+    company_id: str
     raw_data: dict[str, Any]
 
 
@@ -37,4 +38,4 @@ class ApiFeedRawDataCreateIn(_ApiFeedRawDataBase):
 class ApiFeedRawDataCreateOut(_ApiFeedRawDataOutBase):
     """Output model for the raw data creation endpoint."""
 
-    pass
+    document_id: str

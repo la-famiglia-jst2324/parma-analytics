@@ -51,7 +51,10 @@ def test_parma_mining_datasource_docs(engine: firestore_types.Client):
             content = typed_raw_data_doc.get()
             assert content.exists
             assert (
-                len({"mining_trigger", "status", "data"} - content.to_dict().keys())
+                len(
+                    {"mining_trigger", "status", "company_id", "data"}
+                    - content.to_dict().keys()
+                )
                 == 0
             )
 
