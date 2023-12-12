@@ -56,7 +56,6 @@ def feed_raw_data(body: ApiFeedRawDataCreateIn) -> ApiFeedRawDataCreateOut:
         ),
         mapping_schema=latest_mapping_schema,
     )
-    print(normalized_data)
     # TODO: Write normalized_data to the PROD DB
 
     return ApiFeedRawDataCreateOut(
