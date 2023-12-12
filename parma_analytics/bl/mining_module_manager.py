@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 from datetime import datetime
+from typing import Any
 
 import httpx
 from sqlalchemy.orm import Session
@@ -18,10 +19,46 @@ logger = logging.getLogger(__name__)
 
 
 class MiningModuleManager:
+    # --------------------------- Context manager functions -------------------------- #
+
     def __init__(self):
         self.session = Session(get_engine(), autocommit=False, autoflush=False)
 
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *args: tuple[Any, ...], **kwargs: dict[str, Any]):
+        self.session.close()
+
+    # ------------------------------- Public functions ------------------------------- #
+
+    def set_task_status_success(self, task_id: int) -> bool:
+        """Set the status of the task with the given task_id to success."""
+        try:
+            self.session.begin_nested()
+            task = (
+                self.session.query(ScheduledTasks)
+                .filter(ScheduledTasks.task_id == task_id)
+                .with_for_update()
+                .first()
+            )
+            if not task:
+                logger.error(f"Task with id {task_id} not found.")
+                return False
+
+            task.status = TaskStatus.SUCCESS
+            task.completed_at = datetime.now()
+            self.session.commit()
+            logger.info(f"Task {task.task_id} successfully completed")
+            return True
+        except Exception as e:
+            logger.error(f"Error setting task {task_id} status to success: {e}")
+            self.session.rollback()
+
+        return False
+
     async def trigger_datasources(self, task_ids: list[int]) -> None:
+        """Trigger the mining modules for the given task_ids."""
         logger.info(f"Triggering mining modules for task_ids {task_ids}")
 
         trigger_tasks = []
@@ -61,10 +98,12 @@ class MiningModuleManager:
                 self.session.rollback()
                 continue
 
-        self.session.close()
         await asyncio.gather(*trigger_tasks)
 
+    # ------------------------------ Internal functions ------------------------------ #
+
     def schedule_task(self, task: ScheduledTasks) -> ScheduledTasks | None:
+        """Schedule the given task before triggering module."""
         try:
             task.status = TaskStatus.PROCESSING
             task.locked_at = datetime.now()
@@ -82,6 +121,7 @@ class MiningModuleManager:
         return None
 
     def construct_payload(self, data_source: DataSource) -> str | None:
+        """Construct the payload for the given data source."""
         company_data_sources = (
             self.session.query(CompanyDataSource)
             .filter(CompanyDataSource.data_source_id == data_source.id)
@@ -126,6 +166,7 @@ class MiningModuleManager:
         return json_payload
 
     async def trigger(self, invocation_endpoint: str, json_payload: str | None) -> None:
+        """Trigger the mining module for the given invocation endpoint and payload."""
         try:
             logger.debug(f"Sending request to {invocation_endpoint}")
             async with httpx.AsyncClient() as client:
