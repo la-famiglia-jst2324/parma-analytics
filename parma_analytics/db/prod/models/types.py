@@ -67,6 +67,9 @@ class DataSource(Base):
 
     # Relationships
     scheduled_tasks = relationship("ScheduledTasks", back_populates="data_source")
+    company_data_sources = relationship(
+        "CompanyDataSource", back_populates="data_source"
+    )
 
 
 class ScheduledTasks(Base):
@@ -84,3 +87,28 @@ class ScheduledTasks(Base):
 
     # Relationships
     data_source = relationship("DataSource", back_populates="scheduled_tasks")
+
+
+class Company(Base):
+    __tablename__ = "company"
+
+    id = Column(Integer, primary_key=True)
+    name = Column(String)
+    description = Column(String, nullable=True)
+    added_by = Column(Integer)
+
+    # Relationships
+    company_data_sources = relationship("CompanyDataSource", back_populates="company")
+
+
+class CompanyDataSource(Base):
+    __tablename__ = "company_data_source"
+
+    data_source_id = Column(Integer, ForeignKey("data_source.id"), primary_key=True)
+    company_id = Column(Integer, ForeignKey("company.id"), primary_key=True)
+    is_data_source_active = Column(Boolean)
+    health_status = Column(Enum(HealthStatus))
+
+    # Relationships
+    data_source = relationship("DataSource", back_populates="company_data_sources")
+    company = relationship("Company", back_populates="company_data_sources")
