@@ -1,11 +1,12 @@
-import pytest
 from datetime import datetime
 
-from parma_analytics.db.mining.models import RawData, NormalizationSchema
+import pytest
+
+from parma_analytics.db.mining.models import NormalizationSchema, RawData
 from parma_analytics.sourcing.normalization.normalization_engine import (
     build_lookup_dict,
-    process_data_point,
     normalize_data,
+    process_data_point,
 )
 from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
 

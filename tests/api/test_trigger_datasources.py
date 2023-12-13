@@ -1,7 +1,7 @@
-from parma_analytics.api import app
 from fastapi.testclient import TestClient
 from starlette import status
 
+from parma_analytics.api import app
 
 client = TestClient(app)
 

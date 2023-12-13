@@ -1,7 +1,7 @@
 from datetime import datetime
 from typing import Any
 
-from parma_analytics.db.mining.models import RawData, NormalizationSchema
+from parma_analytics.db.mining.models import NormalizationSchema, RawData
 from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
 
 

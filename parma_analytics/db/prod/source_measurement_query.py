@@ -1,8 +1,8 @@
-from sqlalchemy import text
-from sqlalchemy.orm import Session
 from dataclasses import dataclass
 
 from pydantic import BaseModel, validator
+from sqlalchemy import text
+from sqlalchemy.orm import Session
 
 
 class SourceMeasurement(BaseModel):

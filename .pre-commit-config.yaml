@@ -2,6 +2,10 @@ ci:
   autoupdate_commit_msg: "chore: Update pre-commit hooks"
 exclude: ^(\.conda_lock_files/)
 repos:
+  # - repo: https://github.com/pycqa/isort
+  #   rev: 5.12.0
+  #   hooks:
+  #     - id: isort
   - repo: https://github.com/astral-sh/ruff-pre-commit
     rev: "v0.1.4"
     hooks:

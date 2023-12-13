@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from typing import Dict, List
 
 # ------------------------------------------------------------------------------------ #
 #                                       Internal                                       #
@@ -27,7 +26,7 @@ class ApiTriggerDataSourcesCreateIn(_ApiTriggerDataSourcesBase):
     """Input model for the TriggerDataSources creation endpoint."""
 
     # the api accepts a dictionary of data_source_id as key and list of company ids as values.
-    trigger_data: Dict[int, List[int]]
+    trigger_data: dict[int, list[int]]
 
 
 class ApiTriggerDataSourcesCreateOut(_ApiTriggerDataSourcesOutBase):

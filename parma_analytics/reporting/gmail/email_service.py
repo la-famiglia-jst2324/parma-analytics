@@ -1,20 +1,21 @@
-import os
 import base64
+import os
+
 import requests
-from typing import List
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import (
-    Mail,
     Attachment,
+    Disposition,
     FileContent,
     FileName,
     FileType,
-    Disposition,
+    Mail,
 )
+
 from ..notification_service_manager import (
-    NotificationServiceManager,
     Category,
     MessageType,
+    NotificationServiceManager,
 )
 
 
@@ -32,7 +33,7 @@ class EmailService:
         self.category: Category = bucket_or_company
         self.company_or_bucket_id: int = company_or_bucket_id
 
-    def _get_users_emails(self, message_type: MessageType) -> List[str]:
+    def _get_users_emails(self, message_type: MessageType) -> list[str]:
         """Get all user emails for notification or report."""
         subscription_table = (
             "notification_subscription"
@@ -51,7 +52,7 @@ class EmailService:
 
     def _send_email(
         self,
-        to_emails: List[str],
+        to_emails: list[str],
         template_id: str | None,
         dynamic_template_data: dict,
         attachments=None,

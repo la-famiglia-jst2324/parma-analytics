@@ -1,20 +1,19 @@
 # source_measurement_bll.py
+from sqlalchemy.orm import Session
+
 from parma_analytics.api.models.source_measurement import (
     ApiSourceMeasurementCreateIn,
     ApiSourceMeasurementUpdateIn,
 )
-
 from parma_analytics.db.prod.source_measurement_query import (
     MeasurementPaginationResult,
     SourceMeasurement,
     create_source_measurement_query,
+    delete_source_measurement_query,
     get_source_measurement_query,
     list_source_measurements_query,
     update_source_measurement_query,
-    delete_source_measurement_query,
 )
-
-from sqlalchemy.orm import Session
 
 
 def create_source_measurement_bll(
@@ -24,7 +23,7 @@ def create_source_measurement_bll(
     """Business logic function for creating a SourceMeasurement.
 
     Args:
-        engine: The database engine.
+        db: The database engine.
         source_measurement: The SourceMeasurement object to create.
 
     Returns:
@@ -39,7 +38,7 @@ def read_source_measurement_bll(
     """Business logic function for reading a SourceMeasurement.
 
     Args:
-        engine: The database engine.
+        db: The database engine.
         source_measurement_id: The ID of the SourceMeasurement to read.
 
     Returns:
@@ -56,7 +55,7 @@ def update_source_measurement_bll(
     """Business logic function for updating a SourceMeasurement.
 
     Args:
-        engine: The database engine.
+        db: The database engine.
         source_measurement_id: The ID of the SourceMeasurement to update.
         source_measurement: The new SourceMeasurement data.
 
@@ -70,7 +69,7 @@ def delete_source_measurement_bll(db: Session, source_measurement_id: int) -> No
     """Business logic function for deleting a SourceMeasurement.
 
     Args:
-        engine: The database engine.
+        db: The database engine.
         source_measurement_id: The ID of the SourceMeasurement to delete.
     """
     delete_source_measurement_query(db, source_measurement_id)
@@ -82,7 +81,7 @@ def list_source_measurements_bll(
     """Business logic function for listing all SourceMeasurements.
 
     Args:
-        engine: The database engine.
+        db: The database engine.
         page: The page number.
         page_size: The number of items per page.
 

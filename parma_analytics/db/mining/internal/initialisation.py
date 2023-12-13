@@ -10,12 +10,7 @@ from parma_analytics.db.mining.internal.storage import save_validated_document
 
 from ..engine import get_engine
 from .definitions import parma_collection
-from .models import (
-    Collection,
-    Doc,
-    DocTemplate,
-    DocTemplateInstance,
-)
+from .models import Collection, Doc, DocTemplate, DocTemplateInstance
 
 
 def init_schema() -> None:

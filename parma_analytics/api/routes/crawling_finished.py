@@ -6,7 +6,6 @@ from parma_analytics.api.models.crawling_finished import (
     ApiCrawlingFinishedCreateOut,
 )
 
-
 router = APIRouter()
 
 
