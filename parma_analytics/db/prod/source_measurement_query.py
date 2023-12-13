@@ -16,8 +16,9 @@ class SourceMeasurement(BaseModel):
     created_at: str
     modified_at: str
 
+    @classmethod
     @validator("created_at", "modified_at", pre=True)
-    def format_datetime(self, value) -> str:
+    def format_datetime(cls, value) -> str:
         """Validate and format the datetime string."""
         return value.strftime("%Y-%m-%d %H:%M:%S")
 

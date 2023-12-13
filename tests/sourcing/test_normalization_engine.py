@@ -212,7 +212,7 @@ def test_process_data_point():
     result = process_data_point("Langfuse", "123", "2023-01-01T00:00:00Z", mapping)
     assert isinstance(result, NormalizedData)
     assert result.company_id == "123"
-    assert result.timeStamp == datetime.fromisoformat("2023-01-01T00:00:00Z")
+    assert result.timestamp == datetime.fromisoformat("2023-01-01T00:00:00Z")
     assert result.value == "Langfuse"
 
 

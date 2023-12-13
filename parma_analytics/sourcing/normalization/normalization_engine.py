@@ -53,7 +53,7 @@ def process_data_point(
     """
     return NormalizedData(
         source_measurement_id=mapping.get("source_measurement_id"),
-        timeStamp=datetime.fromisoformat(timestamp),
+        timestamp=datetime.fromisoformat(timestamp),
         company_id=company_id,
         value=value,
         type=mapping.get("type"),
