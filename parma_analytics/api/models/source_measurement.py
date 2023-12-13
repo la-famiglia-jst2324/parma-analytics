@@ -24,7 +24,7 @@ class _ApiSourceMeasurementOutBase(
     type: str
     measurement_name: str
     source_module_id: int
-    company_id: int
+    parent_measurement_id: int
     created_at: str
     modified_at: str
 
@@ -40,7 +40,7 @@ class ApiSourceMeasurementCreateIn(_ApiSourceMeasurementBase):
     type: str
     measurement_name: str
     source_module_id: int
-    company_id: int
+    parent_measurement_id: Optional[int] = None
 
 
 class ApiSourceMeasurementCreateOut(
@@ -89,7 +89,7 @@ class ApiSourceMeasurementUpdateIn(_ApiSourceMeasurementBase):
     type: Optional[str] = None
     measurement_name: Optional[str] = None
     source_module_id: Optional[int] = None
-    company_id: Optional[int] = None
+    parent_measurement_id: Optional[int] = None
 
 
 class ApiSourceMeasurementUpdateOut(_ApiSourceMeasurementOutBase):

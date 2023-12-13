@@ -10,7 +10,7 @@ class SourceMeasurement(BaseModel):
     type: str
     measurement_name: str
     source_module_id: int
-    company_id: int
+    parent_measurement_id: int
     created_at: str
     modified_at: str
 
@@ -27,9 +27,13 @@ class MeasurementPaginationResult:
 
 def create_source_measurement_query(db: Session, source_measurement_data) -> int:
     source_measurement_data = mapping_list(source_measurement_data)
+    # Ensure parent_measurement_id is in the dictionary
+    if "parent_measurement_id" not in source_measurement_data:
+        source_measurement_data["parent_measurement_id"] = None
+
     query = text(
-        """INSERT INTO source_measurement (type, measurement_name, source_module_id, company_id, created_at, modified_at)
-                    VALUES (:type, :measurement_name, :source_module_id, :company_id, NOW(), NOW()) RETURNING *"""
+        """INSERT INTO source_measurement (type, measurement_name, source_module_id, parent_measurement_id, created_at, modified_at)
+                    VALUES (:type, :measurement_name, :source_module_id, :parent_measurement_id, NOW(), NOW()) RETURNING *"""
     )
     result = db.execute(query, source_measurement_data)
     db.commit()
@@ -42,7 +46,7 @@ def get_source_measurement_query(
     db: Session, source_measurement_id
 ) -> SourceMeasurement:
     query = text(
-        """SELECT id, type, measurement_name, source_module_id, company_id, created_at, modified_at
+        """SELECT id, type, measurement_name, source_module_id, parent_measurement_id, created_at, modified_at
                  FROM source_measurement WHERE id = :id"""
     )
     result = db.execute(query, {"id": source_measurement_id})
@@ -61,6 +65,7 @@ def list_source_measurements_query(
 
     # Calculate the total number of pages
     num_pages = (total_records + page_size - 1) // page_size
+    page = max(1, min(page, num_pages))
 
     query = text("""SELECT * FROM source_measurement LIMIT :limit OFFSET :offset""")
     result = db.execute(query, {"limit": page_size, "offset": (page - 1) * page_size})

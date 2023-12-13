@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from parma_analytics.db.prod.engine import get_db
+from parma_analytics.db.prod.engine import get_session
 from starlette import status
 
 from parma_analytics.api.models.source_measurement import (
@@ -30,7 +30,7 @@ router = APIRouter()
     description="Create a new source measurement.",
 )
 async def create_source_measurement(
-    source_measurement: ApiSourceMeasurementCreateIn, db: Session = Depends(get_db)
+    source_measurement: ApiSourceMeasurementCreateIn, db: Session = Depends(get_session)
 ) -> ApiSourceMeasurementCreateOut:
     print(source_measurement)
     created_source_measurement_id = create_source_measurement_bll(
@@ -48,7 +48,7 @@ async def create_source_measurement(
     description="List all source measurements with pagination. Additionally returns the total number of pages.",
 )
 def read_all_source_measurements(
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_session),
     page: int = 1,
     per_page: int = 10,
 ) -> ApiSourceMeasurementListOut:
@@ -68,7 +68,7 @@ def read_all_source_measurements(
     description="Get details of a specific source measurement.",
 )
 async def read_source_measurement(
-    source_measurement_id: int, db: Session = Depends(get_db)
+    source_measurement_id: int, db: Session = Depends(get_session)
 ) -> ApiSourceMeasurementOut:
     retrieved_source_measurement = read_source_measurement_bll(
         db, source_measurement_id
@@ -84,7 +84,7 @@ async def read_source_measurement(
 async def update_source_measurement(
     source_measurement_id: int,
     source_measurement: ApiSourceMeasurementUpdateIn,
-    db: Session = Depends(get_db),
+    db: Session = Depends(get_session),
 ) -> ApiSourceMeasurementUpdateOut:
     updated_source_measurement = update_source_measurement_bll(
         db, source_measurement_id, source_measurement
@@ -98,7 +98,7 @@ async def update_source_measurement(
     description="Delete a specific source measurement.",
 )
 async def delete_source_measurement(
-    source_measurement_id: int, db: Session = Depends(get_db)
+    source_measurement_id: int, db: Session = Depends(get_session)
 ) -> ApiSourceMeasurementDeleteOut:
     delete_source_measurement_bll(db, source_measurement_id)
     return ApiSourceMeasurementDeleteOut(
