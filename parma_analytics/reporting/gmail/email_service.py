@@ -16,7 +16,6 @@ from ..notification_service_manager import (
     NotificationServiceManager,
     Category,
     MessageType,
-    ServiceType,
 )
 
 load_dotenv()
