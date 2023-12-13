@@ -44,7 +44,10 @@ async def create_source_measurement(
 @router.get(
     "/source-measurement",
     status_code=status.HTTP_200_OK,
-    description="List all source measurements with pagination. Additionally returns the total number of pages.",
+    description=(
+        "List all source measurements with pagination. Additionally returns "
+        "the total number of pages."
+    ),
 )
 def read_all_source_measurements(
     db: Session = Depends(get_session),

@@ -165,7 +165,7 @@ def raw_data() -> RawData:
         "repos": [
             {
                 "repo_name": "langfuse",
-                "repo_description": "Open source observability and analytics for LLM applications",
+                "repo_description": "Open source observability and analytics for LLM applications",  # noqa
                 "stars": 1531,
                 "forks": 121,
                 "language": "TypeScript",

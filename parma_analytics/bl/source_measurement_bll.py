@@ -56,7 +56,7 @@ def update_source_measurement_bll(
 
     Args:
         db: The database engine.
-        source_measurement_id: The ID of the SourceMeasurement to update.
+        id: The ID of the SourceMeasurement to update.
         source_measurement: The new SourceMeasurement data.
 
     Returns:
@@ -89,5 +89,6 @@ def list_source_measurements_bll(
         A paginated list of source measurements.
     """
     # Perform any necessary business logic operations here
-    # Then, call the function from your data access layer to fetch the list of SourceMeasurements from the database
+    # Then, call the function from your data access layer to fetch the list of
+    # SourceMeasurements from the database
     return list_source_measurements_query(db, page=page, page_size=page_size)

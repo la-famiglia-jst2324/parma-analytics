@@ -25,7 +25,7 @@ class _ApiTriggerDataSourcesOutBase(_ApiTriggerDataSourcesBase):
 class ApiTriggerDataSourcesCreateIn(_ApiTriggerDataSourcesBase):
     """Input model for the TriggerDataSources creation endpoint."""
 
-    # the api accepts a dictionary of data_source_id as key and list of company ids as values.
+    # api expects a dict mapping from data_source_id to a list of company_ids
     trigger_data: dict[int, list[int]]
 
 

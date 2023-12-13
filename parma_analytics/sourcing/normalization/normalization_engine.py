@@ -12,7 +12,7 @@ def build_lookup_dict(mapping_schema: dict[str, Any]) -> dict[str, dict[str, str
         mapping_schema: The mapping schema containing the fields and their types.
 
     Returns:
-        A dictionary for looking up the types and source measurement IDs by source field.
+        A dictionary for mapping types and source measurement ids by source field.
     """
     lookup_dict: dict[str, dict[str, str]] = {}
 
@@ -65,16 +65,18 @@ def normalize_nested_data(
 ) -> list[NormalizedData]:
     """Recursively normalizes nested data according to the provided mapping schema.
 
-    This function processes each nested item (which could itself be a nested structure) and normalizes it into
-    instances of NormalizedData. It handles multiple levels of nested data by recursively calling itself when
+    This function processes each nested item (which could itself be a nested structure)
+    and normalizes it into instances of NormalizedData. It handles multiple levels of
+    nested data by recursively calling itself when
     encountering further nested structures.
 
     Args:
-        nested_data: The nested data to be normalized. It can be a list of dicts (representing multiple nested items)
+        nested_data: The nested data to be normalized. It can be a list of dicts
+            (representing multiple nested items)
         or a single dict (representing one nested item).
         company_id: The ID of the company associated with the data.
         timestamp: The timestamp when the data was retrieved or processed.
-        lookup_dict: A dictionary containing the mapping information for data normalization.
+        lookup_dict: map information for data normalization.
 
     Returns:
         A list of NormalizedData instances representing the normalized nested data.
@@ -104,8 +106,7 @@ def normalize_nested_data(
 def normalize_data(
     raw_data: RawData, mapping_schema: NormalizationSchema
 ) -> list[NormalizedData]:
-    """Normalizes raw data according to the provided mapping schema for one company at a
-    time.
+    """Normalizes raw data according to the mapping schema for one company at a time.
 
     Args:
         raw_data: The raw data to be normalized.
