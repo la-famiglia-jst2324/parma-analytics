@@ -102,17 +102,3 @@ class EmailService:
         self._send_email(
             emails, self.report_template_id, dynamic_template_data, attachments
         )
-
-
-email_service = EmailService("bucket", 1)
-email_service.send_notification_email(
-    content="Microsoft to join OpenAI’s board after Sam Altman rehired as CEO.",
-    company_name="OpenAI",
-    company_logo="https://upload.wikimedia.org/wikipedia/commons/4/4d/OpenAI_Logo.svg",
-)
-email_service.send_report_email(
-    company_bucket_name="My Bucket",
-    attachments=[
-        "https://www.imi.europa.eu/sites/default/files/uploads/documents/apply-for-funding/call-documents/imi1/Annex2_FinalReportTemplate.pdf",
-    ],
-)
