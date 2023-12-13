@@ -36,7 +36,7 @@ class EmailService:
         """Get all user emails for notification or report."""
         subscription_table = (
             "notification_subscription"
-            if message_type == "NOTIFICATION"
+            if message_type == "notification"
             else "report_subscription"
         )
 
@@ -44,7 +44,7 @@ class EmailService:
             self.company_or_bucket_id,
             subscription_table,
             message_type,
-            "EMAIL",
+            "email",
             self.category,
         )
         return channel_manager.get_notification_destinations()
@@ -87,7 +87,7 @@ class EmailService:
         self, content: str, company_name=None, company_logo=None
     ):
         """Sends a notification email."""
-        emails = self._get_users_emails(message_type="NOTIFICATION")
+        emails = self._get_users_emails(message_type="notification")
         dynamic_template_data = {
             "company_name": company_name,
             "company_logo": company_logo,
@@ -97,8 +97,22 @@ class EmailService:
 
     def send_report_email(self, company_bucket_name: str, attachments=None):
         """Sends a report email."""
-        emails = self._get_users_emails(message_type="REPORT")
+        emails = self._get_users_emails(message_type="report")
         dynamic_template_data = {"company_bucket": company_bucket_name}
         self._send_email(
             emails, self.report_template_id, dynamic_template_data, attachments
         )
+
+
+email_service = EmailService("bucket", 1)
+email_service.send_notification_email(
+    content="Microsoft to join OpenAI’s board after Sam Altman rehired as CEO.",
+    company_name="OpenAI",
+    company_logo="https://upload.wikimedia.org/wikipedia/commons/4/4d/OpenAI_Logo.svg",
+)
+email_service.send_report_email(
+    company_bucket_name="My Bucket",
+    attachments=[
+        "https://www.imi.europa.eu/sites/default/files/uploads/documents/apply-for-funding/call-documents/imi1/Annex2_FinalReportTemplate.pdf",
+    ],
+)

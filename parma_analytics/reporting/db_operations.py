@@ -32,8 +32,8 @@ def fetch_notification_destinations(
             query,
             {
                 "channel_ids": tuple(channel_ids),
-                "entity_type": entity_type,
-                "channel_type": service_type,
+                "entity_type": entity_type.upper(),
+                "channel_type": service_type.upper(),
             },
         )
         return [row[0] for row in result.fetchall()]

@@ -5,12 +5,10 @@ from .db_operations import (
     fetch_notification_destinations,
     fetch_company_id_from_bucket,
 )
-from enum import Enum
 
-
-Category = Literal["COMPANY", "BUCKET"]
-MessageType = Literal["NOTIFICATION", "REPORT"]
-ServiceType = Literal["EMAIL", "SLACK"]
+Category = Literal["company", "bucket"]
+MessageType = Literal["notification", "report"]
+ServiceType = Literal["email", "slack"]
 
 
 class NotificationServiceManager:
@@ -31,7 +29,7 @@ class NotificationServiceManager:
     def get_notification_destinations(self) -> List[str]:
         company_id = self.company_or_bucket_id
         # if the category is a bucket, get a company_id from the bucket. Assume that every company in the bucket is subscribed by the user.
-        if self.category == "BUCKET":
+        if self.category == "bucket":
             company_id = fetch_company_id_from_bucket(self.company_or_bucket_id)
         user_ids = fetch_user_ids_for_company(company_id)
         channel_ids = fetch_channel_ids(user_ids, self.subscription_table)
