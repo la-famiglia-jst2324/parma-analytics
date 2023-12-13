@@ -1,5 +1,5 @@
-from typing import Optional
 from dataclasses import dataclass
+
 from pydantic import BaseModel, validator
 from sqlalchemy import text
 from sqlalchemy.orm import Session
@@ -12,7 +12,7 @@ class SourceMeasurement(BaseModel):
     type: str
     measurement_name: str
     source_module_id: int
-    parent_measurement_id: Optional[int]
+    parent_measurement_id: int | None
     created_at: str
     modified_at: str
 

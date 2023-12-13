@@ -1,13 +1,15 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from sqlalchemy.orm import Session
+
 from parma_analytics.db.prod.measurement_paragraph_value_query import (
     MeasurementParagraphValue,
     create_measurement_paragraph_value_query,
+    delete_measurement_paragraph_value_query,
     get_measurement_paragraph_value_query,
     list_measurement_paragraph_values_query,
     update_measurement_paragraph_value_query,
-    delete_measurement_paragraph_value_query,
 )
 
 

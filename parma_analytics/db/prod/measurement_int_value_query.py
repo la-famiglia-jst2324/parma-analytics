@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, DateTime, func
+from sqlalchemy import Column, DateTime, Integer, func
 from sqlalchemy.orm import Session
+
 from parma_analytics.db.prod.engine import Base
 
 

@@ -1,17 +1,17 @@
 from sqlalchemy import Column, Integer
 from sqlalchemy.orm import Session
+
 from parma_analytics.db.prod.engine import Base
 
 
-# Define the CompanyMeasurement model
 class CompanyMeasurement(Base):
     __tablename__ = "company_source_measurement"
 
-    companyMeasurementId = Column(
+    company_measurement_id = Column(
         "company_measurement_id", Integer, primary_key=True, autoincrement=True
     )
-    sourceMeasurementId = Column("source_measurement_id", Integer)
-    companyId = Column("company_id", Integer)
+    source_measurement_id = Column("source_measurement_id", Integer)
+    company_id = Column("company_id", Integer)
 
 
 def create_company_measurement_query(

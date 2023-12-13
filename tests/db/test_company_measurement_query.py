@@ -1,14 +1,16 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from sqlalchemy.orm import Session
+
 from parma_analytics.db.prod.company_source_measurement_query import (
     CompanyMeasurement,
     create_company_measurement_query,
+    delete_company_measurement_query,
+    get_by_company_and_measurement_ids_query,
     get_company_measurement_query,
     list_company_measurements_query,
     update_company_measurement_query,
-    delete_company_measurement_query,
-    get_by_company_and_measurement_ids_query,
 )
 
 
@@ -61,16 +63,21 @@ def test_list_company_measurements_query(mock_db, mock_company_measurement):
 
 
 def test_update_company_measurement_query(mock_db, mock_company_measurement):
-    data = {"sourceMeasurementId": 2, "companyId": 2}
+    new_source_measurement_id = 2
+    new_company_id = 2
+    data = {
+        "source_measurement_id": new_source_measurement_id,
+        "company_id": new_company_id,
+    }
     mock_db.query.return_value.filter.return_value.first.return_value = (
         mock_company_measurement
     )
     result = update_company_measurement_query(mock_db, 1, data)
-    assert result.sourceMeasurementId == 2
-    assert result.companyId == 2
+    assert result.source_measurement_id == new_source_measurement_id
+    assert result.company_id == new_company_id
     mock_db.query.assert_called_once_with(CompanyMeasurement)
-    assert mock_company_measurement.sourceMeasurementId == 2
-    assert mock_company_measurement.companyId == 2
+    assert mock_company_measurement.source_measurement_id == new_source_measurement_id
+    assert mock_company_measurement.company_id == new_company_id
 
 
 def test_delete_company_measurement_query(mock_db, mock_company_measurement):

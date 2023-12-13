@@ -1,13 +1,15 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from sqlalchemy.orm import Session
+
 from parma_analytics.db.prod.measurement_int_value_query import (
     MeasurementIntValue,
     create_measurement_int_value_query,
+    delete_measurement_int_value_query,
     get_measurement_int_value_query,
     list_measurement_int_values_query,
     update_measurement_int_value_query,
-    delete_measurement_int_value_query,
 )
 
 
@@ -52,13 +54,14 @@ def test_list_measurement_int_values_query(mock_db, mock_measurement_int_value):
 
 
 def test_update_measurement_int_value_query(mock_db, mock_measurement_int_value):
-    data = {"value": 200}
+    float_value = 200.0
+    data = {"value": float_value}
     mock_db.query.return_value.filter.return_value.first.return_value = (
         mock_measurement_int_value
     )
     result = update_measurement_int_value_query(mock_db, 1, data)
     mock_db.query.assert_called_once_with(MeasurementIntValue)
-    assert mock_measurement_int_value.value == 200
+    assert mock_measurement_int_value.value == float_value
     mock_db.commit.assert_called_once()
     assert result == mock_measurement_int_value
 

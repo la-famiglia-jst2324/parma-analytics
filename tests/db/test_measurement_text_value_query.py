@@ -1,13 +1,15 @@
-import pytest
 from unittest.mock import MagicMock, patch
+
+import pytest
 from sqlalchemy.orm import Session
+
 from parma_analytics.db.prod.measurement_text_value_query import (
     MeasurementTextValue,
     create_measurement_text_value_query,
+    delete_measurement_text_value_query,
     get_measurement_text_value_query,
     list_measurement_text_values_query,
     update_measurement_text_value_query,
-    delete_measurement_text_value_query,
 )
 
 
