@@ -36,7 +36,6 @@ def fetch_data() -> pd.DataFrame:
         columns = [desc[0] for desc in cursor.description]
         df = pd.DataFrame(data, columns=columns)
         connection.commit()
-        print(df)
         return df
 
     except Exception as e:

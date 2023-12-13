@@ -13,7 +13,7 @@ def generate_html_report(
         int_measurement_data=int_measurement_data,
         float_measurement_data=float_measurement_data,
         comment_measurement_data=comment_measurement_data,
-        generate_chart=generate_chart,  # Include the generate_chart function
+        generate_chart=generate_chart,
         get_value_for_measurement=get_value_for_measurement,
     )
 
@@ -22,10 +22,12 @@ def generate_html_report(
 
 
 def get_value_for_measurement(company_measurement_id, comment_data_frame):
+    if comment_data_frame.empty:
+        return False
+
     filtered_df = comment_data_frame[
         comment_data_frame["company_measurement_id"] == company_measurement_id
     ]
 
     recent_value = filtered_df["value"].max() if not filtered_df.empty else None
-
     return recent_value
