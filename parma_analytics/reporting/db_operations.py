@@ -1,7 +1,7 @@
 from typing import List
 from sqlalchemy.sql import text
 from sqlalchemy.orm import Session
-from parma_analytics.db.prod.engine import get_session
+from ..db.prod.engine import get_session
 
 
 def fetch_user_ids_for_company(company_id: int) -> List[int]:
@@ -43,7 +43,8 @@ def fetch_notification_destinations(
 def fetch_company_id_from_bucket(bucket_id: int) -> int:
     db: Session = next(get_session())
     query = text(
-        "SELECT company_id FROM company_bucket_membership WHERE id = :bucket_id"
+        "SELECT company_id FROM company_bucket_membership WHERE bucket_id = :bucket_id"
     )
     result = db.execute(query, {"bucket_id": bucket_id})
-    return result.fetchone()[0]
+    # return the first company_id, since every company in the bucket is subscribed by the user
+    return [row[0] for row in result.fetchall()][0]

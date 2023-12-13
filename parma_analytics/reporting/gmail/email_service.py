@@ -12,7 +12,7 @@ from sendgrid.helpers.mail import (
     FileType,
     Disposition,
 )
-from parma_analytics.reporting.notification_service_manager import (
+from ..notification_service_manager import (
     NotificationServiceManager,
     Category,
     MessageType,

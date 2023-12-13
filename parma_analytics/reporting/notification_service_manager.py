@@ -1,5 +1,5 @@
 from typing import List
-from parma_analytics.reporting.db_operations import (
+from .db_operations import (
     fetch_user_ids_for_company,
     fetch_channel_ids,
     fetch_notification_destinations,
