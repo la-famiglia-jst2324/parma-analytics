@@ -14,7 +14,6 @@ from parma_analytics.db.mining.service import (
 )
 from parma_analytics.sourcing.normalization.normalization_engine import normalize_data
 
-
 router = APIRouter()
 
 
@@ -45,7 +44,7 @@ def feed_raw_data(body: ApiFeedRawDataCreateIn) -> ApiFeedRawDataCreateOut:
         # Get the latest mapping schema for now
         latest_mapping_schema = mapping_schemas[-1]
 
-    normalized_data = normalize_data(
+    _ = normalize_data(
         raw_data=RawData(
             mining_trigger="",
             status="success",
@@ -58,7 +57,8 @@ def feed_raw_data(body: ApiFeedRawDataCreateIn) -> ApiFeedRawDataCreateOut:
         ),
         mapping_schema=latest_mapping_schema,
     )
-    # TODO: Write normalized_data to the PROD DB
+
+    # TODO: Write normalized_data(_) to the PROD DB
 
     return ApiFeedRawDataCreateOut(
         return_message=return_message,
