@@ -2,7 +2,6 @@ import os
 import base64
 import requests
 from typing import List
-from dotenv import load_dotenv
 from sendgrid import SendGridAPIClient
 from sendgrid.helpers.mail import (
     Mail,
@@ -17,8 +16,6 @@ from ..notification_service_manager import (
     Category,
     MessageType,
 )
-
-load_dotenv()
 
 
 class EmailService:
