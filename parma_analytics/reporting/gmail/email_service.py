@@ -26,16 +26,13 @@ class EmailService:
     """A service that handles the sending of emails."""
 
     def __init__(self, bucket_or_company: Category, company_or_bucket_id: int):
-        self.sg: SendGridAPIClient = SendGridAPIClient(
-            os.environ.get("SENDGRID_API_KEY")
-        )
-        self.notification_template_id: str | None = os.environ.get(
+        self.sg: SendGridAPIClient = SendGridAPIClient(os.environ["SENDGRID_API_KEY"])
+        self.notification_template_id: str | None = os.environ[
             "SENDGRID_NOTIFICATION_TEMPLATE_ID"
-        )
-        self.report_template_id: str | None = os.environ.get(
-            "SENDGRID_REPORT_TEMPLATE_ID"
-        )
-        self.from_email: str | None = os.environ.get("SENDGRID_FROM_EMAIL")
+        ]
+        self.report_template_id: str | None = os.environ["SENDGRID_REPORT_TEMPLATE_ID"]
+
+        self.from_email: str | None = os.environ["SENDGRID_FROM_EMAIL"]
         self.category: Category = bucket_or_company
         self.company_or_bucket_id: int = company_or_bucket_id
 
@@ -43,7 +40,7 @@ class EmailService:
         """Get all user emails for notification or report."""
         subscription_table = (
             "notification_subscription"
-            if message_type == MessageType.NOTIFICATION
+            if message_type == "NOTIFICATION"
             else "report_subscription"
         )
 
@@ -51,7 +48,7 @@ class EmailService:
             self.company_or_bucket_id,
             subscription_table,
             message_type,
-            ServiceType.EMAIL,
+            "EMAIL",
             self.category,
         )
         return channel_manager.get_notification_destinations()
@@ -94,7 +91,7 @@ class EmailService:
         self, content: str, company_name=None, company_logo=None
     ):
         """Sends a notification email."""
-        emails = self._get_users_emails(message_type=MessageType.NOTIFICATION)
+        emails = self._get_users_emails(message_type="NOTIFICATION")
         dynamic_template_data = {
             "company_name": company_name,
             "company_logo": company_logo,
@@ -104,7 +101,7 @@ class EmailService:
 
     def send_report_email(self, company_bucket_name: str, attachments=None):
         """Sends a report email."""
-        emails = self._get_users_emails(message_type=MessageType.REPORT)
+        emails = self._get_users_emails(message_type="REPORT")
         dynamic_template_data = {"company_bucket": company_bucket_name}
         self._send_email(
             emails, self.report_template_id, dynamic_template_data, attachments

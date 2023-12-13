@@ -3,9 +3,8 @@
 import os
 from typing import Iterator
 from urllib.parse import quote
-from requests import Session
 from sqlalchemy import Engine
-from sqlalchemy.orm import sessionmaker
+from sqlalchemy.orm import Session, sessionmaker
 from dotenv import load_dotenv
 from sqlalchemy.engine import create_engine
 from contextlib import contextmanager
