@@ -207,7 +207,7 @@ def filter_documents_from_path(
     Args:
         engine: The database engine.
         path: The document path. (e.g. "mining/datasource/raw_data")
-        filter_name: The name of the field that you want to filter accordingly (e.g. company_id)
+        filter_name: name of field that you want to filter accordingly (e.g. company_id)
         value: Actual value for the filter
 
     Returns:

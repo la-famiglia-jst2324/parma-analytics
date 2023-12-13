@@ -3,6 +3,7 @@
 from typing import Any
 
 from firebase_admin.firestore import firestore as firestore_types
+
 from parma_analytics.db.mining.engine import get_engine
 from parma_analytics.db.mining.internal.models import DocTemplateInstance
 from parma_analytics.db.mining.internal.storage import (

@@ -1,5 +1,4 @@
 from pydantic import BaseModel
-from typing import Optional
 
 # ------------------------------------------------------------------------------------ #
 #                                       Internal                                       #
@@ -40,7 +39,7 @@ class ApiSourceMeasurementCreateIn(_ApiSourceMeasurementBase):
     type: str
     measurement_name: str
     source_module_id: int
-    parent_measurement_id: Optional[int] = None
+    parent_measurement_id: int | None = None
 
 
 class ApiSourceMeasurementCreateOut(
@@ -86,10 +85,10 @@ class ApiSourceMeasurementListOut(_ApiSourceMeasurementBase):
 class ApiSourceMeasurementUpdateIn(_ApiSourceMeasurementBase):
     """Input model for the SourceMeasurement update endpoint."""
 
-    type: Optional[str] = None
-    measurement_name: Optional[str] = None
-    source_module_id: Optional[int] = None
-    parent_measurement_id: Optional[int] = None
+    type: str | None = None
+    measurement_name: str | None = None
+    source_module_id: int | None = None
+    parent_measurement_id: int | None = None
 
 
 class ApiSourceMeasurementUpdateOut(_ApiSourceMeasurementOutBase):

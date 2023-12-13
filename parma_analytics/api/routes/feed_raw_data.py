@@ -1,15 +1,14 @@
+from datetime import datetime
+
 from fastapi import APIRouter
 from starlette import status
-from datetime import datetime
 
 from parma_analytics.api.models.feed_raw_data import (
     ApiFeedRawDataCreateIn,
     ApiFeedRawDataCreateOut,
 )
 from parma_analytics.db.mining.models import RawDataIn
-from parma_analytics.db.mining.service import (
-    store_raw_data,
-)
+from parma_analytics.db.mining.service import store_raw_data
 
 router = APIRouter()
 

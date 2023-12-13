@@ -1,3 +1,5 @@
+# ruff: noqa: PLR0913
+
 from typing import Literal
 
 from .db_operations import (
@@ -13,6 +15,8 @@ ServiceType = Literal["email", "slack"]
 
 
 class NotificationServiceManager:
+    """Class for managing notification."""
+
     def __init__(
         self,
         company_or_bucket_id: int,
@@ -24,12 +28,14 @@ class NotificationServiceManager:
         self.company_or_bucket_id = company_or_bucket_id
         self.subscription_table = subscription_table
         self.entity_type: MessageType = entity_type
-        self.service_type: ServiceType = service_type
-        self.category: Category = category
+        self.service_type = service_type
+        self.category = category
 
     def get_notification_destinations(self) -> list[str]:
+        """Get the notification destinations for the given company or bucket ID."""
         company_id = self.company_or_bucket_id
-        # if the category is a bucket, get a company_id from the bucket. Assume that every company in the bucket is subscribed by the user.
+        # if the category is a bucket, get a company_id from the bucket.
+        # Assume that every company in the bucket is subscribed by the user.
         if self.category == "bucket":
             company_id = fetch_company_id_from_bucket(self.company_or_bucket_id)
         user_ids = fetch_user_ids_for_company(company_id)
