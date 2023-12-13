@@ -1,25 +1,24 @@
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
-from parma_analytics.db.prod.engine import get_session
 from starlette import status
 
 from parma_analytics.api.models.source_measurement import (
     ApiSourceMeasurementCreateIn,
     ApiSourceMeasurementCreateOut,
+    ApiSourceMeasurementDeleteOut,
     ApiSourceMeasurementListOut,
     ApiSourceMeasurementOut,
     ApiSourceMeasurementUpdateIn,
     ApiSourceMeasurementUpdateOut,
-    ApiSourceMeasurementDeleteOut,
 )
-
 from parma_analytics.bl.source_measurement_bll import (
     create_source_measurement_bll,
-    read_source_measurement_bll,
-    update_source_measurement_bll,
     delete_source_measurement_bll,
     list_source_measurements_bll,
+    read_source_measurement_bll,
+    update_source_measurement_bll,
 )
+from parma_analytics.db.prod.engine import get_session
 
 router = APIRouter()
 
@@ -45,7 +44,10 @@ async def create_source_measurement(
 @router.get(
     "/source-measurement",
     status_code=status.HTTP_200_OK,
-    description="List all source measurements with pagination. Additionally returns the total number of pages.",
+    description=(
+        "List all source measurements with pagination. Additionally returns "
+        "the total number of pages."
+    ),
 )
 def read_all_source_measurements(
     db: Session = Depends(get_session),

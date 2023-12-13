@@ -1,8 +1,9 @@
 """Example of a model for the API."""
 
-from pydantic import BaseModel
 from datetime import datetime
 from typing import Any
+
+from pydantic import BaseModel
 
 # ------------------------------------------------------------------------------------ #
 #                                       Internal                                       #
@@ -13,6 +14,7 @@ class _ApiFeedRawDataBase(BaseModel):
     """Internal base model for the raw data endpoints."""
 
     source_name: str
+    company_id: str
     raw_data: dict[str, Any]
 
 
@@ -37,4 +39,4 @@ class ApiFeedRawDataCreateIn(_ApiFeedRawDataBase):
 class ApiFeedRawDataCreateOut(_ApiFeedRawDataOutBase):
     """Output model for the raw data creation endpoint."""
 
-    pass
+    document_id: str

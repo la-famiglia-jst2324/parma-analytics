@@ -1,12 +1,13 @@
 from typing import Optional
+from dataclasses import dataclass
+from pydantic import BaseModel, validator
 from sqlalchemy import text
 from sqlalchemy.orm import Session
-from dataclasses import dataclass
-
-from pydantic import BaseModel, validator
 
 
 class SourceMeasurement(BaseModel):
+    """Model for the source_measurement table in the database."""
+
     id: int
     type: str
     measurement_name: str
@@ -15,13 +16,17 @@ class SourceMeasurement(BaseModel):
     created_at: str
     modified_at: str
 
+    @classmethod
     @validator("created_at", "modified_at", pre=True)
     def format_datetime(cls, value) -> str:
+        """Validate and format the datetime string."""
         return value.strftime("%Y-%m-%d %H:%M:%S")
 
 
 @dataclass
 class MeasurementPaginationResult:
+    """Dataclass for the pagination results of a measurement query."""
+
     measurements_list: list[SourceMeasurement]
     num_pages: int
 
@@ -33,8 +38,15 @@ def create_source_measurement_query(db: Session, source_measurement_data) -> int
         source_measurement_data["parent_measurement_id"] = None
 
     query = text(
-        """INSERT INTO source_measurement (type, measurement_name, source_module_id, parent_measurement_id, created_at, modified_at)
-                    VALUES (:type, :measurement_name, :source_module_id, :parent_measurement_id, NOW(), NOW()) RETURNING *"""
+        """
+        INSERT INTO source_measurement (
+            type, measurement_name, source_module_id, parent_measurement_id,
+            created_at, modified_at
+        ) VALUES (
+            :type, :measurement_name, :source_module_id, :parent_measurement_id,
+            NOW(), NOW()
+        ) RETURNING *
+        """
     )
     result = db.execute(query, source_measurement_data)
     db.commit()
@@ -47,8 +59,9 @@ def get_source_measurement_query(
     db: Session, source_measurement_id
 ) -> SourceMeasurement:
     query = text(
-        """SELECT id, type, measurement_name, source_module_id, parent_measurement_id, created_at, modified_at
-                 FROM source_measurement WHERE id = :id"""
+        "SELECT id, type, measurement_name, source_module_id, parent_measurement_id, "
+        "created_at, modified_at "
+        "FROM source_measurement WHERE id = :id"
     )
     result = db.execute(query, {"id": source_measurement_id})
     source_measurement = result.fetchone()
@@ -84,10 +97,11 @@ def update_source_measurement_query(
     db: Session, id: int, source_measurement_data
 ) -> SourceMeasurement:
     source_measurement_data = mapping_list(source_measurement_data)
-    # create a list of "column = :value" strings for each item in source_measurement_data
+    # create list of "column = :value" strings for each item in source_measurement_data
     set_clause = ", ".join(f"{key} = :{key}" for key in source_measurement_data.keys())
     query = text(
-        f"""UPDATE source_measurement SET {set_clause}, modified_at = NOW() WHERE id = :id RETURNING *"""
+        f"""UPDATE source_measurement SET {set_clause}, modified_at = NOW() "
+        "WHERE id = :id RETURNING *"""
     )
     source_measurement_data["id"] = str(id)
     result = db.execute(query, source_measurement_data)
