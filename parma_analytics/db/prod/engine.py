@@ -1,13 +1,14 @@
 """Engine utilities."""
 
 import os
-from typing import Iterator
-from urllib.parse import quote
-from sqlalchemy import Engine
-from sqlalchemy.orm import Session, sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from collections.abc import Iterator
 from contextlib import contextmanager
+from urllib.parse import quote
+
+from sqlalchemy import Engine
 from sqlalchemy.engine import create_engine
+from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Session, sessionmaker
 
 Base = declarative_base()
 

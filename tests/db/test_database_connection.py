@@ -5,7 +5,7 @@ from parma_analytics.db.prod.engine import get_engine
 
 
 def test_database_reachable():
-    """Verifies that the database is reachable.""" ""
+    """Verifies that the database is reachable."""
     engine = get_engine()
 
     with engine.connect() as conn:

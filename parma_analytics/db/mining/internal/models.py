@@ -24,7 +24,7 @@ class Collection(BaseModel):
     """Collections are like singletons.
 
     They are containers for documents.
-    """ ""
+    """
 
     name: str = Field(..., pattern=r"^[a-z0-9_-]+$")
     docs: DocTemplate | dict[str, Doc] = Field(default_factory=dict)
