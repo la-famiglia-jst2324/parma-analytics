@@ -60,6 +60,32 @@ resource "google_cloud_run_service" "parma_analytics_cloud_run" {
           name  = "FIREBASE_ADMINSDK_CERTIFICATE"
           value = var.firebase_adminsdk_certificate
         }
+
+        env {
+          name  = "SENDGRID_API_KEY"
+          value = var.sendgrid_api_key
+        }
+
+        env {
+          name  = "SENDGRID_FROM_EMAIL"
+          value = var.sendgrid_from_email
+        }
+
+        env {
+          name  = "SENDGRID_NOTIFICATION_TEMPLATE_ID"
+          value = var.sendgrid_notification_template_id
+        }
+
+        env {
+          name  = "SENDGRID_REPORT_TEMPLATE_ID"
+          value = var.sendgrid_report_template_id
+        }
+
+        env {
+          name  = "CHATGPT_API_KEY"
+          value = var.chatgpt_api_key
+        }
+
       }
     }
   }

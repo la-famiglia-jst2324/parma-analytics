@@ -12,8 +12,11 @@ router = APIRouter()
 @router.post(
     "/trigger-datasources/",
     status_code=status.HTTP_201_CREATED,
-    description="""Endpoint to receive the trigger for the data sources.
-        Expects a dictionary of data source ids as keys and the company ids for which they will be triggered as values.""",
+    description=(
+        "Endpoint to receive the trigger for the data sources."
+        "Expects a dictionary of data source ids as keys and the company ids for "
+        "which they will be triggered as values."
+    ),
 )
 async def create_trigger_data_sources(
     body: ApiTriggerDataSourcesCreateIn,

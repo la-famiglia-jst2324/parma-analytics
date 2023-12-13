@@ -1,8 +1,9 @@
 """Example of a model for the API."""
 
-from pydantic import BaseModel
 from datetime import datetime
 from typing import Any
+
+from pydantic import BaseModel
 
 # ------------------------------------------------------------------------------------ #
 #                                       Internal                                       #
