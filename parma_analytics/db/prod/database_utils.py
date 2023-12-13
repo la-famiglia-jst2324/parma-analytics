@@ -1,5 +1,6 @@
-import psycopg2
 import os
+
+import psycopg2
 
 DB_CONFIG = {
     "host": os.getenv("POSTGRES_HOST"),

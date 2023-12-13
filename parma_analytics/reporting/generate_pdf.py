@@ -1,4 +1,5 @@
 from io import BytesIO
+
 from xhtml2pdf import pisa
 
 

@@ -1,26 +1,19 @@
-from jinja2 import Environment, FileSystemLoader
-from generate_charts import generate_chart
 import pandas as pd
+from generate_charts import generate_chart
+from jinja2 import Environment, FileSystemLoader
 
 
-def generate_html_report(
-    data_frame,
-    int_measurement_data,
-    float_measurement_data,
-    comment_measurement_data,
-    text_measurement_data,
-    paragraph_measurement_data,
-):
+def generate_html_report(data_frame, measurement_data):
     env = Environment(loader=FileSystemLoader("parma_analytics/reporting"))
     template = env.get_template("report_template.html")
 
     html_content = template.render(
         data_frame=data_frame,
-        int_measurement_data=int_measurement_data,
-        float_measurement_data=float_measurement_data,
-        comment_measurement_data=comment_measurement_data,
-        text_measurement_data=text_measurement_data,
-        paragraph_measurement_data=paragraph_measurement_data,
+        int_measurement_data=measurement_data.get("int", pd.DataFrame()),
+        float_measurement_data=measurement_data.get("float", pd.DataFrame()),
+        comment_measurement_data=measurement_data.get("comment", pd.DataFrame()),
+        text_measurement_data=measurement_data.get("text", pd.DataFrame()),
+        paragraph_measurement_data=measurement_data.get("paragraph", pd.DataFrame()),
         generate_chart=generate_chart,
         get_value_for_measurement=get_value_for_measurement,
     )

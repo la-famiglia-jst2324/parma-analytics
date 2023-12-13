@@ -1,6 +1,6 @@
-from parma_analytics.db.prod.database_utils import get_connection, close_connection
-
 import pandas as pd
+
+from parma_analytics.db.prod.database_utils import close_connection, get_connection
 
 
 def fetch_data() -> pd.DataFrame:
