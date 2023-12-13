@@ -41,6 +41,9 @@ doc_mining = Doc(
                                     name="mining_trigger", type="reference"
                                 ),
                                 "status": DocField(name="status", type="string"),
+                                "company_id": DocField(
+                                    name="company_id", type="string"
+                                ),
                                 "data": DocField(name="data", type="map"),
                             }
                         ),

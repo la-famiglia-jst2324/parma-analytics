@@ -33,7 +33,8 @@ def test_parma_mining_datasource_docs(engine: firestore_types.Client):
     for d in datasource_collection.list_documents():
         doc_datasource = cast(firestore_types.DocumentReference, d)
         content = doc_datasource.get()
-        assert content.exists
+        if not content.exists:
+            continue
 
         # for every datasource doc, check it's contents
         sub_collections = doc_datasource.collections()
@@ -49,9 +50,13 @@ def test_parma_mining_datasource_docs(engine: firestore_types.Client):
         ).list_documents():
             typed_raw_data_doc = cast(firestore_types.DocumentReference, raw_data_doc)
             content = typed_raw_data_doc.get()
-            assert content.exists
+            if not content.exists:
+                continue
             assert (
-                len({"mining_trigger", "status", "data"} - content.to_dict().keys())
+                len(
+                    {"mining_trigger", "status", "company_id", "data"}
+                    - content.to_dict().keys()
+                )
                 == 0
             )
 

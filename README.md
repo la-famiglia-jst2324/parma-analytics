@@ -581,6 +581,11 @@ The following steps will get you started with the project.
    make test
    ```
 
+9. Setup the Firestore DB (if necessary):
+
+   If you want to connect to the crawling database, where we save the raw data, you have to get the credentials from the [Notion](https://www.notion.so/firebase-admin-sdk-certificate-4279aa3b4e904e1b927619ed69537045).
+   Then create `.secrets` folder in the main directory (or use the existing one) and add the credentials in a new file named `la-famiglia-parma-ai-firebase-adminsdk.json`.
+
 ## PR workflow
 
 1. **Create a new branch**
