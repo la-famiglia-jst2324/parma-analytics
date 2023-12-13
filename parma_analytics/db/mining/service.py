@@ -148,7 +148,6 @@ def read_normalization_schema_by_datasource(
     Returns:
         List of normalization schema.
     """
-
     current_collection = _resolve_from_path(
         get_engine(),
         f"parma/mining/datasource/{datasource}/normalization_schema",
