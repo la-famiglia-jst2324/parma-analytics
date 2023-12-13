@@ -16,6 +16,19 @@
             box-sizing: border-box;
         }
 
+        @media print {
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: #fff;
+            }
+        }
+
         h1 {
             color: #333;
             text-align: center;
@@ -109,7 +122,6 @@
                         row.source_module_id, row.company_measurement_id) %}
                         {% if chart_data%}
                         <div class="chart">
-
                             <img src="{{ chart_data }}" alt="Chart">
                         </div>
                         {% endif %}
@@ -123,7 +135,7 @@
                         {% endif %}
                         {% else %}
                         {% set measurement_value = get_value_for_measurement(row.company_measurement_id,
-                        comment_measurement_data) %}
+                        comment_measurement_data, text_measurement_data, paragraph_measurement_data) %}
                         {%if measurement_value %}
                         <div class="company-attributes">
                             {{ row.measurement_name }}: {{ measurement_value }}<br>
