@@ -11,7 +11,7 @@ from parma_analytics.db.prod.engine import get_engine
 from parma_analytics.db.prod.models.types import (
     CompanyDataSource,
     DataSource,
-    ScheduledTasks,
+    ScheduledTask,
 )
 
 logger = logging.getLogger(__name__)
@@ -41,8 +41,8 @@ class MiningModuleManager:
         try:
             self.session.begin_nested()
             task = (
-                self.session.query(ScheduledTasks)
-                .filter(ScheduledTasks.task_id == task_id)
+                self.session.query(ScheduledTask)
+                .filter(ScheduledTask.task_id == task_id)
                 .with_for_update()
                 .first()
             )
@@ -51,7 +51,7 @@ class MiningModuleManager:
                 return False
 
             task.status = "SUCCESS"
-            task.completed_at = datetime.now()
+            task.ended_at = datetime.now()
             self.session.commit()
             logger.info(f"Task {task.task_id} successfully completed")
             return True
@@ -62,18 +62,21 @@ class MiningModuleManager:
         return False
 
     async def trigger_datasources(self, task_ids: list[int]) -> None:
-        """Trigger the mining modules for the given task_ids."""
+        """Trigger the mining modules for the given task_ids.
+
+        Read only db access.
+        """
         logger.info(f"Triggering mining modules for task_ids {task_ids}")
 
         trigger_tasks = []
 
         for task_id in task_ids:
             try:
-                logger.info(f"Triggering mining module for task_id {task_id}")
                 self.session.begin_nested()
+                logger.info(f"Triggering mining module for task_id {task_id}")
                 task = (
-                    self.session.query(ScheduledTasks)
-                    .filter(ScheduledTasks.task_id == task_id)
+                    self.session.query(ScheduledTask)
+                    .filter(ScheduledTask.task_id == task_id)
                     .with_for_update()
                     .first()
                 )
@@ -81,20 +84,20 @@ class MiningModuleManager:
                     logger.error(f"Task with id {task_id} not found.")
                     continue
 
-                task = self.schedule_task(task)
+                task = self._schedule_task(task)
                 if not task:
                     logger.error(f"Error scheduling task {task_id}")
                     continue
 
                 data_source = task.data_source
-                json_payload = self.construct_payload(data_source)
+                json_payload = self._construct_payload(data_source)
                 logger.debug(
                     f"Payload for data source {data_source.id}: {json_payload}"
                 )
 
                 invocation_endpoint = data_source.invocation_endpoint
                 trigger_task = asyncio.create_task(
-                    self.trigger(invocation_endpoint, json_payload)
+                    self._trigger(invocation_endpoint, json_payload)
                 )
                 trigger_tasks.append(trigger_task)
 
@@ -109,12 +112,9 @@ class MiningModuleManager:
 
     # ------------------------------ Internal functions ------------------------------ #
 
-    def schedule_task(self, task: ScheduledTasks) -> ScheduledTasks | None:
+    def _schedule_task(self, task: ScheduledTask) -> ScheduledTask | None:
         """Schedule the given task before triggering module."""
         try:
-            task.status = "PROCESSING"
-            task.locked_at = datetime.now()
-            task.attempts += 1
             self.session.commit()
             logger.info(
                 f"Task {task.task_id} scheduled (data source {task.data_source.id})"
@@ -127,7 +127,7 @@ class MiningModuleManager:
 
         return None
 
-    def construct_payload(self, data_source: DataSource) -> str | None:
+    def _construct_payload(self, data_source: DataSource) -> str | None:
         """Construct the payload for the given data source."""
         company_data_sources = (
             self.session.query(CompanyDataSource)
@@ -153,7 +153,9 @@ class MiningModuleManager:
 
         return json_payload
 
-    async def trigger(self, invocation_endpoint: str, json_payload: str | None) -> None:
+    async def _trigger(
+        self, invocation_endpoint: str, json_payload: str | None
+    ) -> None:
         """Trigger the mining module for the given invocation endpoint and payload."""
         try:
             logger.debug(f"Sending request to {invocation_endpoint}")

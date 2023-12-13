@@ -1,4 +1,4 @@
-from typing import Literal
+from typing import Literal, get_args
 
 from sqlalchemy import (
     JSON,
@@ -22,10 +22,19 @@ This file contains all the types used in the production PostgreSQL database.
 
 # -------------------------------------- ENUMS ----------------------------------------
 
-Frequency = Literal["DAILY", "WEEKLY", "CRON"]
+Frequency = Literal["HOURLY", "DAILY", "WEEKLY", "MONTHLY"]
 HealthStatus = Literal["UP", "DOWN"]
 ScheduleType = Literal["ON_DEMAND", "REGULAR"]
 TaskStatus = Literal["PENDING", "PROCESSING", "SUCCESS", "FAILED"]
+"""Success and failed are terminal states."""
+
+
+def literal_to_enum(literal) -> Enum:  # noqa
+    return Enum(
+        *get_args(literal),
+        name=literal.__name__,
+        validate_strings=True,
+    )
 
 
 # -------------------------------------- MODELS ----------------------------------------
@@ -37,14 +46,14 @@ class DataSource(Base):
     id = Column(Integer, primary_key=True)
     source_name = Column(String)
     is_active = Column(Boolean)
-    default_frequency = Column(Enum(Frequency))
+    default_frequency = Column(literal_to_enum(Frequency))
     frequency_pattern = Column(String, nullable=True)
-    health_status = Column(Enum(HealthStatus))
+    health_status = Column(literal_to_enum(HealthStatus))
     description = Column(String, nullable=True)
     created_at = Column(DateTime)
     modified_at = Column(DateTime)
     version = Column(String, default="1.0")
-    maximum_expected_run_time = Column(Integer, default=60)
+    max_run_seconds = Column(Integer, default=5 * 60)
     invocation_endpoint = Column(String, default="")
     additional_params = Column(JSON, nullable=True)
 
@@ -55,17 +64,18 @@ class DataSource(Base):
     )
 
 
-class ScheduledTasks(Base):
-    __tablename__ = "scheduled_tasks"
+class ScheduledTask(Base):
+    __tablename__ = "scheduled_task"
 
     task_id = Column(Integer, primary_key=True)
     data_source_id = Column(Integer, ForeignKey("data_source.id"))
-    schedule_type = Column(Enum(ScheduleType))
-    started_at = Column(DateTime)
-    locked_at = Column(DateTime, nullable=True)
+    schedule_type = Column(literal_to_enum(ScheduleType))
+    scheduled_at = Column(DateTime)
+    started_at = Column(DateTime, nullable=True)
     ended_at = Column(DateTime, nullable=True)
+    max_run_seconds = Column(Integer, default=60 * 5)
     result_summary = Column(String, nullable=True)
-    status = Column(Enum(TaskStatus))
+    status = Column(literal_to_enum(TaskStatus))
     attempts = Column(Integer, default=0)
 
     # Relationships
@@ -90,7 +100,7 @@ class CompanyDataSource(Base):
     data_source_id = Column(Integer, ForeignKey("data_source.id"), primary_key=True)
     company_id = Column(Integer, ForeignKey("company.id"), primary_key=True)
     is_data_source_active = Column(Boolean)
-    health_status = Column(Enum(HealthStatus))
+    health_status = Column(literal_to_enum(HealthStatus))
 
     # Relationships
     data_source = relationship("DataSource", back_populates="company_data_sources")
