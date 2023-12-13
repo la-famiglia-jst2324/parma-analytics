@@ -1,9 +1,10 @@
-from typing import List, Literal
+from typing import Literal
+
 from .db_operations import (
-    fetch_user_ids_for_company,
     fetch_channel_ids,
-    fetch_notification_destinations,
     fetch_company_id_from_bucket,
+    fetch_notification_destinations,
+    fetch_user_ids_for_company,
 )
 
 Category = Literal["company", "bucket"]
@@ -26,7 +27,7 @@ class NotificationServiceManager:
         self.service_type: ServiceType = service_type
         self.category: Category = category
 
-    def get_notification_destinations(self) -> List[str]:
+    def get_notification_destinations(self) -> list[str]:
         company_id = self.company_or_bucket_id
         # if the category is a bucket, get a company_id from the bucket. Assume that every company in the bucket is subscribed by the user.
         if self.category == "bucket":
