@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 from dataclasses import dataclass
@@ -10,7 +11,7 @@ class SourceMeasurement(BaseModel):
     type: str
     measurement_name: str
     source_module_id: int
-    parent_measurement_id: int
+    parent_measurement_id: Optional[int]
     created_at: str
     modified_at: str
 

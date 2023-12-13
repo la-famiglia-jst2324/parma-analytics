@@ -6,7 +6,7 @@ from urllib.parse import quote
 from requests import Session
 from sqlalchemy import Engine
 from sqlalchemy.orm import sessionmaker
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import declarative_base
 
 from sqlalchemy.engine import create_engine
 
