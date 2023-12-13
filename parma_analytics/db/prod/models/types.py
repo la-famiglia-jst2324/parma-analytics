@@ -1,13 +1,14 @@
-import enum
+from typing import Literal
+
 from sqlalchemy import (
+    JSON,
+    Boolean,
     Column,
+    DateTime,
+    Enum,
+    ForeignKey,
     Integer,
     String,
-    Boolean,
-    DateTime,
-    ForeignKey,
-    JSON,
-    Enum,
 )
 from sqlalchemy.orm import relationship
 
@@ -21,28 +22,10 @@ This file contains all the types used in the production PostgreSQL database.
 
 # -------------------------------------- ENUMS ----------------------------------------
 
-
-class Frequency(enum.Enum):
-    DAILY = "DAILY"
-    WEEKLY = "WEEKLY"
-    CRON = "CRON"
-
-
-class HealthStatus(enum.Enum):
-    UP = "UP"
-    DOWN = "DOWN"
-
-
-class ScheduleType(enum.Enum):
-    ON_DEMAND = "ON_DEMAND"
-    REGULAR = "REGULAR"
-
-
-class TaskStatus(enum.Enum):
-    PENDING = "PENDING"
-    PROCESSING = "PROCESSING"
-    SUCCESS = "SUCCESS"
-    FAILED = "FAILED"
+Frequency = Literal["DAILY", "WEEKLY", "CRON"]
+HealthStatus = Literal["UP", "DOWN"]
+ScheduleType = Literal["ON_DEMAND", "REGULAR"]
+TaskStatus = Literal["PENDING", "PROCESSING", "SUCCESS", "FAILED"]
 
 
 # -------------------------------------- MODELS ----------------------------------------
