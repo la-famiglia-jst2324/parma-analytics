@@ -8,6 +8,7 @@ from sqlalchemy import Engine
 from sqlalchemy.orm import sessionmaker
 from dotenv import load_dotenv
 from sqlalchemy.engine import create_engine
+from contextlib import contextmanager
 
 
 engine = None
@@ -33,9 +34,13 @@ engine = get_engine()
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 
+@contextmanager
 def get_session() -> Iterator[Session]:
     db = SessionLocal()
     try:
         yield db
+    except:
+        db.rollback()
+        raise
     finally:
         db.close()
