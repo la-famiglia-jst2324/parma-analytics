@@ -1,11 +1,12 @@
-import pytest
 from datetime import datetime
 
-from parma_analytics.db.mining.models import RawData, NormalizationSchema
+import pytest
+
+from parma_analytics.db.mining.models import NormalizationSchema, RawData
 from parma_analytics.sourcing.normalization.normalization_engine import (
     build_lookup_dict,
-    process_data_point,
     normalize_data,
+    process_data_point,
 )
 from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
 
@@ -164,7 +165,7 @@ def raw_data() -> RawData:
         "repos": [
             {
                 "repo_name": "langfuse",
-                "repo_description": "Open source observability and analytics for LLM applications",
+                "repo_description": "Open source observability and analytics for LLM applications",  # noqa
                 "stars": 1531,
                 "forks": 121,
                 "language": "TypeScript",
@@ -211,7 +212,7 @@ def test_process_data_point():
     result = process_data_point("Langfuse", "123", "2023-01-01T00:00:00Z", mapping)
     assert isinstance(result, NormalizedData)
     assert result.company_id == "123"
-    assert result.timeStamp == datetime.fromisoformat("2023-01-01T00:00:00Z")
+    assert result.timestamp == datetime.fromisoformat("2023-01-01T00:00:00Z")
     assert result.value == "Langfuse"
 
 

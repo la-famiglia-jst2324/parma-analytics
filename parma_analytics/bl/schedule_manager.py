@@ -10,14 +10,14 @@ from sqlalchemy.orm import Session
 
 from parma_analytics.bl.mining_module_manager import MiningModuleManager
 from parma_analytics.db.prod.models.types import (
-    ScheduledTasks,
-    Frequency,
-    TaskStatus,
-    ScheduleType,
     DataSource,
+    ScheduledTasks,
 )
 
 logger = logging.getLogger(__name__)
+
+
+SCHEDULING_RETRIES = 3
 
 
 class ScheduleManager:
@@ -30,9 +30,14 @@ class ScheduleManager:
         self.mining_module_manager = MiningModuleManager()
 
     def __enter__(self):
+        """Enter the context manager."""
         return self
 
     def __exit__(self, *args: tuple[Any, ...], **kwargs: dict[str, Any]):
+        """Exit the context manager.
+
+        Close the session.
+        """
         self.session.close()
 
     # ------------------------------- Public functions ------------------------------- #
@@ -72,15 +77,18 @@ class ScheduleManager:
         logger.info(f"Triggering mining module for task ids {task_ids_to_trigger}")
         await self.mining_module_manager.trigger_datasources(task_ids_to_trigger)
 
-    def is_time_to_run(self, start_date_time: datetime, second_param) -> bool:
+    def is_time_to_run(
+        self, start_date_time: datetime, second_param: int | str
+    ) -> bool:
         """Check if it is time to run the task."""
-        if isinstance(second_param, Frequency):
+        if isinstance(second_param, str):
             # Handle the case where second_param is Frequency
-            if second_param == Frequency.DAILY:
+            if second_param == "DAILY":
                 time_delta = timedelta(days=1)
-            elif second_param == Frequency.WEEKLY:
+            elif second_param == "WEEKLY":
                 time_delta = timedelta(days=7)
-            # TODO: implement other frequencies (CRON)
+            else:
+                raise NotImplementedError("Cron frequency not implemented")
         elif isinstance(second_param, int):
             # Handle the case where second_param is maximum_expected_runtime (minutes)
             time_delta = timedelta(minutes=second_param)
@@ -96,10 +104,10 @@ class ScheduleManager:
         tasks: list[ScheduledTasks] = (
             self.session.query(ScheduledTasks)
             .filter(
-                ScheduledTasks.attempts >= 3,
+                ScheduledTasks.attempts >= SCHEDULING_RETRIES,
                 or_(
-                    ScheduledTasks.status == TaskStatus.PENDING,
-                    ScheduledTasks.status == TaskStatus.PROCESSING,
+                    ScheduledTasks.status == "PENDING",
+                    ScheduledTasks.status == "PROCESSING",
                 ),
             )
             .with_for_update()
@@ -113,17 +121,17 @@ class ScheduleManager:
             try:
                 self.session.refresh(task)
                 logger.debug(f"-- Processing task {task.task_id}...")
-                if task.status == TaskStatus.PENDING:
-                    task.status = TaskStatus.FAILED
+                if task.status == "PENDING":
+                    task.status = "FAILED"
                     logger.debug(
                         f"Task {task.task_id} status set from PENDING to FAILED."
                     )
-                elif task.status == TaskStatus.PROCESSING:
+                elif task.status == "PROCESSING":
                     data_source = task.data_source
                     if self.is_time_to_run(
                         task.locked_at, data_source.maximum_expected_run_time
                     ):
-                        task.status = TaskStatus.FAILED
+                        task.status = "FAILED"
                         logger.debug(
                             f"Task {task.task_id} status set from PROCESSING to FAILED."
                         )
@@ -132,7 +140,7 @@ class ScheduleManager:
                 logger.error(f"SQLAlchemyError in updating failed tasks: {e}")
                 self.session.rollback()
 
-        # In order to release the lock for all the rows that were locked in the previous query
+        # To release the lock for all the rows that were locked in the previous query
         self.session.commit()
 
     def _process_ondemand_scheduled_tasks(self) -> None:
@@ -140,10 +148,10 @@ class ScheduleManager:
         tasks: list[ScheduledTasks] = (
             self.session.query(ScheduledTasks)
             .filter(
-                ScheduledTasks.schedule_type == ScheduleType.ON_DEMAND,
+                ScheduledTasks.schedule_type == "ON_DEMAND",
                 or_(
-                    ScheduledTasks.status == TaskStatus.PENDING,
-                    ScheduledTasks.status == TaskStatus.PROCESSING,
+                    ScheduledTasks.status == "PENDING",
+                    ScheduledTasks.status == "PROCESSING",
                 ),
             )
             .with_for_update()
@@ -164,7 +172,7 @@ class ScheduleManager:
                 logger.error(f"SQLAlchemyError in processing scheduled tasks: {e}")
                 self.session.rollback()
 
-        # In order to release the lock for all the rows that were locked in the previous query
+        # To release the lock for all the rows that were locked in the previous query
         self.session.commit()
         # Trigger the mining module
         if len(task_ids_to_trigger) > 0:
@@ -175,7 +183,7 @@ class ScheduleManager:
     def _process_data_sources(self) -> None:
         logger.info("Processing active data sources...")
         sources: list[DataSource] = (
-            self.session.query(DataSource).filter(DataSource.is_active == True).all()
+            self.session.query(DataSource).filter(DataSource.is_active is True).all()
         )
 
         logger.info(f"Found {len(sources)} active data sources.")
@@ -188,7 +196,7 @@ class ScheduleManager:
             if task_id is not None:
                 task_ids_to_trigger.append(task_id)
 
-        # In order to release the lock for all the rows that were locked in the previous query
+        # To release the lock for all the rows that were locked in the previous query
         self.session.commit()
         # Trigger the mining module
         if len(task_ids_to_trigger) > 0:
@@ -198,16 +206,17 @@ class ScheduleManager:
 
     def _handle_ondemand_task(self, task: ScheduledTasks) -> int | None:
         self.session.refresh(task)
-        if task.status == TaskStatus.PENDING:
+        if task.status == "PENDING":
             logger.debug(f"Scheduled Task {task.task_id} status equals to PENDING.")
             return self._reschedule_task(task)
-        elif task.status == TaskStatus.PROCESSING:
-            # Check if the task has exceeded the maximum expected run time using locked_at
+        elif task.status == "PROCESSING":
+            # Check if task has exceeded the maximum expected run time using locked_at
             if self.is_time_to_run(
                 task.started_at, task.data_source.maximum_expected_run_time
             ):
                 logger.debug(
-                    f"Scheduled Task {task.task_id} status equals to PROCESSING and has exceeded the maximum run time."
+                    f"Scheduled Task {task.task_id} status equals to PROCESSING "
+                    "and has exceeded the maximum run time."
                 )
                 return self._reschedule_task(task)
 
@@ -219,7 +228,7 @@ class ScheduleManager:
             self.session.query(ScheduledTasks)
             .filter(
                 ScheduledTasks.data_source_id == source.id,
-                ScheduledTasks.schedule_type == ScheduleType.REGULAR,
+                ScheduledTasks.schedule_type == "REGULAR",
             )
             .order_by(ScheduledTasks.started_at.desc())
             .with_for_update()
@@ -234,27 +243,29 @@ class ScheduleManager:
                 return self._create_new_task(source)
 
             self.session.refresh(latest_task)
-            if latest_task.status == TaskStatus.PENDING:
+            if latest_task.status == "PENDING":
                 logger.debug(
-                    f"Latest scheduled task {latest_task.task_id} found for data source {source.id}, and it's status "
-                    f"equals to PENDING."
+                    f"Latest scheduled task {latest_task.task_id} found for data "
+                    f"source {source.id}, and it's status equals to PENDING."
                 )
                 return self._reschedule_task(latest_task)
             elif latest_task.status in [
-                TaskStatus.SUCCESS,
-                TaskStatus.FAILED,
+                "SUCCESS",
+                "FAILED",
             ] and self.is_time_to_run(latest_task.started_at, source.default_frequency):
                 logger.debug(
-                    f"Latest scheduled task {latest_task.task_id} found for data source {source.id}, and it's status "
-                    f"equals to {latest_task.status} and has exceeded the default frequency."
+                    f"Latest scheduled task {latest_task.task_id} found for data "
+                    f"source {source.id}, and it's status equals to "
+                    f"{latest_task.status} and has exceeded the default frequency."
                 )
                 return self._create_new_task(source)
-            elif latest_task.status == TaskStatus.PROCESSING:
+            elif latest_task.status == "PROCESSING":
                 if self.is_time_to_run(
                     latest_task.locked_at, source.maximum_expected_run_time
                 ):
                     logger.debug(
-                        f"Latest scheduled task {latest_task.task_id} found for data source {source.id}, and it's status "
+                        f"Latest scheduled task {latest_task.task_id} found for data "
+                        f"source {source.id}, and it's status "
                         f"equals to PROCESSING and has exceeded the maximum run time."
                     )
                     return self._reschedule_task(latest_task)
@@ -268,9 +279,9 @@ class ScheduleManager:
         new_task = ScheduledTasks(
             data_source_id=source.id,
             started_at=datetime.now(),
-            status=TaskStatus.PENDING,
+            status="PENDING",
             attempts=0,
-            schedule_type=ScheduleType.REGULAR,
+            schedule_type="REGULAR",
         )
         self.session.add(new_task)
         self.session.commit()
@@ -279,7 +290,7 @@ class ScheduleManager:
 
     def _reschedule_task(self, task: ScheduledTasks) -> int:
         # Release the lock
-        task.status = TaskStatus.PENDING
+        task.status = "PENDING"
         task.locked_at = None
         self.session.commit()
         logger.info(

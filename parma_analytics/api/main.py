@@ -7,10 +7,10 @@ from parma_analytics.db.prod.engine import get_engine
 from .routes import (
     crawling_finished_router,
     dummy_router,
-    new_company_router,
     feed_raw_data_router,
-    source_measurement_router,
+    new_company_router,
     schedule_router,
+    source_measurement_router,
 )
 
 app = FastAPI()

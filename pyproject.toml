@@ -42,6 +42,11 @@ exclude = '''
 line-length = 88
 select = ["F", "E", "W", "I", "N", "UP", "D", "PL"]
 target-version = "py311"
+ignore = ["D100", "D101", "D102", "D103", "D104", "D107"]  # TODO: remove after midterm
+
+[tool.ruff.lint.isort]
+case-sensitive = true
+detect-same-package = true
 
 [tool.mypy]
 python_version = '3.11'

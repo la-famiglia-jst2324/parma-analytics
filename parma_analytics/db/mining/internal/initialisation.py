@@ -10,12 +10,7 @@ from parma_analytics.db.mining.internal.storage import save_validated_document
 
 from ..engine import get_engine
 from .definitions import parma_collection
-from .models import (
-    Collection,
-    Doc,
-    DocTemplate,
-    DocTemplateInstance,
-)
+from .models import Collection, Doc, DocTemplate, DocTemplateInstance
 
 
 def init_schema() -> None:
@@ -51,7 +46,8 @@ def _traverse(
     """Traverse the schema tree and create the collections and docs.
 
     Args:
-        path: The path to the parent item.
+        engine: The firestore Client to operatre on.
+        current_ref: The reference to the parent item.
         current_item: The current item.
     """
     if isinstance(current_item, Collection):

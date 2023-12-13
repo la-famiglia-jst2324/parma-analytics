@@ -21,6 +21,84 @@ The parma ai backend consists of the following process flow:
 #### Detailed architecture
 
 ```mermaid
+
+graph TD
+
+        %% Subgraphs
+    subgraph FrontendContainer[FRONTEND]
+        Frontend[("Next.js<br>TypeScript")]
+    end
+
+    subgraph ApiBackendContainer[API BACKEND]
+        ApiRestBackend[("Next.js<br>Node.js<br>TypeScript")]
+        AuthUser(("Authentication<br>User Management"))
+    end
+
+    subgraph WebLayer[Web Layer]
+        FrontendContainer
+        ApiBackendContainer
+    end
+
+    subgraph DatabaseLayer[Database Layer]
+        AnalyticsDatabase[("Analytics Database")]
+        ProductionDatabase[("Production Database")]
+        CrawlingDatabase[("Crawling Database")]
+    end
+
+    subgraph AnalyticsLayer[Analytics Layer]
+        AnalyticsBackendContainer
+    end
+
+    subgraph AnalyticsBackendContainer[Analytics Backend]
+        AnalyticsRestBackend[("Python Backend")]
+        NormalizationService
+        NotificationContainer
+    end
+
+    subgraph NotificationContainer[Notification Module]
+        Slack
+        Email
+    end
+
+    subgraph NormalizationService[Normalization Module]
+    end
+
+    subgraph DataSourcingLayer[Data Sourcing Layer]
+        DataMiningModules
+    end
+
+    subgraph GoogleCloudScheduler[Google Cloud Scheduler]
+    end
+
+    subgraph DataMiningModules[Data Mining Modules]
+        Module1[("Reddit")]
+        Module2[("GitHub")]
+        Module3[("Clearbit")]
+        ModuleN[("People Data Labs")]
+    end
+
+        %% Links
+    Users --> FrontendContainer
+    FrontendContainer -->|REST| ApiRestBackend
+    ApiRestBackend -->|SQL Framework| ProductionDatabase
+    ProductionDatabase -->|Replicate| AnalyticsDatabase
+    AnalyticsRestBackend -->|SQL Framework| ProductionDatabase
+    AnalyticsRestBackend -->|SQL Framework| CrawlingDatabase
+    AnalyticsRestBackend --> NotificationContainer
+    NotificationContainer --> ExternalNotificationProvider["External Notification Provider"]
+    AnalyticsRestBackend -->|Trigger Run| DataMiningModules
+    DataMiningModules -->|Notify Finished / Send Raw Data| AnalyticsRestBackend
+    GoogleCloudScheduler -->|Trigger Periodically| AnalyticsRestBackend
+    AnalyticsRestBackend -->|Raw Data| NormalizationService
+    NormalizationService -->|Normalized Data| AnalyticsRestBackend
+
+        %% Link Styles
+    linkStyle default stroke: #9E9D91, stroke-width: 2px;
+```
+
+#### Data flow diagram
+
+```mermaid
 graph LR
     subgraph "parma-scheduler (Google Cloud Scheduler)"
         S(Cloud Scheduler)
@@ -66,6 +144,363 @@ graph LR
     end
     P <--> W1
 
+```
+
+#### Process Flows
+
+The parma ai backend consists of the following process flow:
+
+```mermaid
+graph LR
+   subgraph parma-mining
+      A[Data Mining] --> B[Data Preprocessing]
+   end
+   subgraph parma-mining-db
+      B --> C[NoSQL Mining Database]
+   end
+   subgraph parma-analytics
+      C --> D[Data Processing]
+      D --> F[Data Analytics]
+      F --> G[Data Inference]
+      D --> H[Data Visualization]
+      D --> I[Data Reporting / Alerting]
+      H --> I
+   end
+   subgraph parma-prod-db
+      D --> E[Data Storage]
+      G --> E
+   end
+   subgraph parma-web
+      E --> J[REST API]
+      J --> K[Frontend]
+   end
+
+```
+
+### `parma-analytics` architecture
+
+```mermaid
+graph LR
+   subgraph parma_analytics
+      subgraph .
+         subgraph api
+            models
+            routes
+         end
+         subgraph db.mining
+         end
+         subgraph etl
+         end
+         subgraph analytics
+            subgraph inference
+            end
+            subgraph visualization
+            end
+         end
+         subgraph reporting
+            subgraph slack
+            end
+            subgraph gmail
+            end
+         end
+         subgraph db.prod
+         end
+         api -.-> db.mining
+         db.mining -.-> etl
+         etl -.-> analytics
+         analytics -.-> reporting
+         analytics -.-> db.prod
+      end
+      bl[bl=business logic] <--> api
+      bl <--> db.mining
+      bl <--> etl
+      bl <--> analytics
+      bl <--> reporting
+      bl <--> db.prod
+   end
+```
+
+### `parma-analytics` data model
+
+```mermaid
+erDiagram
+   BUCKET ||--o{ COMPANY_BUCKET_MEMBERSHIP : "includes"
+   BUCKET ||--o{ BUCKET_ACCESS : "grants"
+   COMPANY ||--o{ COMPANY_BUCKET_MEMBERSHIP : "has"
+   COMPANY ||--o{ NOTIFICATION_SUBSCRIPTION : "has"
+   COMPANY ||--o{ REPORT_SUBSCRIPTION : "has"
+   COMPANY ||--o{ COMPANY_ATTACHMENT : "has"
+   COMPANY ||--o{ NOTIFICATION : "generates"
+   COMPANY ||--o{ COMPANY_DATA_SOURCE : "has"
+   COMPANY ||--|| DATA_SOURCE_MEASUREMENT_NEWS_SUBSCRIPTION :"subscribes"
+   DATA_SOURCE ||--o{ COMPANY_DATA_SOURCE : "provided_to"
+   DATA_SOURCE ||--o{ SOURCE_MEASUREMENT : "produces"
+   DATA_SOURCE ||--o{ NOTIFICATION : "triggers"
+   DATA_SOURCE ||--|| USER_IMPORTANT_MEASUREMENT_PREFERENCE : "saves"
+   NOTIFICATION_SUBSCRIPTION ||--o{ NOTIFICATION_CHANNEL : "delivers_via"
+   REPORT ||--o{ COMPANY : "contains"
+   REPORT_SUBSCRIPTION ||--o{ NOTIFICATION_CHANNEL : "informs_via"
+   USER ||--o{ USER_IMPORTANT_MEASUREMENT_PREFERENCE : "chooses"
+   USER ||--o{ NOTIFICATION_SUBSCRIPTION : "subscribes_to"
+   USER ||--|| REPORT_SUBSCRIPTION : "subscribes_to"
+   USER ||--o{ COMPANY : "subscribes"
+   USER ||--o{ BUCKET_ACCESS : "has"
+   USER ||--|| DATA_SOURCE_MEASUREMENT_NEWS_SUBSCRIPTION :"subscribes"
+   USER ||--o{ COMPANY_ATTACHMENT : "uploads"
+   SOURCE_MEASUREMENT ||--o{ MEASUREMENT_TEXT_VALUE : "includes"
+   SOURCE_MEASUREMENT ||--o{ MEASUREMENT_INT_VALUE : "includes"
+   BUCKET {
+      int id PK
+      string title
+      string description
+      boolean is_public
+      int owner_id FK
+      string created_at
+   }
+   BUCKET_ACCESS{
+      int id PK,FK
+      int invitee_id PK,FK
+      tbd  permission
+   }
+   COMPANY {
+      int id PK
+      string name
+      string description
+      int added_by FK
+   }
+   COMPANY_ATTACHMENT {
+      int id PK
+      int company_id FK
+      string file_type
+      string file_url
+      int user_id FK
+      string title
+      date created_at
+   }
+   COMPANY_BUCKET_MEMBERSHIP{
+      int bucket_id PK,FK
+      int company_id PK,FK
+   }
+   COMPANY_DATA_SOURCE {
+      int data_source_id PK, FK
+      int company_id PK, FK
+      string frequency
+      boolean is_data_source_active
+      string health_status
+   }
+   DATA_SOURCE {
+      int source_module_id PK
+      string source_name
+      boolean is_active
+      string default_frequency
+      string health_status
+   }
+   DATA_SOURCE_MEASUREMENT_NEWS_SUBSCRIPTION{
+      int id PK
+      int user_id FK
+      int company_id FK
+   }
+   NOTIFICATION {
+      int id PK
+      string message
+      int company_id FK
+      int data_source_id FK
+      date timestamp
+   }
+   NOTIFICATION_CHANNEL {
+      int channel_id PK, FK
+      int entity_id FK
+      string entity_type
+      string channel_type
+      string destination
+   }
+   NOTIFICATION_SUBSCRIPTION {
+      int user_id FK, PK
+      int company_id FK, PK
+      int channel_id FK, PK
+   }
+   REPORT{
+      int id PK
+      string name
+      date timestamp
+      blob content
+      int company_id FK
+   }
+   REPORT_SUBSCRIPTION {
+      int user_id FK, PK
+      int company_id FK, PK
+      int channel_id FK, PK
+   }
+   SOURCE_MEASUREMENT {
+      int source_measurement_id PK
+      int source_module_id FK
+      string type
+      string measurement_name
+   }
+   USER {
+      int id PK
+      string name
+      string role
+   }
+   USER_IMPORTANT_MEASUREMENT_PREFERENCE {
+      int data_source_id PK, FK
+      int user_id PK, FK
+      string important_field_name
+   }
+   MEASUREMENT_TEXT_VALUE {
+      id measurement_value_id PK
+      id source_measurement_id FK
+      timestamp timestamp
+      string value
+   }
+   MEASUREMENT_INT_VALUE {
+      id measurement_value_id PK
+      id source_measurement_id FK
+      timestamp timestamp
+      int value
+   }
+```
+
+### `parma-analytics` data model
+
+```mermaid
+erDiagram
+    BUCKET ||--o{ COMPANY_BUCKET_MEMBERSHIP : ""
+    BUCKET ||--o{ BUCKET_ACCESS : ""
+    COMPANY ||--o{ COMPANY_BUCKET_MEMBERSHIP : ""
+    COMPANY ||--o{ NOTIFICATION_SUBSCRIPTION : "has"
+    COMPANY ||--o{ REPORT_SUBSCRIPTION : ""
+    COMPANY ||--o{ COMPANY_ATTACHMENT : "has"
+    COMPANY ||--o{ NOTIFICATION : ""
+    COMPANY ||--o{ COMPANY_DATA_SOURCE : ""
+    COMPANY ||--|| DATA_SOURCE_MEASUREMENT_NEWS_SUBSCRIPTION :""
+    DATA_SOURCE ||--o{ COMPANY_DATA_SOURCE : ""
+    DATA_SOURCE ||--o{ SOURCE_MEASUREMENT : ""
+    DATA_SOURCE ||--o{ NOTIFICATION : ""
+    DATA_SOURCE ||--|| USER_IMPORTANT_MEASUREMENT_PREFERENCE : ""
+    NOTIFICATION_SUBSCRIPTION ||--o{ NOTIFICATION_CHANNEL : ""
+    REPORT ||--o{ COMPANY : "contains"
+    REPORT_SUBSCRIPTION ||--o{ NOTIFICATION_CHANNEL : ""
+    USER ||--o{ USER_IMPORTANT_MEASUREMENT_PREFERENCE : "chooses"
+    USER ||--o{ NOTIFICATION_SUBSCRIPTION : ""
+    USER ||--|| REPORT_SUBSCRIPTION : ""
+    USER ||--o{ COMPANY : "subscribes"
+    USER ||--o{ BUCKET_ACCESS : "has"
+    USER ||--|| DATA_SOURCE_MEASUREMENT_NEWS_SUBSCRIPTION :""
+    USER ||--o{ COMPANY_ATTACHMENT : "attaches"
+    SOURCE_MEASUREMENT ||--o{ MEASUREMENT_TEXT_VALUE : ""
+    SOURCE_MEASUREMENT ||--o{ MEASUREMENT_INT_VALUE : ""
+    BUCKET {
+        uuid id PK
+        string title
+        string description
+        boolean is_public
+        uuid owner_id FK
+        string created_at
+    }
+    BUCKET_ACCESS{
+        uuid id PK,FK
+        uuid invitee_id PK,FK
+        tbd  permission
+    }
+    COMPANY {
+        uuid id PK
+        string name
+        string description
+        uuid added_by FK
+    }
+    COMPANY_ATTACHMENT {
+        uuid id PK
+        uuid company_id FK
+        string file_type
+        string file_url
+        uuid user_id FK
+        string title
+        date created_at
+    }
+    COMPANY_BUCKET_MEMBERSHIP{
+        uuid bucket_id PK,FK
+        uuid company_id PK,FK
+    }
+    COMPANY_DATA_SOURCE {
+        uuid data_source_id PK, FK
+        uuid company_id PK, FK
+        string frequency
+        boolean is_data_source_active
+        string health_status
+    }
+    DATA_SOURCE {
+        uuid source_module_id PK
+        string source_name
+        boolean is_active
+        string default_frequency
+        string health_status
+    }
+    DATA_SOURCE_MEASUREMENT_NEWS_SUBSCRIPTION{
+        uuid id PK
+        uuid user_id FK
+        uuid company_id FK
+    }
+    NOTIFICATION {
+        uuid id PK
+        string message
+        uuid company_id FK
+        uuid data_source_id FK
+        date timestamp
+    }
+    NOTIFICATION_CHANNEL {
+        uuid channel_id PK, FK
+        uuid entity_id FK
+        string entity_type
+        string channel_type
+        string destination
+    }
+    NOTIFICATION_SUBSCRIPTION {
+        uuid user_id FK, PK
+        uuid company_id FK, PK
+        uuid channel_id FK, PK
+    }
+    REPORT{
+        uuid id PK
+        string name
+        date timestamp
+        blob content
+        uuid company_id FK
+    }
+    REPORT_SUBSCRIPTION {
+        uuid user_id FK, PK
+        uuid company_id FK, PK
+        uuid channel_id FK, PK
+    }
+    SOURCE_MEASUREMENT {
+        uuid source_measurement_id PK
+        uuid source_module_id FK
+        string type
+        string measurement_name
+    }
+    USER {
+        uuid id PK
+        string auth_id UK
+        string name
+        string role
+    }
+    USER_IMPORTANT_MEASUREMENT_PREFERENCE {
+        uuid data_source_id PK, FK
+        uuid user_id PK, FK
+        string important_field_name
+    }
+    MEASUREMENT_TEXT_VALUE {
+        id measurement_value_id PK
+        id source_measurement_id FK
+        timestamp timestamp
+        string value
+    }
+    MEASUREMENT_INT_VALUE {
+        id measurement_value_id PK
+        id source_measurement_id FK
+        timestamp timestamp
+        int value
+    }
 ```
 
 ## How to add new data sources
@@ -150,6 +585,10 @@ The following steps will get you started with the project.
 
    If you want to connect to the crawling database, where we save the raw data, you have to get the credentials from the [Notion](https://www.notion.so/firebase-admin-sdk-certificate-4279aa3b4e904e1b927619ed69537045).
    Then create `.secrets` folder in the main directory (or use the existing one) and add the credentials in a new file named `la-famiglia-parma-ai-firebase-adminsdk.json`.
+
+## Sendgrid
+
+- Add the [environment variables](https://www.notion.so/Sendgrid-environment-variables-07b749c85d894d51bb07c8b5375aa533) in your local.
 
 ## PR workflow
 

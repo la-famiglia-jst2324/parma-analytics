@@ -9,10 +9,9 @@ from sqlalchemy.orm import Session
 
 from parma_analytics.db.prod.engine import get_engine
 from parma_analytics.db.prod.models.types import (
-    ScheduledTasks,
-    TaskStatus,
     CompanyDataSource,
     DataSource,
+    ScheduledTasks,
 )
 
 logger = logging.getLogger(__name__)
@@ -25,9 +24,14 @@ class MiningModuleManager:
         self.session = Session(get_engine(), autocommit=False, autoflush=False)
 
     def __enter__(self):
+        """Enter the context manager."""
         return self
 
     def __exit__(self, *args: tuple[Any, ...], **kwargs: dict[str, Any]):
+        """Exit the context manager.
+
+        Close the session.
+        """
         self.session.close()
 
     # ------------------------------- Public functions ------------------------------- #
@@ -46,7 +50,7 @@ class MiningModuleManager:
                 logger.error(f"Task with id {task_id} not found.")
                 return False
 
-            task.status = TaskStatus.SUCCESS
+            task.status = "SUCCESS"
             task.completed_at = datetime.now()
             self.session.commit()
             logger.info(f"Task {task.task_id} successfully completed")
@@ -108,12 +112,12 @@ class MiningModuleManager:
     def schedule_task(self, task: ScheduledTasks) -> ScheduledTasks | None:
         """Schedule the given task before triggering module."""
         try:
-            task.status = TaskStatus.PROCESSING
+            task.status = "PROCESSING"
             task.locked_at = datetime.now()
             task.attempts += 1
             self.session.commit()
             logger.info(
-                f"Task {task.task_id} successfully scheduled (data source {task.data_source.id})"
+                f"Task {task.task_id} scheduled (data source {task.data_source.id})"
             )
             self.session.refresh(task)
             return task
@@ -174,7 +178,8 @@ class MiningModuleManager:
             )
         except httpx.HTTPStatusError as exc:
             logger.error(
-                f"Error response {exc.response.status_code} while requesting {exc.request.url!r}."
+                f"Error response {exc.response.status_code} while "
+                f"requesting {exc.request.url!r}."
             )
         except Exception as exc:
             logger.error(f"An unexpected error occurred while sending request: {exc}")
