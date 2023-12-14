@@ -27,7 +27,7 @@ def mock_company_measurement():
 def test_create_company_measurement_query(mock_db, mock_company_measurement):
     data = {"sourceMeasurementId": 1, "companyId": 1}
     with patch(
-        "parma_analytics.db.prod.company_measurement_query.CompanyMeasurement",
+        "parma_analytics.db.prod.company_source_measurement_query.CompanyMeasurement",
         return_value=mock_company_measurement,
     ):
         result = create_company_measurement_query(mock_db, data)

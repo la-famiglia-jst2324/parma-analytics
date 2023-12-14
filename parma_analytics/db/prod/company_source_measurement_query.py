@@ -29,7 +29,7 @@ def get_company_measurement_query(
 ) -> CompanyMeasurement:
     return (
         db.query(CompanyMeasurement)
-        .filter(CompanyMeasurement.companyMeasurementId == company_measurement_id)
+        .filter(CompanyMeasurement.company_measurement_id == company_measurement_id)
         .first()
     )
 
@@ -40,8 +40,8 @@ def get_by_company_and_measurement_ids_query(
     return (
         db.query(CompanyMeasurement)
         .filter(
-            CompanyMeasurement.companyId == company_id
-            and CompanyMeasurement.sourceMeasurementId == measurement_id
+            CompanyMeasurement.company_id == company_id
+            and CompanyMeasurement.source_measurement_id == measurement_id
         )
         .first()
     )
@@ -57,7 +57,7 @@ def update_company_measurement_query(
 ) -> CompanyMeasurement:
     company_measurement = (
         db.query(CompanyMeasurement)
-        .filter(CompanyMeasurement.companyMeasurementId == id)
+        .filter(CompanyMeasurement.company_measurement_id == id)
         .first()
     )
     for key, value in company_measurement_data.items():
@@ -69,7 +69,7 @@ def update_company_measurement_query(
 def delete_company_measurement_query(db: Session, company_measurement_id) -> None:
     company_measurement = (
         db.query(CompanyMeasurement)
-        .filter(CompanyMeasurement.companyMeasurementId == company_measurement_id)
+        .filter(CompanyMeasurement.company_measurement_id == company_measurement_id)
         .first()
     )
     db.delete(company_measurement)
