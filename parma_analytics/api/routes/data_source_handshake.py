@@ -1,3 +1,5 @@
+import json
+from ast import literal_eval
 from http import HTTPStatus
 
 import requests
@@ -6,7 +8,10 @@ from fastapi import APIRouter, HTTPException, status
 from parma_analytics.api.models.data_source_handshake import (
     ApiDataSourceHandshakeOut,
 )
-from parma_analytics.db.mining.service import store_normalization_schema
+from parma_analytics.db.mining.service import (
+    NormalizationSchemaIn,
+    store_normalization_schema,
+)
 
 router = APIRouter()
 
@@ -35,8 +40,8 @@ def perform_handshake(
             )
 
         response_json = response.json()
-        
-         # Check if response_json is a string and convert it to a dictionary if necessary
+
+        # Check if response_json is a string and convert it to a dictionary if necessary
         if isinstance(response_json, str):
             response_json = json.loads(response_json)
 
