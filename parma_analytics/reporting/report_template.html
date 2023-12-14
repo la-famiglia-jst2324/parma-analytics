@@ -35,44 +35,35 @@
             margin-bottom: 20px;
         }
 
-        ul {
-            list-style-type: none;
-            padding: 0;
-        }
-
-        li {
-            background-color: #fff;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-            display: flex;
-            flex-direction: column;
-            align-items: stretch;
-        }
-
         h3 {
             color: #0066cc;
             margin-bottom: 10px;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 10px;
-        }
 
-        .company-data {
+        .outer-container {
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
         }
 
-        .company-attributes {
-            flex: 0 1 calc(33.33% - 20px);
-            background-color: #f0f0f0;
-            padding: 10px;
+        .company-info {
+            flex: 1 1 calc(66.66% - 20px);
+            background-color: #fff;
+            padding: 11px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .company-info h3,
+        .company-info p {
+            flex: 1 1 100%;
+            margin-bottom: 20px;
+        }
+
+        .source-info {
+            flex: 1 1 calc(33.33% - 20px);
             margin: 10px;
-            border-radius: 5px;
         }
 
         .data-source {
@@ -83,16 +74,16 @@
             font-weight: bold;
         }
 
+        .container {
+            width: 100%;
+            padding: 10px;
+        }
+
         .chart-container {
-            flex: 1 1 100%;
-            margin: 10px;
             display: flex;
             flex-wrap: wrap;
             justify-content: space-between;
-        }
-
-        .chart-container .chart {
-            flex: 0 1 calc(48% - 20px);
+            flex: 1 1 100%;
             margin-bottom: 20px;
         }
 
@@ -100,56 +91,68 @@
             width: 100%;
             border-radius: 5px;
         }
+
+        .measurement-value {
+            flex: 1 1 100%;
+        }
     </style>
 </head>
 
 <body>
     <h1>Data Analysis Report of Companies</h1>
-    <ul>
-        {% for company, group in data_frame.groupby(['company_id', 'company_name', 'company_description']) %}
-        <li>
-            <h3>{{ company[1] }}</h3>
-            <p>{{ company[2] }}</p>
-            <ul>
-                {% for source_module_id, source_group in group.groupby(['source_module_id', 'source_name']) %}
-                <li>
-                    <div class="data-source">{{ source_module_id[1] }}</div>
-                    {% for row in source_group.itertuples() %}
-                    <div class="measurement">
-                        {{ row.measurement_name }}:
-                        {% if row.type in ['int'] %}
-                        {% set chart_data = generate_chart(data_frame, int_measurement_data, row.company_id,
-                        row.source_module_id, row.company_measurement_id) %}
-                        {% if chart_data%}
+    <div class="outer-container">
+        {% for company_data in data_for_template %}
+        <div class="company-info" style="box-shadow: 0 0 10px rgba(0, 0, 0, 0.1)">
+            <h3>{{ company_data['company_name'] }}</h3>
+            <p>{{ company_data['company_description'] }}</p>
+        </div>
+        <div class="source-info">
+            {% set sources = company_data['sources'].items() %}
+            {% for source_id, source_data in sources %}
+            <div class="data-source">
+                {{ source_data['source_name'] }}
+            </div>
+            <div class="container">
+                {% for measurement in source_data['measurements'] %}
+                <div class="measurement-value">
+                    {{ measurement['measurement_name'] }}:
+                    {% if measurement['measurement_type'] in ['int', 'float'] %}
+                    <div class="chart-container">
+                        {% if measurement['measurement_type'] in ['int'] %}
+                        {% set chart_data = generate_chart(int_measurement_data, company_data['company_name'],
+                        measurement['measurement_name'], measurement['company_measurement_id']) %}
+                        {% elif measurement['measurement_type'] in ['float'] %}
+                        {% set chart_data = generate_chart(float_measurement_data, company_data['company_name'],
+                        measurement['measurement_name'], measurement['company_measurement_id']) %}
+                        {% endif %}
+                        {% if chart_data %}
                         <div class="chart">
                             <img src="{{ chart_data }}" alt="Chart">
                         </div>
-                        {% endif %}
-                        {% elif row.type in ['float'] %}
-                        {% set chart_data = generate_chart(data_frame, float_measurement_data, row.company_id,
-                        row.source_module_id, row.company_measurement_id) %}
-                        {% if chart_data%}
-                        <div class="chart">
-                            <img src="{{ chart_data }}" alt="Chart">
-                        </div>
-                        {% endif %}
-                        {% else %}
-                        {% set measurement_value = get_value_for_measurement(row.company_measurement_id,
-                        comment_measurement_data, text_measurement_data, paragraph_measurement_data) %}
-                        {%if measurement_value %}
-                        <div class="company-attributes">
-                            {{ row.measurement_name }}: {{ measurement_value }}<br>
-                        </div>
-                        {% endif %}
                         {% endif %}
                     </div>
-                    {% endfor %}
-                </li>
+                    {% else %}
+                    {% if measurement['measurement_type'] == 'comment' %}
+                    {% set measurement_value =
+                    get_value_for_measurement(measurement['company_measurement_id'], comment_measurement_data) %}
+                    {% elif measurement['measurement_type'] == 'text' %}
+                    {% set measurement_value =
+                    get_value_for_measurement(measurement['company_measurement_id'], text_measurement_data) %}
+                    {% elif measurement['measurement_type'] == 'paragraph' %}
+                    {% set measurement_value =
+                    get_value_for_measurement(measurement['company_measurement_id'], paragraph_measurement_data) %}
+                    {% endif %}
+                    {% if measurement_value %}
+                    {{ measurement_value }}
+                    {% endif %}
+                    {% endif %}
+                </div>
                 {% endfor %}
-            </ul>
-        </li>
+            </div>
+            {% endfor %}
+        </div>
         {% endfor %}
-    </ul>
+    </div>
 </body>
 
 </html>
