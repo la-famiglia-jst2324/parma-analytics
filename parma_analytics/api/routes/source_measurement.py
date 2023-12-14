@@ -29,7 +29,7 @@ router = APIRouter()
     description="Create a new source measurement.",
 )
 async def create_source_measurement(
-    source_measurement: ApiSourceMeasurementCreateIn, db: Session = Depends(get_session)
+    source_measurement: ApiSourceMeasurementCreateIn,
 ) -> ApiSourceMeasurementCreateOut:
     with get_session() as db:
         created_source_measurement_id = create_source_measurement_bll(
