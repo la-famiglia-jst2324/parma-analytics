@@ -35,11 +35,18 @@ def perform_handshake(
             )
 
         response_json = response.json()
+        
+         # Check if response_json is a string and convert it to a dictionary if necessary
+        if isinstance(response_json, str):
+            response_json = json.loads(response_json)
+
         frequency = response_json.get("frequency")
         normalization_map = response_json.get("normalization_map")
+        normalization_map = literal_eval(normalization_map)
+        data_source = normalization_map.get("Source")
+        normalization_map_in = NormalizationSchemaIn(schema=normalization_map)
 
-        # Assuming store_normalization_schema is a function you have defined elsewhere
-        store_normalization_schema(str(data_source_id), normalization_map)
+        store_normalization_schema(data_source, normalization_map_in)
 
         return ApiDataSourceHandshakeOut(frequency=frequency)
     except requests.exceptions.RequestException as e:
