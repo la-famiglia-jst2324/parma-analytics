@@ -105,6 +105,7 @@ def store_normalization_schema(
         name=instance_id,
         values=dict(normalization_schema),
     )
+    print("before return store_normalization_schema")
     return save_document_from_template(
         engine,
         f"parma/mining/datasource/{datasource}/normalization_schema/{instance_id}",
