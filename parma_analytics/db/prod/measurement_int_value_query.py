@@ -11,6 +11,7 @@ class MeasurementIntValue(Base):
     id = Column(Integer, primary_key=True, autoincrement=True)
     company_measurement_id = Column("company_measurement_id", Integer)
     value = Column(Integer)
+    timestamp = Column(DateTime)
     created_at = Column("created_at", DateTime, default=func.now())
     modified_at = Column("modified_at", DateTime, onupdate=func.now())
 

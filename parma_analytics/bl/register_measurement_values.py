@@ -32,7 +32,7 @@ from parma_analytics.db.prod.source_measurement_query import (
 
 def register_values(
     source_measurement_id: int, company_id: int, value: Any, timestamp: datetime
-):
+) -> int:
     """This function takes an existing source_measurement_id and company_id, a value,
     and a timestamp as parameters. It returns the id.
 
@@ -82,13 +82,13 @@ def register_values(
 
             # Call the function
             if handle_type is not None:
-                created_measurement = handle_type(
-                    session, value, timestamp, company_measurement.companyMeasurementId
+                created_measurement_id = handle_type(
+                    session, value, timestamp, company_measurement.company_measurement_id
                 )
             else:
                 raise ValueError(f"Invalid type: {source_measurement.type}")
 
-            return created_measurement
+            return created_measurement_id
 
     except SQLAlchemyError as e:
         print(f"Database error occurred: {e}")

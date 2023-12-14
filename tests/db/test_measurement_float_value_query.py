@@ -1,5 +1,5 @@
 from unittest.mock import MagicMock, patch
-
+from datetime import datetime
 import pytest
 from sqlalchemy.orm import Session
 
@@ -24,7 +24,7 @@ def mock_measurement_float_value():
 
 
 def test_create_measurement_float_value_query(mock_db, mock_measurement_float_value):
-    data = {"company_measurement_id": 1, "value": 100.0}
+    data = {"company_measurement_id": 1, "value": 100.0, "timestamp": datetime.now()}
     with patch(
         "parma_analytics.db.prod.measurement_float_value_query.MeasurementFloatValue",
         return_value=mock_measurement_float_value,

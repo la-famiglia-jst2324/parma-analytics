@@ -1,5 +1,5 @@
 from unittest.mock import MagicMock, patch
-
+from datetime import datetime
 import pytest
 from sqlalchemy.orm import Session
 
@@ -26,7 +26,7 @@ def mock_measurement_paragraph_value():
 def test_create_measurement_paragraph_value_query(
     mock_db, mock_measurement_paragraph_value
 ):
-    data = {"company_measurement_id": 1, "value": "test paragraph"}
+    data = {"company_measurement_id": 1, "value": "test paragraph", "timestamp": datetime.now()}
     with patch(
         "parma_analytics.db.prod.measurement_paragraph_value_query.MeasurementParagraphValue",
         return_value=mock_measurement_paragraph_value,
