@@ -31,7 +31,7 @@ def get_value_for_measurement(company_measurement_id, data_frame):
         data_frame["company_measurement_id"] == company_measurement_id
     )
 
-    sorted_df = filtered_df.sort("created_at")
+    sorted_df = filtered_df.sort("created_at", descending=True)
     if sorted_df.shape[0] == 0:
         return False
 
