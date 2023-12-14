@@ -86,8 +86,10 @@ def register_values(normalizedMeasurement: NormalizedData) -> int:
 
     except SQLAlchemyError as e:
         print(f"Database error occurred: {e}")
+        return -1
     except Exception as e:
         print(f"An error occurred: {e}")
+        return -1
 
 
 # Define the functions for each type
