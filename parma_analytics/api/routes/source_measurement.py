@@ -31,14 +31,14 @@ router = APIRouter()
 async def create_source_measurement(
     source_measurement: ApiSourceMeasurementCreateIn, db: Session = Depends(get_session)
 ) -> ApiSourceMeasurementCreateOut:
-    print(source_measurement)
-    created_source_measurement_id = create_source_measurement_bll(
-        db, source_measurement
-    )
-    return ApiSourceMeasurementCreateOut(
-        id=created_source_measurement_id,
-        creation_msg="Source Measurement successfully created",
-    )
+    with get_session() as db:
+        created_source_measurement_id = create_source_measurement_bll(
+            db, source_measurement
+        )
+        return ApiSourceMeasurementCreateOut(
+            id=created_source_measurement_id,
+            creation_msg="Source Measurement successfully created",
+        )
 
 
 @router.get(
