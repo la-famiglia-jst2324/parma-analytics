@@ -1,6 +1,5 @@
 from collections.abc import Callable
 from datetime import datetime
-from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -25,14 +24,10 @@ from parma_analytics.db.prod.measurement_paragraph_value_query import (
 from parma_analytics.db.prod.measurement_text_value_query import (
     create_measurement_text_value_query,
 )
-from parma_analytics.db.prod.source_measurement_query import (
-    get_source_measurement_query,
-)
+from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
 
 
-def register_values(
-    source_measurement_id: int, company_id: int, value: Any, timestamp: datetime
-) -> int:
+def register_values(normalizedMeasurement: NormalizedData) -> int:
     """This function takes an existing source_measurement_id and company_id, a value,
     and a timestamp as parameters. It returns the id.
 
@@ -45,6 +40,11 @@ def register_values(
     Returns:
     int: the created measurement value id.
     """
+    source_measurement_id = normalizedMeasurement.source_measurement_id
+    company_id = normalizedMeasurement.company_id
+    value = normalizedMeasurement.value
+    timestamp = normalizedMeasurement.timestamp
+    measurement_type = normalizedMeasurement.type
     try:
         with get_session() as session:
             company_measurement = get_by_company_and_measurement_ids_query(
@@ -59,15 +59,6 @@ def register_values(
                     },
                 )
 
-            # now check the type of the values:
-            source_measurement = get_source_measurement_query(
-                session, source_measurement_id
-            )
-            if source_measurement is None:
-                raise ValueError(
-                    f"Source measurement with id {source_measurement_id} does not exist"
-                )
-
             # Map the types to their corresponding functions
             type_functions: dict[str, Callable] = {
                 "int": handle_int,
@@ -78,15 +69,18 @@ def register_values(
             }
 
             # Get the function for the type of the source_measurement
-            handle_type = type_functions.get(source_measurement.type)
+            handle_type = type_functions.get(measurement_type)
 
             # Call the function
             if handle_type is not None:
                 created_measurement_id = handle_type(
-                    session, value, timestamp, company_measurement.company_measurement_id
+                    session,
+                    value,
+                    timestamp,
+                    company_measurement.company_measurement_id,
                 )
             else:
-                raise ValueError(f"Invalid type: {source_measurement.type}")
+                raise ValueError(f"Invalid type: {measurement_type}")
 
             return created_measurement_id
 
