@@ -29,23 +29,22 @@ from parma_analytics.db.prod.source_measurement_query import (
     get_source_measurement_query,
 )
 
-"""This function takes an existing source_measurement_id and company_id, a value,
-and a timestamp as parameters. It returns the id.
-
-Parameters:
-source_measurement_id (int): The ID of the source measurement.
-company_id (int): The ID of the company.
-value (any): The value to be registered.
-timestamp (datetime): The timestamp when the value was registered.
-
-Returns:
-int: the created measurement value id.
-"""
-
 
 def register_values(
     source_measurement_id: int, company_id: int, value: Any, timestamp: datetime
 ):
+    """This function takes an existing source_measurement_id and company_id, a value,
+    and a timestamp as parameters. It returns the id.
+
+    Parameters:
+    source_measurement_id (int): The ID of the source measurement.
+    company_id (int): The ID of the company.
+    value (any): The value to be registered.
+    timestamp (datetime): The timestamp when the value was registered.
+
+    Returns:
+    int: the created measurement value id.
+    """
     try:
         with get_session() as session:
             company_measurement = get_by_company_and_measurement_ids_query(
