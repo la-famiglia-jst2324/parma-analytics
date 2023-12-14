@@ -61,12 +61,14 @@ class MiningModuleManager:
 
         return False
 
-    async def trigger_datasources(self, task_ids: list[int]) -> None:
+    def trigger_datasources(self, task_ids: list[int]) -> None:
         """Trigger the mining modules for the given task_ids.
 
         Read only db access.
         """
         logger.info(f"Triggering mining modules for task_ids {task_ids}")
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
 
         trigger_tasks = []
 
@@ -108,7 +110,8 @@ class MiningModuleManager:
                 self.session.rollback()
                 continue
 
-        await asyncio.gather(*trigger_tasks)
+        loop.run_until_complete(asyncio.gather(*trigger_tasks))
+        loop.close()
 
     # ------------------------------ Internal functions ------------------------------ #
 

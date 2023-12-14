@@ -69,10 +69,10 @@ class ScheduleManager:
 
         logger.info("Task scheduling completed.")
 
-    async def trigger_mining_module(self, task_ids_to_trigger: list[int]) -> None:
+    def trigger_mining_module(self, task_ids_to_trigger: list[int]) -> None:
         """Dispatching function to trigger the mining module."""
         logger.info(f"Triggering mining module for task ids {task_ids_to_trigger}")
-        await self.mining_module_manager.trigger_datasources(task_ids_to_trigger)
+        self.mining_module_manager.trigger_datasources(task_ids_to_trigger)
 
     # ------------------------------ Internal functions ------------------------------ #
 
@@ -94,11 +94,7 @@ class ScheduleManager:
                         ),
                     ),
                 ),
-                (
-                    # overdue
-                    ScheduledTask.scheduled_at
-                    <= datetime.now()
-                ),
+                (ScheduledTask.scheduled_at <= datetime.now()),
             )
             .all()
         )
