@@ -27,7 +27,7 @@ from parma_analytics.db.prod.measurement_text_value_query import (
 from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
 
 
-def register_values(normalizedMeasurement: NormalizedData) -> int:
+def register_values(normalized_measurement: NormalizedData) -> int:
     """This function takes an existing source_measurement_id and company_id, a value,
     and a timestamp as parameters. It returns the id.
 
@@ -40,11 +40,11 @@ def register_values(normalizedMeasurement: NormalizedData) -> int:
     Returns:
     int: the created measurement value id.
     """
-    source_measurement_id = normalizedMeasurement.source_measurement_id
-    company_id = normalizedMeasurement.company_id
-    value = normalizedMeasurement.value
-    timestamp = normalizedMeasurement.timestamp
-    measurement_type = normalizedMeasurement.type
+    source_measurement_id = normalized_measurement.source_measurement_id
+    company_id = normalized_measurement.company_id
+    value = normalized_measurement.value
+    timestamp = normalized_measurement.timestamp
+    measurement_type = normalized_measurement.type
     try:
         with get_session() as session:
             company_measurement = get_by_company_and_measurement_ids_query(
