@@ -50,7 +50,7 @@ class RawData(_FirestoreBase, RawDataIn):
 class NormalizationSchemaIn(BaseModel):
     """Raw data input."""
 
-    schema: dict[str, Any]
+    schema: dict[str, Any] | None
 
 
 class NormalizationSchema(_FirestoreBase, NormalizationSchemaIn):

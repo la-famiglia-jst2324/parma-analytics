@@ -198,7 +198,7 @@ def raw_data() -> RawData:
 
 
 def test_build_lookup_dict(mapping_schema: NormalizationSchema):
-    lookup_dict = build_lookup_dict(mapping_schema.schema)
+    lookup_dict = build_lookup_dict(mapping_schema.schema or {})
 
     assert "name" in lookup_dict
     assert lookup_dict["name"]["type"] == "text"
