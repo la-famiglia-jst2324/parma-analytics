@@ -1,6 +1,6 @@
 FROM --platform=linux/amd64 mambaorg/micromamba:1.5.3
 
-COPY --chown=$MAMBA_USER:$MAMBA_USER environment.yml /tmp/environment.yml
+COPY --chown=$MAMBA_USER:$MAMBA_USER environment-prod.yml /tmp/environment.yml
 
 RUN micromamba install -y -n base -f /tmp/environment.yml && \
     micromamba clean --all --yes
