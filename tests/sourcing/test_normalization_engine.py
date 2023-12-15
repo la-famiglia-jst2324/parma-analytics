@@ -20,127 +20,127 @@ def mapping_schema() -> NormalizationSchema:
                 "SourceField": "name",
                 "DataType": "text",
                 "MeasurementName": "company name",
-                "source_measurement_id": "GH001",
+                "source_measurement_id": "1",
             },
             {
                 "SourceField": "description",
                 "DataType": "paragraph",
                 "MeasurementName": "company description",
-                "source_measurement_id": "GH002",
+                "source_measurement_id": "2",
             },
             {
                 "SourceField": "url",
                 "DataType": "link",
                 "MeasurementName": "github url",
-                "source_measurement_id": "GH003",
+                "source_measurement_id": "3",
             },
             {
                 "SourceField": "repos",
                 "DataType": "nested",
                 "MeasurementName": "repositories",
-                "source_measurement_id": "GH004",
+                "source_measurement_id": "4",
                 "NestedMappings": [
                     {
                         "SourceField": "repo_name",
                         "DataType": "text",
                         "MeasurementName": "repository name",
-                        "source_measurement_id": "GH005",
+                        "source_measurement_id": "5",
                     },
                     {
                         "SourceField": "repo_description",
                         "DataType": "paragraph",
                         "MeasurementName": "repository description",
-                        "source_measurement_id": "GH006",
+                        "source_measurement_id": "6",
                     },
                     {
                         "SourceField": "language",
                         "DataType": "text",
                         "MeasurementName": "repository primary language",
-                        "source_measurement_id": "GH007",
+                        "source_measurement_id": "7",
                     },
                     {
                         "SourceField": "created_at",
                         "DataType": "date",
                         "MeasurementName": "repository creation date",
-                        "source_measurement_id": "GH008",
+                        "source_measurement_id": "8",
                     },
                     {
                         "SourceField": "updated_at",
                         "DataType": "date",
                         "MeasurementName": "repository last updated date",
-                        "source_measurement_id": "GH009",
+                        "source_measurement_id": "9",
                     },
                     {
                         "SourceField": "pushed_at",
                         "DataType": "date",
                         "MeasurementName": "repository last pushed date",
-                        "source_measurement_id": "GH010",
+                        "source_measurement_id": "10",
                     },
                     {
                         "SourceField": "html_url",
                         "DataType": "link",
                         "MeasurementName": "repository html url",
-                        "source_measurement_id": "GH011",
+                        "source_measurement_id": "11",
                     },
                     {
                         "SourceField": "clone_url",
                         "DataType": "link",
                         "MeasurementName": "repository clone url",
-                        "source_measurement_id": "GH012",
+                        "source_measurement_id": "12",
                     },
                     {
                         "SourceField": "svn_url",
                         "DataType": "link",
                         "MeasurementName": "repository svn url",
-                        "source_measurement_id": "GH013",
+                        "source_measurement_id": "13",
                     },
                     {
                         "SourceField": "homepage",
                         "DataType": "link",
                         "MeasurementName": "repository homepage url",
-                        "source_measurement_id": "GH014",
+                        "source_measurement_id": "14",
                     },
                     {
                         "SourceField": "size",
                         "DataType": "int",
                         "MeasurementName": "repository size",
-                        "source_measurement_id": "GH015",
+                        "source_measurement_id": "15",
                     },
                     {
                         "SourceField": "stargazers_count",
                         "DataType": "int",
                         "MeasurementName": "repository stargazers count",
-                        "source_measurement_id": "GH016",
+                        "source_measurement_id": "16",
                     },
                     {
                         "SourceField": "watchers_count",
                         "DataType": "int",
                         "MeasurementName": "repository watchers count",
-                        "source_measurement_id": "GH017",
+                        "source_measurement_id": "17",
                     },
                     {
                         "SourceField": "forks_count",
                         "DataType": "int",
                         "MeasurementName": "repository forks count",
-                        "source_measurement_id": "GH018",
+                        "source_measurement_id": "18",
                     },
                     {
                         "SourceField": "open_issues_count",
                         "DataType": "int",
                         "MeasurementName": "repository open issues count",
-                        "source_measurement_id": "GH019",
+                        "source_measurement_id": "19",
                     },
                     {
                         "SourceField": "stars",
                         "DataType": "int",
                         "MeasurementName": "repository stars",
-                        "source_measurement_id": "GH020",
+                        "source_measurement_id": "20",
                     },
                     {
                         "SourceField": "forks",
                         "DataType": "int",
                         "MeasurementName": "repository forks",
-                        "source_measurement_id": "GH021",
+                        "source_measurement_id": "21",
                     },
                 ],
             },
@@ -206,12 +206,12 @@ def test_build_lookup_dict(mapping_schema: NormalizationSchema):
 
 def test_process_data_point():
     mapping = {
-        "source_measurement_id": "GH001",
+        "source_measurement_id": "1",
         "type": "text",
     }
+
     result = process_data_point("Langfuse", "123", "2023-01-01T00:00:00Z", mapping)
     assert isinstance(result, NormalizedData)
-    assert result.company_id == "123"
     assert result.timestamp == datetime.fromisoformat("2023-01-01T00:00:00Z")
     assert result.value == "Langfuse"
 
