@@ -6,6 +6,7 @@ from datetime import datetime
 from typing import Any
 
 import httpx
+from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from parma_analytics.bl.mining_trigger_payloads import GITHUB_PAYLOAD, REDDIT_PAYLOAD
@@ -37,7 +38,9 @@ class MiningModuleManager:
 
     # ------------------------------- Public functions ------------------------------- #
 
-    def set_task_status_success(self, task_id: int) -> bool:
+    def set_task_status_success_with_id(
+        self, task_id: int, result_summary: str | None
+    ) -> bool:
         """Set the status of the task with the given task_id to success."""
         try:
             self.session.begin_nested()
@@ -53,11 +56,50 @@ class MiningModuleManager:
 
             task.status = "SUCCESS"
             task.ended_at = datetime.now()
+            task.result_summary = result_summary or ""
             self.session.commit()
             logger.info(f"Task {task.task_id} successfully completed")
             return True
         except Exception as e:
             logger.error(f"Error setting task {task_id} status to success: {e}")
+            self.session.rollback()
+
+        return False
+
+    def set_task_status_success_with_name(
+        self, source_name: str, result_summary: str | None
+    ) -> bool:
+        """Set the status of the task with the given source_name to success."""
+        try:
+            self.session.begin_nested()
+            task = (
+                self.session.query(ScheduledTask)
+                .filter(
+                    and_(
+                        ScheduledTask.status == "PROCESSING",
+                        ScheduledTask.data_source.has(
+                            DataSource.source_name == source_name
+                        ),
+                    )
+                )
+                .with_for_update()
+                .first()
+            )
+            if not task:
+                logger.error(f"Task with name {source_name} not found.")
+                return False
+
+            task.status = "SUCCESS"
+            task.ended_at = datetime.now()
+            task.result_summary = result_summary or ""
+            self.session.commit()
+            logger.info(f"Task {task.task_id} successfully completed")
+            return True
+        except Exception as e:
+            logger.error(
+                f"Error setting task status to success "
+                f"with source name {source_name}: {e}"
+            )
             self.session.rollback()
 
         return False
