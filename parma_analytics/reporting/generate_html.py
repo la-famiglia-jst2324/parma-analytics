@@ -19,9 +19,9 @@ def generate_html_report(data_for_template, measurement_data):
     }
 
     html_content = template.render(**template_context)
-    html_file_path = "data_analysis_report.html"
-    with open(html_file_path, "w") as html_file:
-        html_file.write(html_content)
+    # html_file_path = "data_analysis_report.html"
+    # with open(html_file_path, "w") as html_file:
+    #     html_file.write(html_content)
 
     return html_content
 
