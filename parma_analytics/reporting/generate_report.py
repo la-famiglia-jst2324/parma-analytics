@@ -1,5 +1,6 @@
 from generate_html import generate_html_report
 from generate_pdf import generate_pdf
+from gmail.email_service import EmailService
 
 from parma_analytics.bl.generate_report import generate_report
 
@@ -45,4 +46,12 @@ def generate_reports():
     grouped_data_list = list(grouped_data.values())
 
     html_content = generate_html_report(grouped_data_list, measurement_data)
-    generate_pdf(html_content, "Analysis Report for Companies.pdf")
+    pdf = generate_pdf(html_content, "Analysis Report for Companies.pdf")
+
+    # Need to remove hard-coded values later
+    EmailService("company", 1).send_temp_email(
+        to_emails=["hamza.chaouki@tum.de"],
+        dynamic_template_data={"name": "John Doe"},
+        attachments=[pdf],
+        local_attachment=True,
+    )
