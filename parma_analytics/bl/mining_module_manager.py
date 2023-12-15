@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import urllib.parse
 from datetime import datetime
 from typing import Any
 
@@ -98,8 +99,19 @@ class MiningModuleManager:
                 )
 
                 invocation_endpoint = data_source.invocation_endpoint
-                trigger_task = asyncio.create_task(
-                    self._trigger(invocation_endpoint, json_payload)
+                if not invocation_endpoint:
+                    logger.error(
+                        f"Invocation endpoint not found "
+                        f"for data source {data_source.id}"
+                    )
+                    continue
+
+                trigger_endpoint = urllib.parse.urljoin(
+                    invocation_endpoint, "/companies"
+                )
+
+                trigger_task = loop.create_task(
+                    self._trigger(trigger_endpoint, json_payload)
                 )
                 trigger_tasks.append(trigger_task)
 
@@ -110,7 +122,9 @@ class MiningModuleManager:
                 self.session.rollback()
                 continue
 
-        loop.run_until_complete(asyncio.gather(*trigger_tasks))
+        if len(trigger_tasks) > 0:
+            loop.run_until_complete(asyncio.gather(*trigger_tasks))
+
         loop.close()
 
     # ------------------------------ Internal functions ------------------------------ #
