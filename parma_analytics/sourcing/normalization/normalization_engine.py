@@ -115,6 +115,9 @@ def normalize_data(
     Returns:
         The list of normalized data points.
     """
+    if mapping_schema.schema is None:
+        return []
+
     lookup_dict = build_lookup_dict(mapping_schema.schema)
     normalized_results = []
 
