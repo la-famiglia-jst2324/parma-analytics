@@ -1,25 +1,14 @@
+# reduced environment for production (no dev dependencies to keep docker image small)
 name: parma-analytics
 channels:
   - conda-forge
   - nodefaults
 dependencies:
-  # Git
-  - pre-commit
   # Python
   - pip
   - python =3.11
   - setuptools-scm
   - setuptools >=61 # pyproject.toml support
-  # Infrastructure provisioning (IAC)
-  - terraform=1.5.3
-  - tflint=0.47.0
-  - yamllint=1.32.0
-  # Development
-  - types-pyyaml
-  - google-cloud-sdk
-  - ipykernel
-  # Testing
-  - pytest >=6 # --import-mode option
   - pytest-cov
   # Dependencies (core)
   - fastapi >=0.104.0
