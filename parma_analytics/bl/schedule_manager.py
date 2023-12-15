@@ -107,7 +107,6 @@ class ScheduleManager:
                 logger.debug(f"-- Processing task {task.task_id}...")
                 if task.status == "PENDING":
                     task.status = "PROCESSING"
-                    task.started_at = datetime.now()
                     task.attempts += 1
                     up_for_scheduling.append(task.task_id)
                     logger.debug(
