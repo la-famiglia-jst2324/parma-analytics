@@ -57,7 +57,7 @@ class DataSource(Base):
     additional_params = Column(JSON, nullable=True)
 
     # Relationships
-    scheduled_tasks = relationship("ScheduledTasks", back_populates="data_source")
+    scheduled_tasks = relationship("ScheduledTask", back_populates="data_source")
     company_data_sources = relationship(
         "CompanyDataSource", back_populates="data_source"
     )

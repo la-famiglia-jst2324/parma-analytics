@@ -2,6 +2,7 @@
 import logging
 from datetime import datetime, timedelta
 from operator import and_
+from pathlib import Path
 from typing import Any
 
 import sqlalchemy as sa
@@ -16,6 +17,7 @@ from parma_analytics.db.prod.models.types import (
 
 logger = logging.getLogger(__name__)
 
+QUERIES_DIR = Path(__file__).parent.parent / "db" / "prod" / "queries"
 
 SCHEDULING_RETRIES = 3
 
@@ -52,9 +54,10 @@ class ScheduleManager:
         # Go through all active data sources and create new scheduled tasks if needed
         try:
             # idempotent creation of tasks for next 24 hours
-            with open("sql/create_tasks.sql") as f:
+            with open(QUERIES_DIR / "create_pending_scheduled_tasks.sql") as f:
                 statement = f.read()
                 self.session.execute(sa.text(statement))
+                self.session.commit()
         except Exception as e:
             logger.error(f"Error in updating data source schedules: {e}")
 
@@ -89,8 +92,8 @@ class ScheduleManager:
                         (
                             # timeout exceeded
                             ScheduledTask.started_at
-                            <= datetime.now()
-                            - timedelta(seconds=ScheduledTask.max_run_seconds)
+                            + ScheduledTask.max_run_seconds * timedelta(seconds=1)
+                            <= (datetime.now())
                         ),
                     ),
                 ),
