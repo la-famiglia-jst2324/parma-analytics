@@ -6,7 +6,7 @@ from pathlib import Path
 from typing import Any
 
 import sqlalchemy as sa
-from sqlalchemy import Engine, or_
+from sqlalchemy import Engine, func, or_
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
@@ -85,19 +85,13 @@ class ScheduleManager:
             self.session.query(ScheduledTask)
             .with_for_update()
             .filter(
-                or_(
-                    ScheduledTask.status == "PENDING",
-                    and_(
+                and_(
+                    or_(
+                        ScheduledTask.status == "PENDING",
                         ScheduledTask.status == "PROCESSING",
-                        (
-                            # timeout exceeded
-                            ScheduledTask.started_at
-                            + ScheduledTask.max_run_seconds * timedelta(seconds=1)
-                            <= (datetime.now())
-                        ),
                     ),
-                ),
-                (ScheduledTask.scheduled_at <= datetime.now()),
+                    (ScheduledTask.scheduled_at <= func.now()),
+                )
             )
             .all()
         )
@@ -113,12 +107,20 @@ class ScheduleManager:
                 logger.debug(f"-- Processing task {task.task_id}...")
                 if task.status == "PENDING":
                     task.status = "PROCESSING"
+                    task.started_at = datetime.now()
                     task.attempts += 1
                     up_for_scheduling.append(task.task_id)
                     logger.debug(
                         f"Task {task.task_id} status set from PENDING to PROCESSING."
                     )
                 elif task.status == "PROCESSING":
+                    # check if task has exceeded maximum expected run time
+                    if (
+                        task.started_at + timedelta(minutes=task.max_run_seconds)
+                        > datetime.now()
+                    ):
+                        continue
+
                     # timeout exceeded
 
                     if task.attempts < SCHEDULING_RETRIES:
