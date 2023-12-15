@@ -1,4 +1,5 @@
 import asyncio
+import json
 import logging
 import urllib.parse
 from datetime import datetime
@@ -8,6 +9,7 @@ import httpx
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
+from parma_analytics.bl.mining_trigger_payloads import GITHUB_PAYLOAD, REDDIT_PAYLOAD
 from parma_analytics.db.prod.engine import get_engine
 from parma_analytics.db.prod.models.types import (
     DataSource,
@@ -188,17 +190,15 @@ class MiningModuleManager:
     def _construct_payload(self, data_source: DataSource) -> str | None:
         """Construct the payload for the given data source."""
         json_payload = None
-        # TODO: do we really need to handle companies non-uniformly? Isn't it the whole
-        # point of this repo to have a uniform interface?
         if data_source.source_name == "affinity":
             # For the Affinity module, we only have  GET /companies with no body
             pass
         elif data_source.source_name == "github":
             logger.warn("Github payload not implemented yet.")
-            # json_payload = json.dumps(GITHUB_PAYLOAD)
+            json_payload = json.dumps(GITHUB_PAYLOAD)
         elif data_source.source_name == "reddit":
             logger.warn("Reddit payload not implemented yet.")
-            # json_payload = json.dumps(REDDIT_PAYLOAD)
+            json_payload = json.dumps(REDDIT_PAYLOAD)
         else:
             logger.warn("Other payload not implemented yet.")
             pass
