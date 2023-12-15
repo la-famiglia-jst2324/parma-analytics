@@ -19,5 +19,4 @@ def generate_pdf(html_content, output_pdf):
 
     pdf_buffer.seek(0)
 
-    with open(output_pdf, "wb") as f:
-        f.write(pdf_buffer.read())
+    return pdf_buffer.read()

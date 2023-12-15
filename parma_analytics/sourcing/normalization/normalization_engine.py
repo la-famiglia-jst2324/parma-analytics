@@ -3,6 +3,7 @@ from typing import Any
 
 from parma_analytics.bl.register_measurement_values import register_values
 from parma_analytics.db.mining.models import NormalizationSchema, RawData
+from parma_analytics.reporting.generate_report import generate_reports
 from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
 
 
@@ -145,4 +146,5 @@ def normalize_data(
             )
             register_values(normalized_data)
             normalized_results.append(normalized_data)
+    generate_reports()
     return normalized_results
