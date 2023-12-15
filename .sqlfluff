@@ -1,0 +1,73 @@
+[sqlfluff]
+dialect = postgres
+exclude_rules = layout.cte_newline,layout.long_lines,aliasing.forbid,structure.subquery,ambiguous.column_count,aliasing.length,structure.column_order
+max_line_length = 88
+
+#--------------------------------------------------------------------------------------#
+#                                     layout config                                    #
+#--------------------------------------------------------------------------------------#
+
+# >>> General
+[sqlfluff:indentation]
+allow_implicit_indents = true
+indented_on_contents = false
+indented_then = false
+indented_then_contents = false
+indented_using_on = true
+# <<< General
+
+# >>> CTEs
+[sqlfluff:layout:type:common_table_expression]
+spacing_within = single
+# <<< CTEs
+
+# >>> Table definitions
+[sqlfluff:layout:type:column_constraint_segment]
+spacing_before = align
+align_within = create_table_statement
+
+[sqlfluff:layout:type:data_type]
+spacing_before = align
+align_within = create_table_statement
+# <<< Table definitions
+
+# >>> SELECT clauses
+[sqlfluff:layout:type:alias_expression]
+spacing_before = align
+align_within = select_clause
+align_scope = bracketed
+# <<< SELECT clauses
+
+# >>> FROM clauses
+[sqlfluff:layout:type:post_table_expression]
+spacing_within = touch:inline
+
+[sqlfluff:layout:type:query_hint_segment]
+spacing_before = touch:inline
+spacing_after = touch:inline
+
+[sqlfluff:layout:type:from_clause]
+spacing_within = single:inline
+# <<< FROM clauses
+
+# -------------------------------------------------------------------------------------#
+#                                  rule configuration                                  #
+# -------------------------------------------------------------------------------------#
+
+[sqlfluff:rules:capitalisation.keywords]
+capitalisation_policy = upper
+
+[sqlfluff:rules:capitalisation.identifiers]
+extended_capitalisation_policy = lower
+
+[sqlfluff:rules:capitalisation.functions]
+extended_capitalisation_policy = upper
+
+[sqlfluff:rules:capitalisation.literals]
+capitalisation_policy = upper
+
+[sqlfluff:rules:structure.subquery]
+forbid_subquery_in = both
+
+[sqlfluff:rules:capitalisation.types]
+extended_capitalisation_policy = upper
