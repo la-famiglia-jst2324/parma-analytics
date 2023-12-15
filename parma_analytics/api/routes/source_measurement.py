@@ -50,18 +50,18 @@ async def create_source_measurement(
     ),
 )
 def read_all_source_measurements(
-    db: Session = Depends(get_session),
     page: int = 1,
     per_page: int = 10,
 ) -> ApiSourceMeasurementListOut:
-    source_measurements = list_source_measurements_bll(db, page, per_page)
-    measurements_out = [
-        ApiSourceMeasurementOut(**dict(sm))
-        for sm in source_measurements.measurements_list
-    ]
-    return ApiSourceMeasurementListOut(
-        measurements_list=measurements_out, num_pages=source_measurements.num_pages
-    )
+    with get_session() as db:
+        source_measurements = list_source_measurements_bll(db, page, per_page)
+        measurements_out = [
+            ApiSourceMeasurementOut(**dict(sm))
+            for sm in source_measurements.measurements_list
+        ]
+        return ApiSourceMeasurementListOut(
+            measurements_list=measurements_out, num_pages=source_measurements.num_pages
+        )
 
 
 @router.get(
@@ -72,10 +72,11 @@ def read_all_source_measurements(
 async def read_source_measurement(
     source_measurement_id: int, db: Session = Depends(get_session)
 ) -> ApiSourceMeasurementOut:
-    retrieved_source_measurement = read_source_measurement_bll(
-        db, source_measurement_id
-    )
-    return ApiSourceMeasurementOut(**dict(retrieved_source_measurement))
+    with get_session() as db:
+        retrieved_source_measurement = read_source_measurement_bll(
+            db, source_measurement_id
+        )
+        return ApiSourceMeasurementOut(**dict(retrieved_source_measurement))
 
 
 @router.put(
@@ -86,12 +87,12 @@ async def read_source_measurement(
 async def update_source_measurement(
     source_measurement_id: int,
     source_measurement: ApiSourceMeasurementUpdateIn,
-    db: Session = Depends(get_session),
 ) -> ApiSourceMeasurementUpdateOut:
-    updated_source_measurement = update_source_measurement_bll(
-        db, source_measurement_id, source_measurement
-    )
-    return ApiSourceMeasurementUpdateOut(**dict(updated_source_measurement))
+    with get_session() as db:
+        updated_source_measurement = update_source_measurement_bll(
+            db, source_measurement_id, source_measurement
+        )
+        return ApiSourceMeasurementUpdateOut(**dict(updated_source_measurement))
 
 
 @router.delete(
@@ -100,9 +101,10 @@ async def update_source_measurement(
     description="Delete a specific source measurement.",
 )
 async def delete_source_measurement(
-    source_measurement_id: int, db: Session = Depends(get_session)
+    source_measurement_id: int,
 ) -> ApiSourceMeasurementDeleteOut:
-    delete_source_measurement_bll(db, source_measurement_id)
-    return ApiSourceMeasurementDeleteOut(
-        deletion_msg=f"Source measurement {source_measurement_id} has been deleted."
-    )
+    with get_session() as db:
+        delete_source_measurement_bll(db, source_measurement_id)
+        return ApiSourceMeasurementDeleteOut(
+            deletion_msg=f"Source measurement {source_measurement_id} has been deleted."
+        )
