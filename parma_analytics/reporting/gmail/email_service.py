@@ -103,3 +103,34 @@ class EmailService:
         self._send_email(
             emails, self.report_template_id, dynamic_template_data, attachments
         )
+
+    # Need to remove later
+    def send_temp_email(
+        self,
+        to_emails: list[str],
+        dynamic_template_data: dict,
+        attachments=None,
+        local_attachment=False,
+    ):
+        """Generic function to send emails using SendGrid."""
+        for email in to_emails:
+            message = Mail(from_email=self.from_email, to_emails=email)
+            message.template_id = os.environ["SENDGRID_REPORT_TEMPLATE_ID"]
+            message.dynamic_template_data = dynamic_template_data
+
+            if local_attachment:
+                for attachment in attachments:
+                    encoded_file = base64.b64encode(attachment).decode()
+                    attached_file = Attachment(
+                        FileContent(encoded_file),
+                        FileName("file_title"),
+                        FileType("application/pdf"),
+                        Disposition("attachment"),
+                    )
+                    message.add_attachment(attached_file)
+
+            try:
+                self.sg.send(message)
+                print(f"Email sent to {email}")
+            except Exception as e:
+                print(f"Failed to send email to {email}: {e}")

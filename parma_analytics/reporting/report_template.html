@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data Analysis Report of Companies</title>
+    <style>
+        body {
+            font-family: 'Roboto', 'Arial', sans-serif;
+            margin: 20px;
+            padding: 20px;
+            background-color: #f7f7f7;
+            box-sizing: border-box;
+        }
+
+        @media print {
+            img {
+                max-width: 100%;
+                height: auto;
+            }
+
+            body {
+                margin: 0;
+                padding: 0;
+                background-color: #fff;
+            }
+        }
+
+        h1 {
+            color: #333;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        h3 {
+            color: #0066cc;
+            margin-bottom: 10px;
+        }
+
+
+        .outer-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+        }
+
+        .company-info {
+            flex: 1 1 calc(66.66% - 20px);
+            background-color: #fff;
+            padding: 11px;
+            margin-bottom: 20px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .company-info h3,
+        .company-info p {
+            flex: 1 1 100%;
+            margin-bottom: 20px;
+        }
+
+        .source-info {
+            flex: 1 1 calc(33.33% - 20px);
+            margin: 10px;
+        }
+
+        .data-source {
+            background-color: #ffeeba;
+            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 3px;
+            font-weight: bold;
+        }
+
+        .container {
+            width: 100%;
+            padding: 10px;
+        }
+
+        .chart-container {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            flex: 1 1 100%;
+            margin-bottom: 20px;
+        }
+
+        .chart-container img {
+            width: 100%;
+            border-radius: 5px;
+        }
+
+        .measurement-value {
+            flex: 1 1 100%;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Data Analysis Report of Companies</h1>
+    <div class="outer-container">
+        {% for company_data in data_for_template %}
+        <div class="company-info" style="box-shadow: 0 0 10px rgba(0, 0, 0, 0.1)">
+            <h3>{{ company_data['company_name'] }}</h3>
+            <p>{{ company_data['company_description'] }}</p>
+        </div>
+        <div class="source-info">
+            {% set sources = company_data['sources'].items() %}
+            {% for source_id, source_data in sources %}
+            <div class="data-source">
+                {{ source_data['source_name'] }}
+            </div>
+            <div class="container">
+                {% for measurement in source_data['measurements'] %}
+                <div class="measurement-value">
+                    {{ measurement['measurement_name'] }}:
+                    {% if measurement['measurement_type'] in ['int', 'float'] %}
+                    <div class="chart-container">
+                        {% if measurement['measurement_type'] in ['int'] %}
+                        {% set chart_data = generate_chart(int_measurement_data, company_data['company_name'],
+                        measurement['measurement_name'], measurement['company_measurement_id']) %}
+                        {% elif measurement['measurement_type'] in ['float'] %}
+                        {% set chart_data = generate_chart(float_measurement_data, company_data['company_name'],
+                        measurement['measurement_name'], measurement['company_measurement_id']) %}
+                        {% endif %}
+                        {% if chart_data %}
+                        <div class="chart">
+                            <img src="{{ chart_data }}" alt="Chart">
+                        </div>
+                        {% endif %}
+                    </div>
+                    {% else %}
+                    {% if measurement['measurement_type'] == 'comment' %}
+                    {% set measurement_value =
+                    get_value_for_measurement(measurement['company_measurement_id'], comment_measurement_data) %}
+                    {% elif measurement['measurement_type'] == 'text' %}
+                    {% set measurement_value =
+                    get_value_for_measurement(measurement['company_measurement_id'], text_measurement_data) %}
+                    {% elif measurement['measurement_type'] == 'paragraph' %}
+                    {% set measurement_value =
+                    get_value_for_measurement(measurement['company_measurement_id'], paragraph_measurement_data) %}
+                    {% endif %}
+                    {% if measurement_value %}
+                    {{ measurement_value }}
+                    {% endif %}
+                    {% endif %}
+                </div>
+                {% endfor %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    </div>
+</body>
+
+</html>

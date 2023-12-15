@@ -35,6 +35,11 @@ dependencies:
   - slack_sdk
   - pip:
       - firebase-admin==6.2.0
+      - xhtml2pdf ==0.2.13
+  - matplotlib >=3.8.2
+  - matplotlib-inline >=0.1.6
+  - Jinja2 >=3.1.2
+  - reportlab =4.0.8
   # Dependencies (db)
   - sqlalchemy >=2.0
   - psycopg2 >=2.9
