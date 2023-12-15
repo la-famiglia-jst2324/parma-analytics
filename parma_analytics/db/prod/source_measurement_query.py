@@ -1,6 +1,7 @@
 from dataclasses import dataclass
+from datetime import datetime
 
-from pydantic import BaseModel, validator
+from pydantic import BaseModel
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
@@ -13,14 +14,8 @@ class SourceMeasurement(BaseModel):
     measurement_name: str
     source_module_id: int
     parent_measurement_id: int | None
-    created_at: str
-    modified_at: str
-
-    @classmethod
-    @validator("created_at", "modified_at", pre=True)
-    def format_datetime(cls, value) -> str:
-        """Validate and format the datetime string."""
-        return value.strftime("%Y-%m-%d %H:%M:%S")
+    created_at: datetime
+    modified_at: datetime
 
 
 @dataclass

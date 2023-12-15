@@ -52,7 +52,6 @@ def process_data_point(
     Returns:
         A normalized data point.
     """
-    print()
     return NormalizedData(
         source_measurement_id=mapping.get("source_measurement_id"),
         timestamp=datetime.fromisoformat(timestamp),
