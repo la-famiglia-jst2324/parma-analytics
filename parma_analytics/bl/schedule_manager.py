@@ -1,6 +1,6 @@
 """Scheduler for providing scheduling functionality interfacing with the database."""
 import logging
-from datetime import datetime, timedelta
+from datetime import timedelta
 from operator import and_
 from pathlib import Path
 from typing import Any
@@ -85,13 +85,20 @@ class ScheduleManager:
             self.session.query(ScheduledTask)
             .with_for_update()
             .filter(
-                and_(
-                    or_(
-                        ScheduledTask.status == "PENDING",
+                or_(
+                    ScheduledTask.status == "PENDING",
+                    and_(
                         ScheduledTask.status == "PROCESSING",
+                        (
+                            # timeout exceeded
+                            ScheduledTask.started_at
+                            + ScheduledTask.max_run_seconds * timedelta(seconds=1)
+                            <= func.now()
+                        ),
                     ),
-                    (ScheduledTask.scheduled_at <= func.now()),
-                )
+                    ScheduledTask.status == "PROCESSING",
+                ),
+                (ScheduledTask.scheduled_at <= func.now()),
             )
             .all()
         )
@@ -114,15 +121,6 @@ class ScheduleManager:
                     )
                 elif task.status == "PROCESSING":
                     # check if task has exceeded maximum expected run time
-                    if (
-                        task.started_at is None
-                        or task.started_at + timedelta(minutes=task.max_run_seconds)
-                        > datetime.now()
-                    ):
-                        continue
-
-                    # timeout exceeded
-
                     if task.attempts < SCHEDULING_RETRIES:
                         task.attempts += 1
                         logger.debug(

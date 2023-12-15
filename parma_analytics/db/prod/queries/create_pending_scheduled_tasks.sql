@@ -1,72 +1,94 @@
-with recursive last_runs_per_datasource (id, freq, last_schedule) as (
-    select
-        ds.id as id,
-        ds.frequency as freq,
-        case
-            when max(st.scheduled_at) > now() then max(st.scheduled_at)
-            else now()
-        end as last_schedule
-    from data_source as ds
-    left join scheduled_task as st on ds.id = st.data_source_id
+-- -------------------------------------------------------------------------------------
+--                      insert scheduled_tasks for next 24 hours
+-- -------------------------------------------------------------------------------------
+
+WITH RECURSIVE last_runs_per_datasource (id, freq, last_schedule) AS (
+    SELECT
+        ds.id        AS id,
+        ds.frequency AS freq,
+        CASE
+            WHEN MAX(st.scheduled_at) > NOW() THEN MAX(st.scheduled_at)
+            ELSE NOW()
+        END          AS last_schedule
+    FROM data_source AS ds
+    LEFT JOIN scheduled_task AS st ON ds.id = st.data_source_id
     -- not on_demand scheduled
-    where st.schedule_type = 'REGULAR' or st.schedule_type is NULL
+    WHERE
+        (st.schedule_type = 'REGULAR' OR st.schedule_type IS NULL)
+        AND ds.is_active = TRUE
 
-    group by id, freq  -- look at data sources latest regular schedules
+    GROUP BY id, freq  -- look at data sources latest regular schedules
 ),
 
-next_runs_per_datasource (id, scheduled_at) as (
+next_runs_per_datasource (id, scheduled_at) AS (
     (
-        select
-            id as id,
-            last_schedule as last_schedule
-        from last_runs_per_datasource
+        SELECT
+            id            AS id,
+            last_schedule AS last_schedule
+        FROM last_runs_per_datasource
     )
-    union
+    UNION
     (
-        select
+        SELECT
             nrpd.id,
-            case
-                when
+            CASE
+                WHEN
                     (d.frequency = 'HOURLY')
-                    then nrpd.scheduled_at + interval '1 hour'
-                when
+                THEN nrpd.scheduled_at + INTERVAL '1 hour'
+                WHEN
                     (d.frequency = 'DAILY')
-                    then nrpd.scheduled_at + interval '1 day'
-                when
+                THEN nrpd.scheduled_at + INTERVAL '1 day'
+                WHEN
                     (d.frequency = 'WEEKLY')
-                    then nrpd.scheduled_at + interval '1 week'
-                when
+                THEN nrpd.scheduled_at + INTERVAL '1 week'
+                WHEN
                     (d.frequency = 'MONTHLY')
-                    then nrpd.scheduled_at + interval '1 month'
-                else nrpd.scheduled_at + interval '1 day'
-            end as scheduled_at
-        from next_runs_per_datasource as nrpd
-        inner join data_source as d on nrpd.id = d.id
-        where nrpd.scheduled_at < now() + interval '1 day'
+                THEN nrpd.scheduled_at + INTERVAL '1 month'
+                ELSE nrpd.scheduled_at + INTERVAL '1 day'
+            END AS scheduled_at
+        FROM next_runs_per_datasource AS nrpd
+        INNER JOIN data_source AS d ON nrpd.id = d.id
+        WHERE nrpd.scheduled_at < NOW() + INTERVAL '1 day'
     )
 ),
 
-next_runs_without_current (id, scheduled_at) as (
-    select *
-    from next_runs_per_datasource
-    where not exists (
-        select 1
-        from last_runs_per_datasource
-        where
-            next_runs_per_datasource.id = last_runs_per_datasource.id
-            and next_runs_per_datasource.scheduled_at
-            = last_runs_per_datasource.last_schedule
-    )
+next_runs_without_current (id, scheduled_at) AS (
+    SELECT *
+    FROM next_runs_per_datasource
+    WHERE NOT EXISTS (
+            SELECT 1
+            FROM last_runs_per_datasource
+            WHERE
+                next_runs_per_datasource.id = last_runs_per_datasource.id
+                AND next_runs_per_datasource.scheduled_at
+                = last_runs_per_datasource.last_schedule
+        )
 )
 
 -- insert new tasks into scheduled_task table
-insert into scheduled_task (
+INSERT INTO scheduled_task (
     data_source_id, schedule_type, scheduled_at, max_run_seconds
 )
-select
-    d.id as data_source_id,
-    'REGULAR' as schedule_type,
-    n.scheduled_at as scheduled_at,
-    d.max_run_seconds as max_run_seconds
-from next_runs_without_current as n
-inner join data_source as d on n.id = d.id;
+SELECT
+    d.id              AS data_source_id,
+    'REGULAR'         AS schedule_type,
+    n.scheduled_at    AS scheduled_at,
+    d.max_run_seconds AS max_run_seconds
+FROM next_runs_without_current AS n
+INNER JOIN data_source AS d ON n.id = d.id;
+
+-- -------------------------------------------------------------------------------------
+--           drop all unfinished scheduled tasks for deactivted data_sources
+-- -------------------------------------------------------------------------------------
+WITH tasks_to_delete (task_id) AS (
+    SELECT st.task_id
+    FROM scheduled_task AS st
+    INNER JOIN data_source AS ds ON st.data_source_id = ds.id
+    WHERE
+        st.status = 'PENDING' -- unstarted tasks
+        AND st.schedule_type = 'REGULAR' -- not on_demand tasks
+        AND ds.is_active = FALSE
+)
+
+DELETE FROM scheduled_task st
+WHERE st.task_id IN (SELECT task_id FROM tasks_to_delete)

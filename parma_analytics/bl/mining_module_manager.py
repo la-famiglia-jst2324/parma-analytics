@@ -1,15 +1,13 @@
 import asyncio
-import json
 import logging
 import urllib.parse
 from datetime import datetime
-from typing import Any
+from typing import Any, cast
 
 import httpx
 from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
-from parma_analytics.bl.mining_trigger_payloads import GITHUB_PAYLOAD, REDDIT_PAYLOAD
 from parma_analytics.db.prod.engine import get_engine
 from parma_analytics.db.prod.models.types import (
     DataSource,
@@ -134,7 +132,7 @@ class MiningModuleManager:
                     logger.error(f"Error scheduling task {task_id}")
                     continue
 
-                data_source = task.data_source
+                data_source = cast(DataSource, task.data_source)
                 json_payload = self._construct_payload(data_source)
                 logger.debug(
                     f"Payload for data source {data_source.id}: {json_payload}"
@@ -190,15 +188,19 @@ class MiningModuleManager:
     def _construct_payload(self, data_source: DataSource) -> str | None:
         """Construct the payload for the given data source."""
         json_payload = None
+        # TODO: do we really need to handle companies non-uniformly? Isn't it the whole
+        # point of this repo to have a uniform interface?
         if data_source.source_name == "affinity":
             # For the Affinity module, we only have  GET /companies with no body
             pass
         elif data_source.source_name == "github":
-            json_payload = json.dumps(GITHUB_PAYLOAD)
+            logger.warn("Github payload not implemented yet.")
+            # json_payload = json.dumps(GITHUB_PAYLOAD)
         elif data_source.source_name == "reddit":
-            json_payload = json.dumps(REDDIT_PAYLOAD)
+            logger.warn("Reddit payload not implemented yet.")
+            # json_payload = json.dumps(REDDIT_PAYLOAD)
         else:
-            ## TODO: add support for other data sources
+            logger.warn("Other payload not implemented yet.")
             pass
 
         return json_payload
