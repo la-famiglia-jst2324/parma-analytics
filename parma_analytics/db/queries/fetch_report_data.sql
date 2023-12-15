@@ -19,4 +19,4 @@ INNER JOIN
 INNER JOIN
     data_source AS ds ON sm.source_module_id = ds.id
 ORDER BY
-    c.id, ds.id, sm.id;
+    c.id, ds.id, sm.id
