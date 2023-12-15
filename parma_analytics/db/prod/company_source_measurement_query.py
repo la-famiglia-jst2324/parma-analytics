@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer
+from sqlalchemy import Column, Integer, and_
 from sqlalchemy.orm import Session
 
 from parma_analytics.db.prod.engine import Base
@@ -40,8 +40,10 @@ def get_by_company_and_measurement_ids_query(
     return (
         db.query(CompanyMeasurement)
         .filter(
-            CompanyMeasurement.company_id == company_id
-            and CompanyMeasurement.source_measurement_id == measurement_id
+            and_(
+                CompanyMeasurement.company_id == company_id,
+                CompanyMeasurement.source_measurement_id == measurement_id,
+            )
         )
         .first()
     )
