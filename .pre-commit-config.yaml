@@ -38,6 +38,7 @@ repos:
     rev: 2.3.5
     hooks:
       - id: sqlfluff-fix
+        args: ["--dialect=postgres"]
   - repo: https://github.com/crate-ci/typos
     rev: v1.16.22
     hooks:
