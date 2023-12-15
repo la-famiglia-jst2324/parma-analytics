@@ -54,8 +54,8 @@ def register_values(normalized_measurement: NormalizedData) -> int:
                 company_measurement = create_company_measurement_query(
                     session,
                     {
-                        "sourceMeasurementId": source_measurement_id,
-                        "companyId": company_id,
+                        "source_measurement_id": source_measurement_id,
+                        "company_id": company_id,
                     },
                 )
 
@@ -101,7 +101,7 @@ def handle_int(
         {
             "value": value,
             "timestamp": timestamp,
-            "companyMeasurementId": company_measurement_id,
+            "company_measurement_id": company_measurement_id,
         },
     )
 
@@ -114,7 +114,7 @@ def handle_float(
         {
             "value": value,
             "timestamp": timestamp,
-            "companyMeasurementId": company_measurement_id,
+            "company_measurement_id": company_measurement_id,
         },
     )
 
@@ -127,7 +127,7 @@ def handle_paragraph(
         {
             "value": value,
             "timestamp": timestamp,
-            "companyMeasurementId": company_measurement_id,
+            "company_measurement_id": company_measurement_id,
         },
     )
 
@@ -140,7 +140,7 @@ def handle_text(
         {
             "value": value,
             "timestamp": timestamp,
-            "companyMeasurementId": company_measurement_id,
+            "company_measurement_id": company_measurement_id,
         },
     )
 
@@ -153,6 +153,6 @@ def handle_comment(
         {
             "value": value,
             "timestamp": timestamp,
-            "companyMeasurementId": company_measurement_id,
+            "company_measurement_id": company_measurement_id,
         },
     )

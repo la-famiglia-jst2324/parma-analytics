@@ -1,6 +1,7 @@
 from datetime import datetime
 from typing import Any
 
+from parma_analytics.bl.register_measurement_values import register_values
 from parma_analytics.db.mining.models import NormalizationSchema, RawData
 from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
 
@@ -51,6 +52,7 @@ def process_data_point(
     Returns:
         A normalized data point.
     """
+    print()
     return NormalizedData(
         source_measurement_id=mapping.get("source_measurement_id"),
         timestamp=datetime.fromisoformat(timestamp),
@@ -99,6 +101,7 @@ def normalize_nested_data(
                     normalized_data = process_data_point(
                         value, company_id, timestamp, nested_mapping_info
                     )
+                    register_values(normalized_data)
                     normalized_results.append(normalized_data)
     return normalized_results
 
@@ -141,5 +144,6 @@ def normalize_data(
             normalized_data = process_data_point(
                 value, company_id, timestamp, mapping_info
             )
+            register_values(normalized_data)
             normalized_results.append(normalized_data)
     return normalized_results

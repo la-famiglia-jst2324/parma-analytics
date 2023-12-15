@@ -13,7 +13,9 @@ class MeasurementFloatValue(Base):
     value = Column(Float)
     timestamp = Column(DateTime)
     created_at = Column("created_at", DateTime, default=func.now())
-    modified_at = Column("modified_at", DateTime, onupdate=func.now())
+    modified_at = Column(
+        "modified_at", DateTime, default=func.now(), onupdate=func.now()
+    )
 
 
 # Define the CRUD operations
