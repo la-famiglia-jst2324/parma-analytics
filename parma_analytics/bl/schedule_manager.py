@@ -115,7 +115,8 @@ class ScheduleManager:
                 elif task.status == "PROCESSING":
                     # check if task has exceeded maximum expected run time
                     if (
-                        task.started_at + timedelta(minutes=task.max_run_seconds)
+                        task.started_at is None
+                        or task.started_at + timedelta(minutes=task.max_run_seconds)
                         > datetime.now()
                     ):
                         continue
