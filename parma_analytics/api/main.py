@@ -10,8 +10,8 @@ from .routes import (
     dummy_router,
     feed_raw_data_router,
     new_company_router,
+    schedule_router,
     source_measurement_router,
-    trigger_datasources_router,
 )
 
 app = FastAPI()
@@ -43,11 +43,6 @@ app.include_router(
 )
 
 app.include_router(
-    trigger_datasources_router,
-    tags=["trigger_datasources"],
-)
-
-app.include_router(
     feed_raw_data_router,
     tags=["feed_raw_data"],
 )
@@ -58,3 +53,8 @@ app.include_router(
 )
 
 app.include_router(source_measurement_router, tags=["source_measurement"])
+
+app.include_router(
+    schedule_router,
+    tags=["schedule_mining_modules"],
+)
