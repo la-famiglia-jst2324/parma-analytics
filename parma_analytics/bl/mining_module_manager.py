@@ -7,9 +7,9 @@ from typing import Any
 import httpx
 from sqlalchemy.orm import Session
 
+from parma_analytics.bl.mining_trigger_payloads import GITHUB_PAYLOAD, REDDIT_PAYLOAD
 from parma_analytics.db.prod.engine import get_engine
 from parma_analytics.db.prod.models.types import (
-    CompanyDataSource,
     DataSource,
     ScheduledTask,
 )
@@ -133,27 +133,17 @@ class MiningModuleManager:
 
     def _construct_payload(self, data_source: DataSource) -> str | None:
         """Construct the payload for the given data source."""
-        company_data_sources = (
-            self.session.query(CompanyDataSource)
-            .filter(CompanyDataSource.data_source_id == data_source.id)
-            .all()
-        )
-
         json_payload = None
         if data_source.source_name == "affinity":
             # For the Affinity module, we only have  GET /companies with no body
             pass
+        elif data_source.source_name == "github":
+            json_payload = json.dumps(GITHUB_PAYLOAD)
+        elif data_source.source_name == "reddit":
+            json_payload = json.dumps(REDDIT_PAYLOAD)
         else:
-            github_payload = {
-                "companies": {
-                    cds.company.name: {
-                        "domain": [cds.company.name],
-                        "name": [cds.company.name],
-                    }
-                    for cds in company_data_sources
-                }
-            }
-            json_payload = json.dumps(github_payload)
+            ## TODO: add support for other data sources
+            pass
 
         return json_payload
 
