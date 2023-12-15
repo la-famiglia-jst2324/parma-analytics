@@ -118,6 +118,7 @@ class MiningModuleManager:
     def _schedule_task(self, task: ScheduledTask) -> ScheduledTask | None:
         """Schedule the given task before triggering module."""
         try:
+            task.started_at = datetime.now()
             self.session.commit()
             logger.info(
                 f"Task {task.task_id} scheduled (data source {task.data_source.id})"
