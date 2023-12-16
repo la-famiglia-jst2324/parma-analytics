@@ -140,10 +140,12 @@ class MiningModuleManager:
                     f"Payload for data source {data_source.id}: {json_payload}"
                 )
 
-                invocation_endpoint = data_source.invocation_endpoint
+                invocation_endpoint = self._ensure_https(
+                    data_source.invocation_endpoint
+                )
                 if not invocation_endpoint:
                     logger.error(
-                        f"Invocation endpoint not found "
+                        f"Invalid invocation endpoint: {invocation_endpoint} "
                         f"for data source {data_source.id}"
                     )
                     continue
@@ -204,6 +206,27 @@ class MiningModuleManager:
             pass
 
         return json_payload
+
+    def _ensure_https(self, url: str) -> str | None:
+        """Ensure that the given URL is HTTPS."""
+        if not url:
+            return None
+
+        try:
+            parsed_url = httpx.URL(url)
+
+            # Check if the scheme is missing or not HTTPS
+            if parsed_url.scheme not in ["http", "https"]:
+                secure_url = "https://" + url
+                return secure_url
+            elif parsed_url.scheme == "http":
+                # Convert http to https
+                return parsed_url.copy_with(scheme="https").__str__()
+
+            return url
+        except httpx.InvalidURL:
+            # Return None if URL parsing fails, invalid URL
+            return None
 
     async def _trigger(
         self, invocation_endpoint: str, json_payload: str | None
