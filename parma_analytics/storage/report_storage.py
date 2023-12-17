@@ -14,11 +14,11 @@ class FirebaseStorageManager:
         self.bucket = storage.bucket()
 
     def add_company_file(self, company_id: str, file_path: str) -> Blob:
-        blob_path = f"Reports/Companies/{company_id}/{os.path.basename(file_path)}"
+        blob_path = f"reports/companies/{company_id}/{os.path.basename(file_path)}"
         return self._upload_file(blob_path, file_path)
 
     def add_user_file(self, user_id: str, file_path: str) -> Blob:
-        blob_path = f"Reports/Users/{user_id}/{os.path.basename(file_path)}"
+        blob_path = f"reports/users/{user_id}/{os.path.basename(file_path)}"
         return self._upload_file(blob_path, file_path)
 
     def _upload_file(self, blob_path: str, file_path: str) -> Blob:
