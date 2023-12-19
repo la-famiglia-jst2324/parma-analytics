@@ -1,3 +1,5 @@
+"""SQLAlchemy base model for our core postgres database."""
+
 from sqlalchemy.ext.declarative import declarative_base
 
 Base = declarative_base()

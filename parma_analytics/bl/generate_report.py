@@ -1,7 +1,12 @@
+"""Report generation business layer module."""
+
+import polars as pl
+
 from parma_analytics.db.prod.report_data import fetch_data, fetch_measurement_data
 
 
-def generate_report():
+def generate_report() -> pl.DataFrame:
+    """Generate a report."""
     df = fetch_data()
     measurement_types = df["measurement_type"].unique().to_list()
     measurement_data = {}

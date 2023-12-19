@@ -1,3 +1,5 @@
+"""Pydantic REST models for the crawling_finished endpoint."""
+
 from pydantic import BaseModel
 
 # ------------------------------------------------------------------------------------ #
