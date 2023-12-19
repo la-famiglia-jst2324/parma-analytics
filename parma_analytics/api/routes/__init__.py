@@ -7,6 +7,7 @@ from .feed_raw_data import router as feed_raw_data_router
 from .new_company import router as new_company_router
 from .schedule import router as schedule_router
 from .source_measurement import router as source_measurement_router
+from .update_task_status import router as update_task_status_router
 
 __all__ = [
     "crawling_finished_router",
@@ -16,4 +17,5 @@ __all__ = [
     "schedule_router",
     "source_measurement_router",
     "data_source_handshake_router",
+    "update_task_status_router",
 ]
