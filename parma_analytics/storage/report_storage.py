@@ -36,10 +36,19 @@ class FirebaseStorageManager:
         else:
             return None
 
-    def get_download_url(self, blob: Blob) -> str:
-        return blob.generate_signed_url(
-            timedelta(days=1)
-        )  # Time can be changed, depending on the use case
+    def get_download_url(
+        self, blob: Blob, validity: timedelta = timedelta(days=1)
+    ) -> str:
+        """Generate a signed url for a file.
+
+        Args:
+            blob: Reference to the file.
+            validity: How long the url will be valid.
+
+        Returns:
+            The signed url.
+        """
+        return blob.generate_signed_url(validity)
 
     def get_file_metadata(self, blob: Blob) -> dict[str, Any]:
         blob.reload()
@@ -49,7 +58,5 @@ class FirebaseStorageManager:
             "size": blob.size,
             "content_type": blob.content_type,
             "path": blob.path,
-            "download_url": blob.generate_signed_url(
-                timedelta(days=1)
-            ),  # Time can be changed, depending on the use case
+            "download_url": blob.generate_signed_url(timedelta(days=1)),
         }
