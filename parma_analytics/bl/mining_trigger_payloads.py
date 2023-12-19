@@ -1,3 +1,8 @@
+"""Dummy payloads for testing the mining trigger.
+
+TODO: remove this asap!
+"""
+
 GITHUB_PAYLOAD = {
     "companies": {
         "1": {"name": ["Forto"]},

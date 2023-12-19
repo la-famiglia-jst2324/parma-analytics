@@ -1,3 +1,5 @@
+"""FastAPI routes for establishing a trust relationship with a new data source."""
+
 import json
 from ast import literal_eval
 from http import HTTPStatus
@@ -25,6 +27,20 @@ def perform_handshake(
     invocation_endpoint: str,
     data_source_id: int,
 ) -> ApiDataSourceHandshakeOut:
+    """Establishes a trust relationship with a new data source.
+
+    The handshake validates the liveness of the data source and verifies that
+    the authenticated frontend user added the necessary information required
+    for sourcing module runs.
+    Furthermore, the normalization schema exchanged and stored in the database.
+
+    Args:
+        invocation_endpoint: The endpoint of the data source.
+        data_source_id: The ID of the data source.
+
+    Returns:
+        The result of the handshake containing frequency information.
+    """
     if not invocation_endpoint.startswith(
         "http://"
     ) and not invocation_endpoint.startswith("https://"):

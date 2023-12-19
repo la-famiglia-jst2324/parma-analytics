@@ -1,27 +1,26 @@
-from sqlalchemy import Column, DateTime, Integer, String, func
+"""Database crud operations for measurement_comment_value table."""
+
+from typing import Any
+
 from sqlalchemy.orm import Session
 
-from parma_analytics.db.prod.engine import Base
+from parma_analytics.db.prod.models.measurement_comment_value import (
+    MeasurementCommentValue,
+)
 
 
-# Define the MeasurementCommentValue model
-class MeasurementCommentValue(Base):
-    __tablename__ = "measurement_comment_value"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    company_measurement_id = Column("company_measurement_id", Integer)
-    value = Column(String)
-    timestamp = Column(DateTime)
-    created_at = Column("created_at", DateTime, default=func.now())
-    modified_at = Column(
-        "modified_at", DateTime, default=func.now(), onupdate=func.now()
-    )
-
-
-# Define the CRUD operations
 def create_measurement_comment_value_query(
-    db: Session, measurement_comment_value_data
+    db: Session, measurement_comment_value_data: dict[str, Any]
 ) -> int:
+    """Create a new measurement_comment_value in the database.
+
+    Args:
+        db: Database session.
+        measurement_comment_value_data: values to be inserted in the database.
+
+    Returns:
+        The id of the newly created measurement_comment_value.
+    """
     measurement_comment_value = MeasurementCommentValue(
         **measurement_comment_value_data
     )
@@ -32,8 +31,17 @@ def create_measurement_comment_value_query(
 
 
 def get_measurement_comment_value_query(
-    db: Session, measurement_comment_value_id
+    db: Session, measurement_comment_value_id: int
 ) -> MeasurementCommentValue:
+    """Get a measurement_comment_value from the database.
+
+    Args:
+        db: Database session.
+        measurement_comment_value_id: id of the value to be retrieved.
+
+    Returns:
+        The measurement_comment_value with the given id.
+    """
     return (
         db.query(MeasurementCommentValue)
         .filter(MeasurementCommentValue.id == measurement_comment_value_id)
@@ -41,14 +49,32 @@ def get_measurement_comment_value_query(
     )
 
 
-def list_measurement_comment_values_query(db: Session) -> list:
+def list_measurement_comment_values_query(db: Session) -> list[MeasurementCommentValue]:
+    """List all measurement_comment_values from the database.
+
+    Args:
+        db: Database session.
+
+    Returns:
+        A list of all measurement_comment_values.
+    """
     measurement_comment_values = db.query(MeasurementCommentValue).all()
     return measurement_comment_values
 
 
 def update_measurement_comment_value_query(
-    db: Session, id: int, measurement_comment_value_data
+    db: Session, id: int, measurement_comment_value_data: dict[str, Any]
 ) -> MeasurementCommentValue:
+    """Update a measurement_comment_value in the database.
+
+    Args:
+        db: Database session.
+        id: id of the measurement_comment_value to be updated.
+        measurement_comment_value_data: values to be updated in the database.
+
+    Returns:
+        The updated measurement_comment_value.
+    """
     measurement_comment_value = (
         db.query(MeasurementCommentValue)
         .filter(MeasurementCommentValue.id == id)
@@ -61,8 +87,14 @@ def update_measurement_comment_value_query(
 
 
 def delete_measurement_comment_value_query(
-    db: Session, measurement_comment_value_id
+    db: Session, measurement_comment_value_id: int
 ) -> None:
+    """Delete a measurement_comment_value from the database.
+
+    Args:
+        db: Database session.
+        measurement_comment_value_id: id of the measurement_comment_value to be deleted.
+    """
     measurement_comment_value = (
         db.query(MeasurementCommentValue)
         .filter(MeasurementCommentValue.id == measurement_comment_value_id)

@@ -1,3 +1,5 @@
+"""FastAPI routes for managing source measurements from within sourcing modules."""
+
 from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from starlette import status
@@ -31,6 +33,14 @@ router = APIRouter()
 async def create_source_measurement(
     source_measurement: ApiSourceMeasurementCreateIn,
 ) -> ApiSourceMeasurementCreateOut:
+    """Create a new source measurement.
+
+    Args:
+        source_measurement: The source measurement to create.
+
+    Returns:
+        The created source measurement.
+    """
     with get_session() as db:
         created_source_measurement_id = create_source_measurement_bll(
             db, source_measurement
@@ -53,6 +63,15 @@ def read_all_source_measurements(
     page: int = 1,
     per_page: int = 10,
 ) -> ApiSourceMeasurementListOut:
+    """List all source measurements with pagination.
+
+    Args:
+        page: The page number.
+        per_page: The number of source measurements to return per page.
+
+    Returns:
+        A list of source measurements.
+    """
     with get_session() as db:
         source_measurements = list_source_measurements_bll(db, page, per_page)
         measurements_out = [
@@ -72,6 +91,15 @@ def read_all_source_measurements(
 async def read_source_measurement(
     source_measurement_id: int, db: Session = Depends(get_session)
 ) -> ApiSourceMeasurementOut:
+    """Get details of a specific source measurement.
+
+    Args:
+        source_measurement_id: The id of the source measurement to retrieve.
+        db: The database session.
+
+    Returns:
+        The source measurement.
+    """
     with get_session() as db:
         retrieved_source_measurement = read_source_measurement_bll(
             db, source_measurement_id
@@ -88,6 +116,15 @@ async def update_source_measurement(
     source_measurement_id: int,
     source_measurement: ApiSourceMeasurementUpdateIn,
 ) -> ApiSourceMeasurementUpdateOut:
+    """Get details of a specific source measurement.
+
+    Args:
+        source_measurement_id: The id of the source measurement to update.
+        source_measurement: The updated source measurement.
+
+    Returns:
+        The updated source measurement.
+    """
     with get_session() as db:
         updated_source_measurement = update_source_measurement_bll(
             db, source_measurement_id, source_measurement
@@ -103,6 +140,14 @@ async def update_source_measurement(
 async def delete_source_measurement(
     source_measurement_id: int,
 ) -> ApiSourceMeasurementDeleteOut:
+    """Delete a specific source measurement.
+
+    Args:
+        source_measurement_id: The id of the source measurement to delete.
+
+    Returns:
+        A message confirming the deletion.
+    """
     with get_session() as db:
         delete_source_measurement_bll(db, source_measurement_id)
         return ApiSourceMeasurementDeleteOut(

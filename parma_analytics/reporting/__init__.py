@@ -1,0 +1,1 @@
+"""Parma analytics reporting module."""

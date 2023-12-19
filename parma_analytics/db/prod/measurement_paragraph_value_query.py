@@ -1,27 +1,26 @@
-from sqlalchemy import Column, DateTime, Integer, String, func
+"""Database crud operations for measurement_paragraph_value table."""
+
+from typing import Any
+
 from sqlalchemy.orm import Session
 
-from parma_analytics.db.prod.engine import Base
+from parma_analytics.db.prod.models.measurement_paragraph_value import (
+    MeasurementParagraphValue,
+)
 
 
-# Define the MeasurementParagraphValue model
-class MeasurementParagraphValue(Base):
-    __tablename__ = "measurement_paragraph_value"
-
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    company_measurement_id = Column("company_measurement_id", Integer)
-    value = Column(String)
-    timestamp = Column(DateTime)
-    created_at = Column("created_at", DateTime, default=func.now())
-    modified_at = Column(
-        "modified_at", DateTime, default=func.now(), onupdate=func.now()
-    )
-
-
-# Define the CRUD operations
 def create_measurement_paragraph_value_query(
-    db: Session, measurement_paragraph_value_data
+    db: Session, measurement_paragraph_value_data: dict[str, Any]
 ) -> int:
+    """Create a new measurement_paragraph_value in the database.
+
+    Args:
+        db: Database session.
+        measurement_paragraph_value_data: values to be inserted in the database.
+
+    Returns:
+        The id of the newly created measurement_paragraph_value.
+    """
     measurement_paragraph_value = MeasurementParagraphValue(
         **measurement_paragraph_value_data
     )
@@ -32,8 +31,17 @@ def create_measurement_paragraph_value_query(
 
 
 def get_measurement_paragraph_value_query(
-    db: Session, measurement_paragraph_value_id
+    db: Session, measurement_paragraph_value_id: int
 ) -> MeasurementParagraphValue:
+    """Get a measurement_paragraph_value from the database.
+
+    Args:
+        db: Database session.
+        measurement_paragraph_value_id: id of the value to be retrieved.
+
+    Returns:
+        The measurement_paragraph_value with the given id.
+    """
     return (
         db.query(MeasurementParagraphValue)
         .filter(MeasurementParagraphValue.id == measurement_paragraph_value_id)
@@ -42,13 +50,31 @@ def get_measurement_paragraph_value_query(
 
 
 def list_measurement_paragraph_values_query(db: Session) -> list:
+    """List all measurement_paragraph_values from the database.
+
+    Args:
+        db: Database session.
+
+    Returns:
+        A list of all measurement_paragraph_values.
+    """
     measurement_paragraph_values = db.query(MeasurementParagraphValue).all()
     return measurement_paragraph_values
 
 
 def update_measurement_paragraph_value_query(
-    db: Session, id: int, measurement_paragraph_value_data
+    db: Session, id: int, measurement_paragraph_value_data: dict[str, Any]
 ) -> MeasurementParagraphValue:
+    """Update a measurement_paragraph_value in the database.
+
+    Args:
+        db: Database session.
+        id: id of the measurement_paragraph_value to be updated.
+        measurement_paragraph_value_data: values to be updated in the database.
+
+    Returns:
+        The updated measurement_paragraph_value.
+    """
     measurement_paragraph_value = (
         db.query(MeasurementParagraphValue)
         .filter(MeasurementParagraphValue.id == id)
@@ -61,8 +87,17 @@ def update_measurement_paragraph_value_query(
 
 
 def delete_measurement_paragraph_value_query(
-    db: Session, measurement_paragraph_value_id
+    db: Session, measurement_paragraph_value_id: int
 ) -> None:
+    """Delete a measurement_paragraph_value from the database.
+
+    Args:
+        db: Database session.
+        measurement_paragraph_value_id: id of the value to be deleted.
+
+    Returns:
+        None
+    """
     measurement_paragraph_value = (
         db.query(MeasurementParagraphValue)
         .filter(MeasurementParagraphValue.id == measurement_paragraph_value_id)

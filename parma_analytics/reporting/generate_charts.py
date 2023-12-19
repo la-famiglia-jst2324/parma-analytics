@@ -1,17 +1,34 @@
+"""Contains functions for generating charts from measurement data."""
+
 import base64
 from io import BytesIO
+from typing import Any
 
 import matplotlib.pyplot as plt
 
 
 def generate_chart(
-    measurement_data, company_name, measurement_name, company_measurement_id
-):
+    measurement_data: Any,  # TODO: what is this?
+    company_name: str,
+    measurement_name: str,
+    company_measurement_id: int,
+) -> str:
+    """Generate a chart from measurement data.
+
+    Args:
+        measurement_data: measurement data.
+        company_name: name of the company.
+        measurement_name: name of the measurement.
+        company_measurement_id: id of the measurement.
+
+    Returns:
+        A base64 encoded png image.
+    """
     value = measurement_data.filter(
         measurement_data["company_measurement_id"] == company_measurement_id
     )["value"].to_list()
     if not value:
-        return False
+        raise ValueError("No data found for the given company measurement id.")
     plt.figure(figsize=(10, 6))
     plt.plot(value, marker="o", linestyle="-", color="b")
     plt.title(f"Change Over Time for Company {company_name}")
