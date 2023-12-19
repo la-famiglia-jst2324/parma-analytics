@@ -1,3 +1,4 @@
+"""Module for managing notification service."""
 # ruff: noqa: PLR0913
 
 from typing import Literal

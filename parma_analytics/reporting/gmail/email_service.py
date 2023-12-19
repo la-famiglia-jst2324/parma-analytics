@@ -1,3 +1,4 @@
+"""A service that handles the sending of emails."""
 import base64
 import os
 

@@ -42,7 +42,16 @@ exclude = '''
 line-length = 88
 select = ["F", "E", "W", "I", "N", "UP", "D", "PL"]
 target-version = "py311"
-ignore = ["D100", "D101", "D102", "D103", "D104", "D107", "D205"]  # TODO: remove after midterm
+ignore = [
+  "D107", # disable missing docstring errors for __init__ files
+]
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+[tool.ruff.per-file-ignores]
+# "*" = ["D212"] # Multi-line docstrings don't have to start at the first line
+"tests/*" = ["D100", "D103", "D104"] # disable missing docstring errors for tests
 
 [tool.ruff.lint.isort]
 case-sensitive = true
@@ -53,9 +62,6 @@ python_version = '3.11'
 ignore_missing_imports = true
 no_implicit_optional = true
 check_untyped_defs = true
-
-[tool.ruff.pydocstyle]
-convention = "google"
 
 [tool.docformatter]
 black = true

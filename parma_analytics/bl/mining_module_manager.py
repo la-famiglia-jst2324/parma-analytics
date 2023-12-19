@@ -1,3 +1,5 @@
+"""Manage the interaction with the mining modules."""
+
 import asyncio
 import json
 import logging
@@ -20,6 +22,8 @@ logger = logging.getLogger(__name__)
 
 
 class MiningModuleManager:
+    """Manage the interaction with the mining modules."""
+
     # --------------------------- Context manager functions -------------------------- #
 
     def __init__(self):

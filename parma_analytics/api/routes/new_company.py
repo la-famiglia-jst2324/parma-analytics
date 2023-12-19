@@ -1,3 +1,5 @@
+"""FastAPI routes for registering a new company from within a sourcing module."""
+
 from fastapi import APIRouter
 from starlette import status
 
@@ -18,9 +20,16 @@ router = APIRouter()
     ),
 )
 def register_new_company(company: ApiNewCompanyCreateIn) -> ApiNewCompanyCreateOut:
-    # Validate or process the company data as needed.
+    """Register a new company.
 
-    # Forward the company data to the Data Retrieval Controller backend.
+    Args:
+        company: The new company to register.
+
+    Returns:
+        Acknowledgement message containing the company id and the company name.
+    """
+    # TODO: Validate or process the company data as needed.
+    # TODO: Forward the company data to the Data Retrieval Controller backend.
 
     return ApiNewCompanyCreateOut(
         id=company.id,

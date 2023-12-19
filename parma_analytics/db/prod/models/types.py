@@ -1,3 +1,5 @@
+"""Types and models for our core postgres database."""
+
 from typing import Literal, get_args
 
 from sqlalchemy import (
@@ -41,6 +43,8 @@ def literal_to_enum(literal) -> Enum:  # noqa
 
 
 class DataSource(Base):
+    """ORM model for the data_source table."""
+
     __tablename__ = "data_source"
 
     id = Column(Integer, primary_key=True)
@@ -64,6 +68,8 @@ class DataSource(Base):
 
 
 class ScheduledTask(Base):
+    """ORM model for the scheduled_task table."""
+
     __tablename__ = "scheduled_task"
 
     task_id = Column(Integer, primary_key=True)
@@ -82,6 +88,8 @@ class ScheduledTask(Base):
 
 
 class Company(Base):
+    """ORM model for the company table."""
+
     __tablename__ = "company"
 
     id = Column(Integer, primary_key=True)
@@ -94,6 +102,8 @@ class Company(Base):
 
 
 class CompanyDataSource(Base):
+    """ORM model for the company_data_source table."""
+
     __tablename__ = "company_data_source"
 
     data_source_id = Column(Integer, ForeignKey("data_source.id"), primary_key=True)

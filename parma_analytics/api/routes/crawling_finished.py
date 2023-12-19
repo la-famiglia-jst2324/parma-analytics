@@ -1,3 +1,5 @@
+"""FastAPI routes for receiving notifications when crawling job finishes."""
+
 from fastapi import APIRouter
 from starlette import status
 
@@ -21,9 +23,14 @@ router = APIRouter()
 def crawling_finished(
     done_message: ApiCrawlingFinishedCreateIn,
 ) -> ApiCrawlingFinishedCreateOut:
-    ## Later specify the trigger flow here
-    print(done_message.incoming_message)
-    # Return a JSON response
+    """Endpoint to receive notifications when crawling job has completed.
+
+    Args:
+        done_message: The status indicating the terminal state of the crawling job.
+
+    Returns:
+        A simple receival confirmation message.
+    """
     return ApiCrawlingFinishedCreateOut(
         incoming_message=done_message.incoming_message,
         return_message="Notified about crawling finished",

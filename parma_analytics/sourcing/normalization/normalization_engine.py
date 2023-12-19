@@ -1,3 +1,5 @@
+"""Normalization engine for normalizing raw data."""
+
 from datetime import datetime
 from typing import Any
 
