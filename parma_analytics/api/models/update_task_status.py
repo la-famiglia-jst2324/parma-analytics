@@ -12,10 +12,10 @@ class _ApiUpdateTaskStatusBase(BaseModel):
 
     task_id: int
     status: str
-    result_summary: str | None
+    result_summary: str | None = None
 
 
-class _ApiUpdateTaskStatusOutBase(_ApiUpdateTaskStatusBase):
+class _ApiUpdateTaskStatusOutBase(BaseModel):
     """Output base model for the update task's status endpoint."""
 
     updated: bool
