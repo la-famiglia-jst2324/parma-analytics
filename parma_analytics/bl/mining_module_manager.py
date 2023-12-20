@@ -4,11 +4,11 @@ import asyncio
 import json
 import logging
 import urllib.parse
+from contextlib import contextmanager
 from datetime import datetime
 from typing import Any, cast
 
 import httpx
-from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
 from parma_analytics.bl.mining_trigger_payloads import GITHUB_PAYLOAD, REDDIT_PAYLOAD
@@ -41,70 +41,33 @@ class MiningModuleManager:
         self.session.close()
 
     # ------------------------------- Public functions ------------------------------- #
-
+    @staticmethod
     def set_task_status_success_with_id(
-        self, task_id: int, result_summary: str | None
+        task_id: int, result_summary: str | None
     ) -> bool:
         """Set the status of the task with the given task_id to success."""
-        try:
-            self.session.begin_nested()
-            task = (
-                self.session.query(ScheduledTask)
-                .filter(ScheduledTask.task_id == task_id)
-                .with_for_update()
-                .first()
-            )
-            if not task:
-                logger.error(f"Task with id {task_id} not found.")
-                return False
-
-            task.status = "SUCCESS"
-            task.ended_at = datetime.now()
-            task.result_summary = result_summary or ""
-            self.session.commit()
-            logger.info(f"Task {task.task_id} successfully completed")
-            return True
-        except Exception as e:
-            logger.error(f"Error setting task {task_id} status to success: {e}")
-            self.session.rollback()
-
-        return False
-
-    def set_task_status_success_with_name(
-        self, source_name: str, result_summary: str | None
-    ) -> bool:
-        """Set the status of the task with the given source_name to success."""
-        try:
-            self.session.begin_nested()
-            task = (
-                self.session.query(ScheduledTask)
-                .filter(
-                    and_(
-                        ScheduledTask.status == "PROCESSING",
-                        ScheduledTask.data_source.has(
-                            DataSource.source_name == source_name
-                        ),
-                    )
+        with MiningModuleManager._manage_session() as session:
+            try:
+                session.begin_nested()
+                task = (
+                    session.query(ScheduledTask)
+                    .filter(ScheduledTask.task_id == task_id)
+                    .with_for_update()
+                    .first()
                 )
-                .with_for_update()
-                .first()
-            )
-            if not task:
-                logger.error(f"Task with name {source_name} not found.")
-                return False
+                if not task:
+                    logger.error(f"Task with id {task_id} not found.")
+                    return False
 
-            task.status = "SUCCESS"
-            task.ended_at = datetime.now()
-            task.result_summary = result_summary or ""
-            self.session.commit()
-            logger.info(f"Task {task.task_id} successfully completed")
-            return True
-        except Exception as e:
-            logger.error(
-                f"Error setting task status to success "
-                f"with source name {source_name}: {e}"
-            )
-            self.session.rollback()
+                task.status = "SUCCESS"
+                task.ended_at = datetime.now()
+                task.result_summary = result_summary or ""
+                session.commit()
+                logger.info(f"Task {task.task_id} successfully completed")
+                return True
+            except Exception as e:
+                logger.error(f"Error setting task {task_id} status to success: {e}")
+                session.rollback()
 
         return False
 
@@ -174,6 +137,23 @@ class MiningModuleManager:
         loop.close()
 
     # ------------------------------ Internal functions ------------------------------ #
+
+    @staticmethod
+    @contextmanager
+    def _manage_session():
+        """Context manager for database session.
+
+        This context manager is used for the static methods of this class.
+        """
+        session = Session(get_engine(), autocommit=False, autoflush=False)
+        try:
+            yield session
+            session.commit()
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
 
     def _schedule_task(self, task: ScheduledTask) -> ScheduledTask | None:
         """Schedule the given task before triggering module."""
