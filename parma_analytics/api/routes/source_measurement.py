@@ -4,6 +4,7 @@ from fastapi import APIRouter, Depends
 from sqlalchemy.orm import Session
 from starlette import status
 
+from parma_analytics.api.dependencies.sourcing_auth import authorize_sourcing_request
 from parma_analytics.api.models.source_measurement import (
     ApiSourceMeasurementCreateIn,
     ApiSourceMeasurementCreateOut,
@@ -32,11 +33,13 @@ router = APIRouter()
 )
 async def create_source_measurement(
     source_measurement: ApiSourceMeasurementCreateIn,
+    source_id: int = Depends(authorize_sourcing_request),
 ) -> ApiSourceMeasurementCreateOut:
     """Create a new source measurement.
 
     Args:
         source_measurement: The source measurement to create.
+        source_id: The id of the data source.
 
     Returns:
         The created source measurement.

@@ -196,6 +196,7 @@ class MiningModuleManager:
         try:
             logger.debug(f"Sending request to {invocation_endpoint}")
             async with httpx.AsyncClient(verify=False) as client:
+                # TODO: Add JWT token to headers
                 headers = {"Content-Type": "application/json"}
                 response = None
                 if json_payload is None:

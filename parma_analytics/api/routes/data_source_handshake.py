@@ -46,6 +46,7 @@ def perform_handshake(
     ) and not invocation_endpoint.startswith("https://"):
         invocation_endpoint = "https://" + invocation_endpoint
 
+    # TODO: Add JWT token to the header
     try:
         response = requests.get(
             f"{invocation_endpoint}/initialize", params={"source_id": data_source_id}

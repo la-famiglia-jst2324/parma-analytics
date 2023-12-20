@@ -1,7 +1,8 @@
 """FastAPI routes for updating the task's status."""
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, Depends, status
 
+from parma_analytics.api.dependencies.sourcing_auth import authorize_sourcing_request
 from parma_analytics.api.models.update_task_status import (
     ApiUpdateTaskStatusCreateIn,
     ApiUpdateTaskStatusCreateOut,
@@ -18,11 +19,13 @@ router = APIRouter()
 )
 def update_task_status(
     task_information: ApiUpdateTaskStatusCreateIn,
+    source_id: int = Depends(authorize_sourcing_request),
 ) -> ApiUpdateTaskStatusCreateOut:
     """Update task's status and result summary (if any).
 
     Args:
         task_information: The task information to update.
+        source_id: The id of the data source.
 
     Returns:
         A simple confirmation message.

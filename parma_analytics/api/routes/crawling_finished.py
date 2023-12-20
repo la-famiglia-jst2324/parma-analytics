@@ -1,8 +1,9 @@
 """FastAPI routes for receiving notifications when crawling job finishes."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from starlette import status
 
+from parma_analytics.api.dependencies.sourcing_auth import authorize_sourcing_request
 from parma_analytics.api.models.crawling_finished import (
     ApiCrawlingFinishedCreateIn,
     ApiCrawlingFinishedCreateOut,
@@ -22,11 +23,13 @@ router = APIRouter()
 )
 def crawling_finished(
     done_message: ApiCrawlingFinishedCreateIn,
+    source_id: int = Depends(authorize_sourcing_request),
 ) -> ApiCrawlingFinishedCreateOut:
     """Endpoint to receive notifications when crawling job has completed.
 
     Args:
         done_message: The status indicating the terminal state of the crawling job.
+        source_id: The id of the module sending the notification.
 
     Returns:
         A simple receival confirmation message.
