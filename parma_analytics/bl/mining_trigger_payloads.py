@@ -1,19 +1,24 @@
+"""Dummy payloads for testing the mining trigger.
+
+TODO: remove this asap!
+"""
+
 GITHUB_PAYLOAD = {
     "companies": {
-        "9": {"name": ["langfuse"]},
-        "7": {"name": ["personio"]},
-        "5": {"name": ["freight-hub"]},
-        "8": {"name": ["luminovo"]},
-        "10": {"name": ["goes-funky"]},
+        "1": {"name": ["Forto"]},
+        "2": {"name": ["Personio"]},
+        "3": {"name": ["Luminovo"]},
+        "4": {"name": ["Langfuse"]},
+        "5": {"name": ["Y42"]},
     }
 }
 
 REDDIT_PAYLOAD = {
     "companies": {
-        "5": {"name": ["Forto"], "domain": ["forto.com"]},
-        "7": {"name": ["Personio"], "domain": ["personio.com"]},
-        "8": {"name": ["Luminovo"], "domain": ["luminovo.ai"]},
-        "9": {"name": ["Langfuse"], "domain": ["langfuse.com"]},
-        "10": {"name": ["Y42"], "domain": ["y42.com"]},
+        "1": {"name": ["Forto"], "domain": ["forto.com"]},
+        "2": {"name": ["Personio"], "domain": ["personio.com"]},
+        "3": {"name": ["Luminovo"], "domain": ["luminovo.ai"]},
+        "4": {"name": ["Langfuse"], "domain": ["langfuse.com"]},
+        "5": {"name": ["Y42"], "domain": ["y42.com"]},
     }
 }

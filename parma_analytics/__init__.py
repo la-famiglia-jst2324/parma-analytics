@@ -1,3 +1,5 @@
+"""Parma analytics package root."""
+
 import importlib.metadata
 
 try:

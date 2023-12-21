@@ -2,16 +2,15 @@
 
 SELECT
     csm.company_measurement_id,
-    c.id AS company_id,
+    c.id          AS company_id,
     c.description AS company_description,
-    c.name AS company_name,
-    ds.id AS source_module_id,
+    c.name        AS company_name,
+    ds.id         AS source_module_id,
     ds.source_name,
-    sm.id AS measurement_id,
+    sm.id         AS measurement_id,
     sm.measurement_name,
-    sm.type AS measurement_type
-FROM
-    company_source_measurement AS csm
+    sm.type       AS measurement_type
+FROM company_source_measurement AS csm
 INNER JOIN
     company AS c ON csm.company_id = c.id
 INNER JOIN

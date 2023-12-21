@@ -1,13 +1,17 @@
+"""Manage the interaction with the mining modules."""
+
 import asyncio
+import json
 import logging
 import urllib.parse
+from contextlib import contextmanager
 from datetime import datetime
 from typing import Any, cast
 
 import httpx
-from sqlalchemy import and_
 from sqlalchemy.orm import Session
 
+from parma_analytics.bl.mining_trigger_payloads import GITHUB_PAYLOAD, REDDIT_PAYLOAD
 from parma_analytics.db.prod.engine import get_engine
 from parma_analytics.db.prod.models.types import (
     DataSource,
@@ -18,6 +22,8 @@ logger = logging.getLogger(__name__)
 
 
 class MiningModuleManager:
+    """Manage the interaction with the mining modules."""
+
     # --------------------------- Context manager functions -------------------------- #
 
     def __init__(self):
@@ -35,70 +41,33 @@ class MiningModuleManager:
         self.session.close()
 
     # ------------------------------- Public functions ------------------------------- #
-
+    @staticmethod
     def set_task_status_success_with_id(
-        self, task_id: int, result_summary: str | None
+        task_id: int, result_summary: str | None
     ) -> bool:
         """Set the status of the task with the given task_id to success."""
-        try:
-            self.session.begin_nested()
-            task = (
-                self.session.query(ScheduledTask)
-                .filter(ScheduledTask.task_id == task_id)
-                .with_for_update()
-                .first()
-            )
-            if not task:
-                logger.error(f"Task with id {task_id} not found.")
-                return False
-
-            task.status = "SUCCESS"
-            task.ended_at = datetime.now()
-            task.result_summary = result_summary or ""
-            self.session.commit()
-            logger.info(f"Task {task.task_id} successfully completed")
-            return True
-        except Exception as e:
-            logger.error(f"Error setting task {task_id} status to success: {e}")
-            self.session.rollback()
-
-        return False
-
-    def set_task_status_success_with_name(
-        self, source_name: str, result_summary: str | None
-    ) -> bool:
-        """Set the status of the task with the given source_name to success."""
-        try:
-            self.session.begin_nested()
-            task = (
-                self.session.query(ScheduledTask)
-                .filter(
-                    and_(
-                        ScheduledTask.status == "PROCESSING",
-                        ScheduledTask.data_source.has(
-                            DataSource.source_name == source_name
-                        ),
-                    )
+        with MiningModuleManager._manage_session() as session:
+            try:
+                session.begin_nested()
+                task = (
+                    session.query(ScheduledTask)
+                    .filter(ScheduledTask.task_id == task_id)
+                    .with_for_update()
+                    .first()
                 )
-                .with_for_update()
-                .first()
-            )
-            if not task:
-                logger.error(f"Task with name {source_name} not found.")
-                return False
+                if not task:
+                    logger.error(f"Task with id {task_id} not found.")
+                    return False
 
-            task.status = "SUCCESS"
-            task.ended_at = datetime.now()
-            task.result_summary = result_summary or ""
-            self.session.commit()
-            logger.info(f"Task {task.task_id} successfully completed")
-            return True
-        except Exception as e:
-            logger.error(
-                f"Error setting task status to success "
-                f"with source name {source_name}: {e}"
-            )
-            self.session.rollback()
+                task.status = "SUCCESS"
+                task.ended_at = datetime.now()
+                task.result_summary = result_summary or ""
+                session.commit()
+                logger.info(f"Task {task.task_id} successfully completed")
+                return True
+            except Exception as e:
+                logger.error(f"Error setting task {task_id} status to success: {e}")
+                session.rollback()
 
         return False
 
@@ -169,6 +138,23 @@ class MiningModuleManager:
 
     # ------------------------------ Internal functions ------------------------------ #
 
+    @staticmethod
+    @contextmanager
+    def _manage_session():
+        """Context manager for database session.
+
+        This context manager is used for the static methods of this class.
+        """
+        session = Session(get_engine(), autocommit=False, autoflush=False)
+        try:
+            yield session
+            session.commit()
+        except Exception:
+            session.rollback()
+            raise
+        finally:
+            session.close()
+
     def _schedule_task(self, task: ScheduledTask) -> ScheduledTask | None:
         """Schedule the given task before triggering module."""
         try:
@@ -188,17 +174,15 @@ class MiningModuleManager:
     def _construct_payload(self, data_source: DataSource) -> str | None:
         """Construct the payload for the given data source."""
         json_payload = None
-        # TODO: do we really need to handle companies non-uniformly? Isn't it the whole
-        # point of this repo to have a uniform interface?
         if data_source.source_name == "affinity":
             # For the Affinity module, we only have  GET /companies with no body
             pass
         elif data_source.source_name == "github":
             logger.warn("Github payload not implemented yet.")
-            # json_payload = json.dumps(GITHUB_PAYLOAD)
+            json_payload = json.dumps(GITHUB_PAYLOAD)
         elif data_source.source_name == "reddit":
             logger.warn("Reddit payload not implemented yet.")
-            # json_payload = json.dumps(REDDIT_PAYLOAD)
+            json_payload = json.dumps(REDDIT_PAYLOAD)
         else:
             logger.warn("Other payload not implemented yet.")
             pass

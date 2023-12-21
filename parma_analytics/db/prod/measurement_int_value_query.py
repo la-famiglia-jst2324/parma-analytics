@@ -1,25 +1,23 @@
-from sqlalchemy import Column, DateTime, Integer, func
+"""Database crud operations for measurement_int_value table.""."""
+from typing import Any
+
 from sqlalchemy.orm import Session
 
-from parma_analytics.db.prod.engine import Base
+from parma_analytics.db.prod.models.measurement_int_value import MeasurementIntValue
 
 
-# Define the MeasurementIntValue model
-class MeasurementIntValue(Base):
-    __tablename__ = "measurement_int_value"
+def create_measurement_int_value_query(
+    db: Session, measurement_int_value_data: dict[str, Any]
+) -> int:
+    """Create a new measurement_int_value in the database.
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    company_measurement_id = Column("company_measurement_id", Integer)
-    value = Column(Integer)
-    timestamp = Column(DateTime)
-    created_at = Column("created_at", DateTime, default=func.now())
-    modified_at = Column(
-        "modified_at", DateTime, default=func.now(), onupdate=func.now()
-    )
+    Args:
+        db: Database session.
+        measurement_int_value_data: values to be inserted in the database.
 
-
-# Define the CRUD operations
-def create_measurement_int_value_query(db: Session, measurement_int_value_data) -> int:
+    Returns:
+        The id of the newly created measurement_int_value.
+    """
     measurement_int_value = MeasurementIntValue(**measurement_int_value_data)
     db.add(measurement_int_value)
     db.commit()
@@ -28,8 +26,17 @@ def create_measurement_int_value_query(db: Session, measurement_int_value_data) 
 
 
 def get_measurement_int_value_query(
-    db: Session, measurement_int_value_id
+    db: Session, measurement_int_value_id: int
 ) -> MeasurementIntValue:
+    """Get a measurement_int_value from the database.
+
+    Args:
+        db: Database session.
+        measurement_int_value_id: id of the measurement_int_value to be retrieved.
+
+    Returns:
+        The measurement_int_value with the given id.
+    """
     return (
         db.query(MeasurementIntValue)
         .filter(MeasurementIntValue.id == measurement_int_value_id)
@@ -38,13 +45,31 @@ def get_measurement_int_value_query(
 
 
 def list_measurement_int_values_query(db: Session) -> list:
+    """List all measurement_int_values from the database.
+
+    Args:
+        db: Database session.
+
+    Returns:
+        A list of all measurement_int_values.
+    """
     measurement_int_values = db.query(MeasurementIntValue).all()
     return measurement_int_values
 
 
 def update_measurement_int_value_query(
-    db: Session, id: int, measurement_int_value_data
+    db: Session, id: int, measurement_int_value_data: dict[str, Any]
 ) -> MeasurementIntValue:
+    """Update a measurement_int_value in the database.
+
+    Args:
+        db: Database session.
+        id: id of the measurement_int_value to be updated.
+        measurement_int_value_data: values to be updated in the database.
+
+    Returns:
+        The updated measurement_int_value.
+    """
     measurement_int_value = (
         db.query(MeasurementIntValue).filter(MeasurementIntValue.id == id).first()
     )
@@ -54,7 +79,18 @@ def update_measurement_int_value_query(
     return measurement_int_value
 
 
-def delete_measurement_int_value_query(db: Session, measurement_int_value_id) -> None:
+def delete_measurement_int_value_query(
+    db: Session, measurement_int_value_id: int
+) -> None:
+    """Delete a measurement_int_value from the database.
+
+    Args:
+        db: Database session.
+        measurement_int_value_id: id of the measurement_int_value to be deleted.
+
+    Returns:
+        The updated measurement_int_value.
+    """
     measurement_int_value = (
         db.query(MeasurementIntValue)
         .filter(MeasurementIntValue.id == measurement_int_value_id)

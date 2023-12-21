@@ -7,5 +7,5 @@ setup:
 	gcloud auth configure-docker europe-west1-docker.pkg.dev
 
 build-image:
-	docker build -t europe-west1-docker.pkg.dev/la-famiglia-parma-ai/parma-registry/parma-analytics:staging-$(git rev-parse --short HEAD) ./..
+	docker build -t europe-west1-docker.pkg.dev/la-famiglia-parma-ai/parma-registry/parma-analytics:staging-$(git rev-parse --short HEAD) ./../..
 	docker push europe-west1-docker.pkg.dev/la-famiglia-parma-ai/parma-registry/parma-analytics:staging-$(git rev-parse --short HEAD)

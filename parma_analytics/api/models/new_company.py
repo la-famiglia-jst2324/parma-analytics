@@ -1,3 +1,5 @@
+"""Pydantic REST models for the new_company endpoint."""
+
 from pydantic import BaseModel
 
 # ------------------------------------------------------------------------------------ #

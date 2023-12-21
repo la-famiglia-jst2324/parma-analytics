@@ -1,4 +1,4 @@
-"""Main entrypoint for the API routes in of parma-analytics."""
+"""FastAPI routes for root and dummy endpoints."""
 
 from fastapi import APIRouter
 

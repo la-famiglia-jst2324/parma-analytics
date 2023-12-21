@@ -1,3 +1,5 @@
+"""Pydantic REST models for the sourcing handshake endpoint."""
+
 from pydantic import BaseModel
 
 
