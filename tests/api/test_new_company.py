@@ -1,8 +1,12 @@
+import logging
+
 import pytest
 from fastapi.testclient import TestClient
 from starlette import status
 
 from parma_analytics.api import app
+
+logger = logging.getLogger(__name__)
 
 
 # Fixture to check if the FastAPI app exists
@@ -46,7 +50,7 @@ def test_register_new_company_missing_field(client):
     assert len(response_json) > 0
 
     actual_errors = response.json()["detail"][0]
-    print("Actual Errors in Response:", actual_errors)
+    logger.warning(f"Actual Errors in Response: {actual_errors}")
 
     # Check for the expected error structure
     expected_error = {
