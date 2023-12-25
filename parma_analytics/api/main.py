@@ -1,5 +1,7 @@
 """Main entrypoint for the API routes in of parma-analytics."""
 
+import logging
+
 from fastapi import FastAPI
 
 from parma_analytics.db.prod.engine import get_engine
@@ -14,6 +16,9 @@ from .routes import (
     source_measurement_router,
     update_task_status_router,
 )
+
+logging.basicConfig(level=logging.INFO)
+
 
 app = FastAPI()
 

@@ -1,5 +1,6 @@
 """This module contains the functions for registering measurement values."""
 
+import logging
 from collections.abc import Callable
 from datetime import datetime
 
@@ -27,6 +28,8 @@ from parma_analytics.db.prod.measurement_text_value_query import (
     create_measurement_text_value_query,
 )
 from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
+
+logger = logging.getLogger(__name__)
 
 
 def register_values(normalized_measurement: NormalizedData) -> int:
@@ -83,10 +86,10 @@ def register_values(normalized_measurement: NormalizedData) -> int:
             return created_measurement_id
 
     except SQLAlchemyError as e:
-        print(f"Database error occurred: {e}")
+        logging.error(f"Database error occurred: {e}")
         return -1
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logging.error(f"An error occurred: {e}")
         return -1
 
 
