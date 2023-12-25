@@ -1,7 +1,6 @@
 """FastAPI routes for managing source measurements from within sourcing modules."""
 
-from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
+from fastapi import APIRouter
 from starlette import status
 
 from parma_analytics.api.models.source_measurement import (
@@ -89,7 +88,7 @@ def read_all_source_measurements(
     description="Get details of a specific source measurement.",
 )
 async def read_source_measurement(
-    source_measurement_id: int, db: Session = Depends(get_session)
+    source_measurement_id: int,
 ) -> ApiSourceMeasurementOut:
     """Get details of a specific source measurement.
 
