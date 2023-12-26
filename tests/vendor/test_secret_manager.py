@@ -22,7 +22,7 @@ def entropy_token() -> Iterator[str]:
     yield generate_uuid()
 
 
-def test_encrypt_decrypt(
+def test_store_retrieve(
     secret_client: secretmanager.SecretManagerServiceClient, entropy_token: str
 ):
     secret_id = f"parma-analytics-ci-test-{entropy_token}"
