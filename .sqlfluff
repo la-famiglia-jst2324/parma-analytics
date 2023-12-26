@@ -2,6 +2,7 @@
 dialect = postgres
 exclude_rules = layout.cte_newline,layout.long_lines,aliasing.forbid,structure.subquery,ambiguous.column_count,aliasing.length,structure.column_order
 max_line_length = 88
+templater = placeholder
 
 #--------------------------------------------------------------------------------------#
 #                                     layout config                                    #
@@ -71,3 +72,9 @@ forbid_subquery_in = both
 
 [sqlfluff:rules:capitalisation.types]
 extended_capitalisation_policy = upper
+
+[sqlfluff:templater]
+unwrap_wrapped_queries = True
+
+[sqlfluff:templater:placeholder]
+param_style = colon
