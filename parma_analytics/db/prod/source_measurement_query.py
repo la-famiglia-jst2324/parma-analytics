@@ -95,7 +95,7 @@ def list_source_measurements_query(
 
     result = db.execute(
         read_query_file(QUERIES_DIR / "list_source_measurements.sql"),
-        {"limit": page_size, "offset": (page - 1) * page_size},
+        {"lim": page_size, "offs": (page - 1) * page_size},
     )
     source_measurements = result.fetchall()
     source_measurement_models = [

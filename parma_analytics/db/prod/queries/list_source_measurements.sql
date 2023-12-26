@@ -1,1 +1,1 @@
-SELECT * FROM source_measurement LIMIT: limit OFFSET: offset
+SELECT * FROM source_measurement LIMIT (:lim) OFFSET (:offs)

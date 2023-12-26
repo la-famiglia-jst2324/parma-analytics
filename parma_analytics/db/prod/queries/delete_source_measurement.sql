@@ -1,1 +1,1 @@
-DELETE FROM source_measurement WHERE id =: id
+DELETE FROM source_measurement WHERE id = (:id)
