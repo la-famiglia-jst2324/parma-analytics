@@ -25,6 +25,12 @@ variable "firebase_adminsdk_certificate" {
   sensitive   = true
 }
 
+variable "gcp_secret_manager_certificate" {
+  description = "Certificate for the a gcp secret manager service account"
+  type        = string
+  sensitive   = true
+}
+
 variable "base_domain" {
   description = "Base domain for the project"
   type        = string
