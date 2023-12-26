@@ -11,10 +11,10 @@ def get_client() -> secretmanager.SecretManagerServiceClient:
     return secretmanager.SecretManagerServiceClient(credentials=get_credentials())
 
 
-def encrypt_secret(
+def store_secret(
     client: secretmanager.SecretManagerServiceClient, secret_id: str, secret_value: str
 ) -> None:
-    """Encrypt a secret string and store it in the Secret Manager.
+    """Store a secret string in the Secret Manager.
 
     Creates a new secret version for the given secret ID.
     If the secret does not exist, it is created.
@@ -49,10 +49,10 @@ def encrypt_secret(
     )
 
 
-def decrypt_secret(
+def retrieve_secret(
     client: secretmanager.SecretManagerServiceClient, secret_id: str
 ) -> str:
-    """Decrypt a secret string from the Secret Manager.
+    """Retrieve a secret string from the Secret Manager.
 
     Args:
         client: The Secret Manager client.
