@@ -21,8 +21,8 @@ logger = logging.getLogger(__name__)
 class KeyType(Enum):
     """Enumeration for JWT key types."""
 
-    SHARED = "shared"
-    ANALYTICS = "analytics"
+    SHARED = "SHARED"
+    ANALYTICS = "ANALYTICS"
 
 
 class JWTHandler:
