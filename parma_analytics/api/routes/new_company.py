@@ -31,6 +31,7 @@ def register_new_company(company: ApiNewCompanyCreateIn) -> ApiNewCompanyCreateO
     # TODO: Validate or process the company data as needed.
     # TODO: Forward the company data to the Data Retrieval Controller backend.
     # TODO: Add JWT token to the header when forwarding the request to the sourcing
+    #  (source_id is needed)
 
     return ApiNewCompanyCreateOut(
         id=company.id,
