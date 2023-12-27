@@ -14,6 +14,7 @@ from parma_analytics.db.mining.service import (
     NormalizationSchemaIn,
     store_normalization_schema,
 )
+from parma_analytics.utils.jwt_handler import JWTHandler
 
 router = APIRouter()
 
@@ -46,10 +47,13 @@ def perform_handshake(
     ) and not invocation_endpoint.startswith("https://"):
         invocation_endpoint = "https://" + invocation_endpoint
 
-    # TODO: Add JWT token to the header
+    token: str = JWTHandler.create_jwt(data_source_id)
+    header = {"Authorization": f"Bearer {token}"}
     try:
         response = requests.get(
-            f"{invocation_endpoint}/initialize", params={"source_id": data_source_id}
+            f"{invocation_endpoint}/initialize",
+            params={"source_id": data_source_id},
+            headers=header,
         )
         if response.status_code != HTTPStatus.OK:
             raise HTTPException(
