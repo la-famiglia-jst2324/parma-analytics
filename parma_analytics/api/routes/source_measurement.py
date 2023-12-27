@@ -1,6 +1,6 @@
 """FastAPI routes for managing source measurements from within sourcing modules."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from starlette import status
 
 from parma_analytics.api.dependencies.sourcing_auth import authorize_sourcing_request
