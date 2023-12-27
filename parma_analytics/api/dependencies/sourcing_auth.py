@@ -11,7 +11,7 @@ from fastapi import Depends, HTTPException, Header, status
 from parma_analytics.utils.jwt_handler import JWTHandler, KeyType
 
 
-async def authenticate_sourcing_request(
+def authenticate_sourcing_request(
     authorization: str = Header(...),
 ) -> dict[str, str]:
     """Authenticate the incoming request using the JWT in the Authorization header.
@@ -39,7 +39,7 @@ async def authenticate_sourcing_request(
     return payload
 
 
-async def authorize_sourcing_request(
+def authorize_sourcing_request(
     payload: dict[str, str] = Depends(authenticate_sourcing_request)
 ) -> int:
     """Authorize the request based on the JWT payload obtained from authentication.
