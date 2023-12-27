@@ -28,7 +28,7 @@ class KeyType(Enum):
 class JWTHandler:
     """A handler for creating and verifying JWTs."""
 
-    SHARED_SECRET_KEY: str = str(os.getenv("ANALYTICS_BASE_URL") or "SHARED_SECRET_KEY")
+    SHARED_SECRET_KEY: str = str(os.getenv("SHARED_SECRET_KEY") or "SHARED_SECRET_KEY")
     ANALYTICS_SECRET_KEY: str = str(
         os.getenv("ANALYTICS_SECRET_KEY") or "ANALYTICS_SECRET_KEY"
     )
