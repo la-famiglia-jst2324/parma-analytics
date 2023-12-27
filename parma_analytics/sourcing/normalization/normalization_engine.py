@@ -1,11 +1,14 @@
 """Normalization engine for normalizing raw data."""
 
+import logging
 from datetime import datetime
 from typing import Any
 
 from parma_analytics.bl.register_measurement_values import register_values
 from parma_analytics.db.mining.models import NormalizationSchema, RawData
 from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
+
+logger = logging.getLogger(__name__)
 
 
 def build_lookup_dict(mapping_schema: dict[str, Any]) -> dict[str, dict[str, str]]:
@@ -34,7 +37,7 @@ def build_lookup_dict(mapping_schema: dict[str, Any]) -> dict[str, dict[str, str
                         nested_mappings = mapping.get("NestedMappings", [])
                         add_mappings(nested_mappings, parent_dict)
         except KeyError as e:
-            print(f"Error processing mapping schema: missing key {e}")
+            logger.error(f"Error processing mapping schema: missing key {e}")
 
     add_mappings(mapping_schema.get("Mappings", []), lookup_dict)
     return lookup_dict
@@ -132,7 +135,7 @@ def normalize_data(
     for key, value in data.items():
         mapping_info = lookup_dict.get(key)
         if not mapping_info:
-            print(f"Warning: Key '{key}' not found in lookup dictionary")
+            logger.warning(f"Key '{key}' not found in lookup dictionary")
             continue
 
         data_type = mapping_info["type"]
