@@ -29,7 +29,7 @@ def mock_authorize_sourcing_request(
 
 
 def mock_authenticate_sourcing_request(
-    authorization: str = Header(...),
+    authorization: str = Header(None),
 ) -> dict[str, str]:
     """Mock function to simulate authentication in a test environment.
 
