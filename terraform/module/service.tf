@@ -62,6 +62,11 @@ resource "google_cloud_run_service" "parma_analytics_cloud_run" {
         }
 
         env {
+          name  = "GCP_SECRET_MANAGER_CERTIFICATE"
+          value = var.gcp_secret_manager_certificate
+        }
+
+        env {
           name  = "SENDGRID_API_KEY"
           value = var.sendgrid_api_key
         }

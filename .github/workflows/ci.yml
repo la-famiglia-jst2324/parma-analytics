@@ -66,6 +66,7 @@ jobs:
           POSTGRES_PASSWORD: parma-prod-db
           POSTGRES_DB: parma-prod-db
           FIREBASE_ADMINSDK_CERTIFICATE: ${{ secrets.STAGING_FIREBASE_ADMINSDK_CERTIFICATE}}
+          GCP_SECRET_MANAGER_CERTIFICATE: ${{ secrets.GCP_SECRET_MANAGER_KEY}}
       - name: Get Cover
         uses: orgoro/coverage@v3.1
         if: github.event_name == 'pull_request'
