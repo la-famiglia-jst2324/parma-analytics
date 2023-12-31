@@ -1,4 +1,4 @@
-"""This module contains the functions for registering measurement values."""
+"""This module contains the functions for registering the measurement values."""
 
 import logging
 from collections.abc import Callable
