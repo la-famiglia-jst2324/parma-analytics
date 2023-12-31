@@ -33,7 +33,7 @@ class MeasurementFloatValue(MeasurementValueBase):
     value = Column(Float)
 
 
-class MeasurementTexthValue(MeasurementValueBase):
+class MeasurementTextValue(MeasurementValueBase):
     """ORM model for measurement_text_value table."""
 
     __tablename__ = "measurement_text_value"
