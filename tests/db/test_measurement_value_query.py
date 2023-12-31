@@ -27,6 +27,7 @@ def test_create_measurement_value(mock_db, mock_measurement_text_value):
 def test_get_measurement_value(mock_db, mock_measurement_text_value):
     crud = MeasurementValueCRUD(mock_measurement_text_value)
     data = {"value": "test_value"}
+    mock_db.query().filter().first().id = 1
     id = crud.create_measurement_value(mock_db, data)
     instance = crud.get_measurement_value(mock_db, id)
     assert instance is not None
@@ -56,5 +57,6 @@ def test_delete_measurement_value(mock_db, mock_measurement_text_value):
     data = {"value": "test_value"}
     id = crud.create_measurement_value(mock_db, data)
     crud.delete_measurement_value(mock_db, id)
+    mock_db.query().filter().first.return_value = None
     instance = crud.get_measurement_value(mock_db, id)
     assert instance is None
