@@ -2,7 +2,7 @@
 
 from sqlalchemy import Column, DateTime, Float, Integer, String, func
 
-from parma_analytics.db.prod.engine import Base
+from parma_analytics.db.prod.models.base import Base
 
 
 class MeasurementValueBase(Base):
