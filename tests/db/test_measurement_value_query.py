@@ -30,6 +30,7 @@ def test_get_measurement_value(mock_db, mock_measurement_text_value):
     mock_instance = MagicMock()
     mock_instance.id = 1
     mock_db.query().filter().first.return_value = mock_instance
+    crud.create_measurement_value = MagicMock(return_value=mock_instance.id)
     id = crud.create_measurement_value(mock_db, data)
     instance = crud.get_measurement_value(mock_db, id)
     assert instance is not None
