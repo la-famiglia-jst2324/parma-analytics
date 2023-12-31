@@ -1,5 +1,9 @@
-from sqlalchemy import Column, DateTime, Integer, Float, String, func
+"""This module contains SQLAlchemy ORM models for measurement value tables."""
+
+from sqlalchemy import Column, DateTime, Float, Integer, String, func
+
 from parma_analytics.db.prod.engine import Base
+
 
 class MeasurementValueBase(Base):
     """Base ORM model for measurement value tables."""
@@ -61,13 +65,6 @@ class MeasurementImageValue(MeasurementValueBase):
     """ORM model for measurement_image_value table."""
 
     __tablename__ = "measurement_image_value"
-    value = Column(String)
-
-
-class MeasurementLinkValue(MeasurementValueBase):
-    """ORM model for measurement_link_value table."""
-
-    __tablename__ = "measurement_link_value"
     value = Column(String)
 
 

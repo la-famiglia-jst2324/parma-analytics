@@ -4,19 +4,26 @@ import logging
 from datetime import datetime
 from typing import Any
 
+from models.measurement_value_models import (
+    MeasurementCommentValue,
+    MeasurementDateValue,
+    MeasurementFloatValue,
+    MeasurementImageValue,
+    MeasurementIntValue,
+    MeasurementLinkValue,
+    MeasurementNestedValue,
+    MeasurementParagraphValue,
+    MeasurementTexthValue,
+)
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
-from models.measurement_value_models import MeasurementCommentValue, MeasurementDateValue, MeasurementFloatValue, MeasurementImageValue, MeasurementIntValue, MeasurementLinkValue, MeasurementNestedValue, MeasurementParagraphValue, MeasurementTexthValue
 
 from parma_analytics.db.prod.company_source_measurement_query import (
     create_company_measurement_query,
     get_by_company_and_measurement_ids_query,
 )
 from parma_analytics.db.prod.engine import get_session
-from parma_analytics.db.prod.measurement_value_query import (
-    MeasurementValueCRUD
-)
-
+from parma_analytics.db.prod.measurement_value_query import MeasurementValueCRUD
 from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
 
 logger = logging.getLogger(__name__)
@@ -71,7 +78,11 @@ def register_values(normalized_measurement: NormalizedData) -> int:
 
 # Determines and calls the create measurement for each measurement type
 def handle_value(
-    session: Session, measurement_type: str, value: Any, timestamp: datetime, company_measurement_id: int
+    session: Session,
+    measurement_type: str,
+    value: Any,
+    timestamp: datetime,
+    company_measurement_id: int,
 ) -> int:
     """Registers a value of a specific type and returns the id.
 
@@ -88,9 +99,13 @@ def handle_value(
     query_functions = {
         "int": MeasurementValueCRUD(MeasurementIntValue).create_measurement_value,
         "float": MeasurementValueCRUD(MeasurementFloatValue).create_measurement_value,
-        "paragraph": MeasurementValueCRUD(MeasurementParagraphValue).create_measurement_value,
+        "paragraph": MeasurementValueCRUD(
+            MeasurementParagraphValue
+        ).create_measurement_value,
         "text": MeasurementValueCRUD(MeasurementTexthValue).create_measurement_value,
-        "comment": MeasurementValueCRUD(MeasurementCommentValue).create_measurement_value,
+        "comment": MeasurementValueCRUD(
+            MeasurementCommentValue
+        ).create_measurement_value,
         "link": MeasurementValueCRUD(MeasurementLinkValue).create_measurement_value,
         "image": MeasurementValueCRUD(MeasurementImageValue).create_measurement_value,
         "date": MeasurementValueCRUD(MeasurementDateValue).create_measurement_value,
