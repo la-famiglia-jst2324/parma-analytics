@@ -34,7 +34,8 @@ dependencies:
   - python-dotenv
   - slack_sdk
   - pip:
-      - firebase-admin==6.2.0
+      - firebase-admin ==6.2.0
+      - google-cloud-secret-manager
       - xhtml2pdf ==0.2.13
   - matplotlib >=3.8.2
   - matplotlib-inline >=0.1.6
@@ -44,5 +45,3 @@ dependencies:
   # Dependencies (db)
   - sqlalchemy >=2.0
   - psycopg2 >=2.9
-  - pip:
-      - firebase-admin==6.2.0
