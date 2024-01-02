@@ -1,4 +1,4 @@
-"""Support for scheduling the data mining modules."""
+"""FastAPI routes for scheduling the invocation of mining modules."""
 
 import logging
 
@@ -17,11 +17,25 @@ logger = logging.getLogger(__name__)
     description="Endpoint to schedule the data mining modules.",
 )
 async def schedule(background_tasks: BackgroundTasks) -> Response:
+    """Trigger a background task to schedule the data mining modules.
+
+    Args:
+        background_tasks: The background tasks to schedule set up by fastapi.
+
+    Returns:
+        HTTP acknowledgement.
+    """
     logger.info("/schedule endpoint called. Scheduling will start in the background.")
-    background_tasks.add_task(schedule_tasks)
+    background_tasks.add_task(_schedule_tasks)
     return Response(status_code=status.HTTP_200_OK)
 
 
-def schedule_tasks() -> None:
+# ------------------------------------------------------------------------------------ #
+#                                       Internal                                       #
+# ------------------------------------------------------------------------------------ #
+
+
+def _schedule_tasks() -> None:
+    """Wrapper function to schedule the data mining modules."""
     with ScheduleManager(get_engine()) as schedule_manager:
         schedule_manager.schedule_tasks()

@@ -1,3 +1,5 @@
+"""Generates the report for the companies and sends it to them via email."""
+
 from generate_html import generate_html_report
 from generate_pdf import generate_pdf
 from gmail.email_service import EmailService
@@ -5,7 +7,8 @@ from gmail.email_service import EmailService
 from parma_analytics.bl.generate_report import generate_report
 
 
-def generate_reports():
+def generate_reports() -> None:
+    """Generates the report for the companies and sends it to them via email."""
     df, measurement_data = generate_report()
     grouped_data = {}
     for row in df.iter_rows():

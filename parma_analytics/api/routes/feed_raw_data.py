@@ -1,3 +1,5 @@
+"""FastAPI routes for establishing a trust relationship with a new data source."""
+
 from datetime import datetime
 
 from fastapi import APIRouter
@@ -23,6 +25,14 @@ router = APIRouter()
     description=""" Endpoint to receive raw data from data mining modules """,
 )
 def feed_raw_data(body: ApiFeedRawDataCreateIn) -> ApiFeedRawDataCreateOut:
+    """Feed raw data from data mining modules to data normalization modules.
+
+    Args:
+        body: The raw data to be normalized.
+
+    Returns:
+        Acknowledgement message containing the raw data and the timestamp.
+    """
     saved_document = store_raw_data(
         datasource=body.source_name,
         raw_data=RawDataIn(

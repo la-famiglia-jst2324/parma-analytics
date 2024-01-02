@@ -1,3 +1,6 @@
+"""This module contains the functions for registering measurement values."""
+
+import logging
 from collections.abc import Callable
 from datetime import datetime
 
@@ -26,19 +29,17 @@ from parma_analytics.db.prod.measurement_text_value_query import (
 )
 from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
 
+logger = logging.getLogger(__name__)
+
 
 def register_values(normalized_measurement: NormalizedData) -> int:
-    """This function takes an existing source_measurement_id and company_id, a value,
-    and a timestamp as parameters. It returns the id.
+    """Registers a new measurement value and returns the id.
 
-    Parameters:
-    source_measurement_id (int): The ID of the source measurement.
-    company_id (int): The ID of the company.
-    value (any): The value to be registered.
-    timestamp (datetime): The timestamp when the value was registered.
+    Args:
+        normalized_measurement: The normalized measurement data.
 
     Returns:
-    int: the created measurement value id.
+        The created measurement value id.
     """
     source_measurement_id = normalized_measurement.source_measurement_id
     company_id = normalized_measurement.company_id
@@ -85,10 +86,10 @@ def register_values(normalized_measurement: NormalizedData) -> int:
             return created_measurement_id
 
     except SQLAlchemyError as e:
-        print(f"Database error occurred: {e}")
+        logging.error(f"Database error occurred: {e}")
         return -1
     except Exception as e:
-        print(f"An error occurred: {e}")
+        logging.error(f"An error occurred: {e}")
         return -1
 
 
@@ -96,6 +97,17 @@ def register_values(normalized_measurement: NormalizedData) -> int:
 def handle_int(
     session: Session, value: int, timestamp: datetime, company_measurement_id: int
 ) -> int:
+    """Registers an int value and returns the id.
+
+    Args:
+        session: The database session.
+        value: The value to be registered.
+        timestamp: The timestamp when the value was registered.
+        company_measurement_id: The ID of the company measurement.
+
+    Returns:
+        The created measurement value id.
+    """
     return create_measurement_int_value_query(
         session,
         {
@@ -109,6 +121,17 @@ def handle_int(
 def handle_float(
     session: Session, value: float, timestamp: datetime, company_measurement_id: int
 ) -> int:
+    """Registers a float value and returns the id.
+
+    Args:
+        session: The database session.
+        value: The value to be inserted into the database.
+        timestamp: The timestamp when the value was registered.
+        company_measurement_id: The ID of the company measurement.
+
+    Returns:
+        The created measurement value id.
+    """
     return create_measurement_float_value_query(
         session,
         {
@@ -122,6 +145,17 @@ def handle_float(
 def handle_paragraph(
     session: Session, value: str, timestamp: datetime, company_measurement_id: int
 ) -> int:
+    """Registers a paragraph value and returns the id.
+
+    Args:
+        session: The database session.
+        value: The value to be registered.
+        timestamp: The timestamp when the value was registered.
+        company_measurement_id: The ID of the company measurement.
+
+    Returns:
+        The created measurement value id.
+    """
     return create_measurement_paragraph_value_query(
         session,
         {
@@ -135,6 +169,17 @@ def handle_paragraph(
 def handle_text(
     session: Session, value: str, timestamp: datetime, company_measurement_id: int
 ) -> int:
+    """Registers a text value and returns the id.
+
+    Args:
+        session: The database session.
+        value: The value to be registered.
+        timestamp: The timestamp when the value was registered.
+        company_measurement_id: The ID of the company measurement.
+
+    Returns:
+        The created measurement value id.
+    """
     return create_measurement_text_value_query(
         session,
         {
@@ -148,6 +193,17 @@ def handle_text(
 def handle_comment(
     session: Session, value: str, timestamp: datetime, company_measurement_id: int
 ) -> int:
+    """Registers a comment value and returns the id.
+
+    Args:
+        session: The database session.
+        value: The value to be registered.
+        timestamp: The timestamp when the value was registered.
+        company_measurement_id: The ID of the company measurement.
+
+    Returns:
+        The created measurement value id.
+    """
     return create_measurement_comment_value_query(
         session,
         {

@@ -1,4 +1,4 @@
-"""Example of a model for the API."""
+"""Pydantic REST models for the raw data feed endpoint."""
 
 from datetime import datetime
 from typing import Any

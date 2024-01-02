@@ -1,3 +1,5 @@
+"""Data model for normalized data."""
+
 from datetime import datetime
 from typing import Any
 
@@ -5,6 +7,8 @@ from pydantic import BaseModel, Field
 
 
 class NormalizedData(BaseModel):
+    """Normalized data point."""
+
     source_measurement_id: int = Field(
         ..., description="Unique identifier for the source measurement"
     )

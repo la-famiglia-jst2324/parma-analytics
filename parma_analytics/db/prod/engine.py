@@ -36,6 +36,11 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 @contextmanager
 def get_session() -> Iterator[Session]:
+    """Get a database session.
+
+    Yields:
+        A database session.
+    """
     db = SessionLocal()
     try:
         yield db
