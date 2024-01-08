@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session
 from parma_analytics.db.prod.models.source_measurement import SourceMeasurement
 from parma_analytics.db.prod.queries.loader import read_query_file
 
-QUERIES_DIR = Path(__file__).parent / "prod" / "queries"
+QUERIES_DIR = Path(__file__).parent / "queries"
 
 
 @dataclass
