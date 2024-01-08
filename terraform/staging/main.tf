@@ -46,4 +46,8 @@ module "main" {
   sendgrid_report_template_id       = var.sendgrid_report_template_id
 
   chatgpt_api_key = var.chatgpt_api_key
+
+  SHARED_SECRET_KEY = var.SHARED_SECRET_KEY
+  ANALYTICS_SECRET_KEY = var.ANALYTICS_SECRET_KEY
+
 }

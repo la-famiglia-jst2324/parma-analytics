@@ -23,6 +23,21 @@ variable "base_domain" {
   default     = "parma.software"
 }
 
+/* ------------------------ Analytics and Sourcing Auth Flow ------------------------ */
+
+variable "SHARED_SECRET_KEY" {
+  description = "Shared secret key for the analytics and sourcing auth flow"
+  type        = string
+  sensitive   = true
+}
+
+variable "ANALYTICS_SECRET_KEY" {
+  description = "Analytics secret key the analytics and sourcing auth flow"
+  type        = string
+  sensitive   = true
+}
+
+
 /* ------------------------------------ SendGrid ------------------------------------ */
 
 variable "sendgrid_api_key" {
