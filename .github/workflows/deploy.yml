@@ -20,9 +20,9 @@ env:
   TF_VAR_gcp_secret_manager_certificate: ${{ secrets.GCP_SECRET_MANAGER_KEY }}
   TF_VAR_chatgpt_api_key: ${{ github.event_name == 'release' && secrets.PROD_CHATGPT_API_KEY || secrets.STAGING_CHATGPT_API_KEY}}
 
-  # Analytics and Sourcing (AS) Auth Flow Secret Keys
-  TF_VAR_SHARED_SECRET_KEY: ${{ github.event_name == 'release' && secrets.PROD_AS_SHARED_SECRET_KEY || secrets.STAGING_AS_SHARED_SECRET_KEY}}
-  TF_VAR_ANALYTICS_SECRET_KEY: ${{ github.event_name == 'release' && secrets.PROD_AS_ANALYTICS_SECRET_KEY || secrets.STAGING_AS_ANALYTICS_SECRET_KEY}}
+  # Analytics and Sourcing Auth Flow Secret Keys
+  TF_VAR_PARMA_SHARED_SECRET_KEY: ${{ github.event_name == 'release' && secrets.PROD_PARMA_SHARED_SECRET_KEY || secrets.STAGING_PARMA_SHARED_SECRET_KEY}}
+  TF_VAR_PARMA_ANALYTICS_SECRET_KEY: ${{ github.event_name == 'release' && secrets.PROD_PARMA_ANALYTICS_SECRET_KEY || secrets.STAGING_PARMA_ANALYTICS_SECRET_KEY}}
 
   # same for both environments
   TF_VAR_sendgrid_api_key: ${{ secrets.SENDGRID_API_KEY }}

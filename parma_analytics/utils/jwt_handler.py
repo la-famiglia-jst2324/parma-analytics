@@ -28,9 +28,11 @@ class KeyType(Enum):
 class JWTHandler:
     """A handler for creating and verifying JWTs."""
 
-    SHARED_SECRET_KEY: str = str(os.getenv("SHARED_SECRET_KEY") or "SHARED_SECRET_KEY")
+    SHARED_SECRET_KEY: str = str(
+        os.getenv("PARMA_SHARED_SECRET_KEY") or "PARMA_SHARED_SECRET_KEY"
+    )
     ANALYTICS_SECRET_KEY: str = str(
-        os.getenv("ANALYTICS_SECRET_KEY") or "ANALYTICS_SECRET_KEY"
+        os.getenv("PARMA_ANALYTICS_SECRET_KEY") or "PARMA_ANALYTICS_SECRET_KEY"
     )
     ALGORITHM: str = "HS256"
 
