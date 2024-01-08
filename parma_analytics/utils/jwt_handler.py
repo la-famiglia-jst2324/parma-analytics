@@ -72,14 +72,12 @@ class JWTHandler:
         """Verify a JWT using either the shared secret key or the analytics secret key.
 
         Args:
-            token (str): The JWT token to verify.
-            key_type (KeyType): The type of key used for verification
-                                    (shared or analytics).
+            token: The JWT token to verify.
+            key_type: The type of key used for verification.
 
         Returns:
-            dict[str, Any] | None: The decoded JWT payload
-                                            if the verification is successful,
-                                            None otherwise.
+            If the verification is successful, the decoded JWT payload.
+            Otherwise, None.
         """
         secret_key = (
             JWTHandler.ANALYTICS_SECRET_KEY

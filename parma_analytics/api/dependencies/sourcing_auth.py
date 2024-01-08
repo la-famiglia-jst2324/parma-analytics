@@ -20,10 +20,10 @@ def authenticate_sourcing_request(
     """Authenticate the incoming request using the JWT in the Authorization header.
 
     Args:
-        authorization (str): The Authorization header containing the JWT.
+        authorization: The Authorization header containing the JWT.
 
     Returns:
-        Dict[str, str | int]: The payload of the authenticated JWT.
+        The payload of the authenticated JWT.
 
     Raises:
         HTTPException: If the JWT is invalid or expired.
@@ -57,15 +57,15 @@ def authorize_sourcing_request(
     """Authorize the request based on the JWT payload obtained from authentication.
 
     Args:
-        payload (Dict[str, str]): The payload from the authenticated JWT.
+        payload: The payload from the authenticated JWT.
 
     Returns:
-        int: The extracted source_id indicating the caller module.
+        The extracted source_id indicating the caller module.
 
     Raises:
-        HTTPException: If the authorization JWT is invalid,
-                            expired,
-                            or lacks a source_id.
+        HTTPException: If the authorization JWT is invalid.
+        HTTPException: If the authorization JWT is expired.
+        HTTPException: If the authorization JWT lacks a source_id.
     """
     auth_token = payload.get("sourcing_id")
     if not auth_token:

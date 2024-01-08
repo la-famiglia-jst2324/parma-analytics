@@ -20,10 +20,10 @@ def mock_authorize_sourcing_request(
     """Mock function to simulate authorization in a test environment.
 
     Args:
-        payload (Dict[str, str]): Mock payload
+        payload: The mock payload for the sourcing authorization request
 
     Returns:
-        int: A random integer representing a mock source_id for testing purposes.
+        A random integer representing a mock source_id for testing purposes.
     """
     return randint(1, 1000)
 
@@ -34,9 +34,9 @@ def mock_authenticate_sourcing_request(
     """Mock function to simulate authentication in a test environment.
 
     Args:
-        authorization (str): A mock authorization header.
+        authorization: A mock authorization header.
 
     Returns:
-        Dict[str, str]: A mock JWT payload containing a 'sourcing_id'.
+        A mock JWT payload containing a 'sourcing_id'.
     """
     return {"sourcing_id": "dummytoken"}
