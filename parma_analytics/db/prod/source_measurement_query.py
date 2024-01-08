@@ -1,12 +1,16 @@
 """Database queries for the source_measurement table."""
 
 from dataclasses import dataclass
+from pathlib import Path
 from typing import Any
 
 from sqlalchemy import text
 from sqlalchemy.orm import Session
 
 from parma_analytics.db.prod.models.source_measurement import SourceMeasurement
+from parma_analytics.db.prod.queries.loader import read_query_file
+
+QUERIES_DIR = Path(__file__).parent / "prod" / "queries"
 
 
 @dataclass
@@ -35,18 +39,10 @@ def create_source_measurement_query(
     if "parent_measurement_id" not in source_measurement_data:
         source_measurement_data["parent_measurement_id"] = None
 
-    query = text(
-        """
-        INSERT INTO source_measurement (
-            type, measurement_name, source_module_id, parent_measurement_id,
-            created_at, modified_at
-        ) VALUES (
-            :type, :measurement_name, :source_module_id, :parent_measurement_id,
-            NOW(), NOW()
-        ) RETURNING *
-        """
+    result = db.execute(
+        read_query_file(QUERIES_DIR / "create_source_measurement.sql"),
+        source_measurement_data,
     )
-    result = db.execute(query, source_measurement_data)
     db.commit()
     new_source_measurement = result.fetchone()
     new_source_measurement_dict = new_source_measurement._asdict()
@@ -65,12 +61,10 @@ def get_source_measurement_query(
     Returns:
         The source_measurement with the given id.
     """
-    query = text(
-        "SELECT id, type, measurement_name, source_module_id, parent_measurement_id, "
-        "created_at, modified_at "
-        "FROM source_measurement WHERE id = :id"
+    result = db.execute(
+        read_query_file(QUERIES_DIR / "get_source_measurement.sql"),
+        {"id": source_measurement_id},
     )
-    result = db.execute(query, {"id": source_measurement_id})
     source_measurement = result.fetchone()
     source_measurement_dict = source_measurement._asdict()
     return SourceMeasurement(**source_measurement_dict)
@@ -90,16 +84,19 @@ def list_source_measurements_query(
         A list of all source_measurements.
     """
     # Get the total number of records
-    count_query = text("""SELECT COUNT(*) FROM source_measurement""")
-    count_result = db.execute(count_query)
+    count_result = db.execute(
+        read_query_file(QUERIES_DIR / "count_source_measurements.sql")
+    )
     total_records = count_result.scalar()
 
     # Calculate the total number of pages
     num_pages = (total_records + page_size - 1) // page_size
     page = max(1, min(page, num_pages))
 
-    query = text("""SELECT * FROM source_measurement LIMIT :limit OFFSET :offset""")
-    result = db.execute(query, {"limit": page_size, "offset": (page - 1) * page_size})
+    result = db.execute(
+        read_query_file(QUERIES_DIR / "list_source_measurements.sql"),
+        {"lim": page_size, "offs": (page - 1) * page_size},
+    )
     source_measurements = result.fetchall()
     source_measurement_models = [
         SourceMeasurement(**source_measurement._asdict())
@@ -145,8 +142,10 @@ def delete_source_measurement_query(db: Session, source_measurement_id: int) -> 
         db: Database session.
         source_measurement_id: id of the source_measurement to be deleted.
     """
-    query = text("""DELETE FROM source_measurement WHERE id = :id""")
-    db.execute(query, {"id": source_measurement_id})
+    db.execute(
+        read_query_file(QUERIES_DIR / "delete_source_measurement.sql"),
+        {"id": source_measurement_id},
+    )
     db.commit()
 
 

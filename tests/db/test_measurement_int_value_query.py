@@ -1,3 +1,4 @@
+import logging
 from datetime import datetime
 from unittest.mock import MagicMock, patch
 
@@ -12,6 +13,8 @@ from parma_analytics.db.prod.measurement_int_value_query import (
     list_measurement_int_values_query,
     update_measurement_int_value_query,
 )
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -43,7 +46,7 @@ def test_get_measurement_int_value_query(mock_db, mock_measurement_int_value):
     )
     result = get_measurement_int_value_query(mock_db, 1)
     mock_db.query.assert_called_once_with(MeasurementIntValue)
-    print(mock_db.query.return_value.filter.call_args_list)
+    logger.debug(mock_db.query.return_value.filter.call_args_list)
     assert result == mock_measurement_int_value
 
 

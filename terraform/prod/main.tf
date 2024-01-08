@@ -37,7 +37,8 @@ module "main" {
   base_domain      = var.base_domain
   api_subdomain    = ""
 
-  firebase_adminsdk_certificate = var.firebase_adminsdk_certificate
+  firebase_adminsdk_certificate  = var.firebase_adminsdk_certificate
+  gcp_secret_manager_certificate = var.gcp_secret_manager_certificate
 
   sendgrid_api_key                  = var.sendgrid_api_key
   sendgrid_from_email               = var.sendgrid_from_email

@@ -17,6 +17,7 @@ defaults:
 env:
   TF_VAR_db_root_password: ${{ github.event_name == 'release' && secrets.PROD_POSTGRES_PASSWORD || secrets.STAGING_POSTGRES_PASSWORD}}
   TF_VAR_firebase_adminsdk_certificate: ${{ github.event_name == 'release' && secrets.PROD_FIREBASE_ADMINSDK_CERTIFICATE || secrets.STAGING_FIREBASE_ADMINSDK_CERTIFICATE}}
+  TF_VAR_gcp_secret_manager_certificate: ${{ secrets.GCP_SECRET_MANAGER_KEY }}
   TF_VAR_chatgpt_api_key: ${{ github.event_name == 'release' && secrets.PROD_CHATGPT_API_KEY || secrets.STAGING_CHATGPT_API_KEY}}
 
   # same for both environments
@@ -43,7 +44,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Configure gcloud CLI
-        uses: google-github-actions/setup-gcloud@63496e652100112a8db8a71668b77c67aa1ab071
+        uses: google-github-actions/setup-gcloud@5a5f7b85fca43e76e53463acaa9d408a03c98d3a
         with:
           version: "416.0.0"
           service_account_email: ${{ secrets.GCP_SA_EMAIL }}
