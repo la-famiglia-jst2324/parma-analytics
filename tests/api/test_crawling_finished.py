@@ -5,14 +5,14 @@ from fastapi.testclient import TestClient
 from starlette import status
 
 from parma_analytics.api import app
-from parma_analytics.api.dependencies.mock_sourcing_auth import (
-    mock_authenticate_sourcing_request,
-    mock_authorization_header,
-    mock_authorize_sourcing_request,
-)
 from parma_analytics.api.dependencies.sourcing_auth import (
     authenticate_sourcing_request,
     authorize_sourcing_request,
+)
+from tests.api.dependencies.mock_sourcing_auth import (
+    mock_authenticate_sourcing_request,
+    mock_authorization_header,
+    mock_authorize_sourcing_request,
 )
 
 logger = logging.getLogger(__name__)
