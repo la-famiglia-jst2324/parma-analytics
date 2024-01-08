@@ -224,10 +224,17 @@ The following steps will get you started with the project.
    make test
    ```
 
-9. Setup the Firestore DB (if necessary):
+9. Setup the `.secrets` folder:
+   - Create `.secrets` folder in the main directory (or use the existing one).
 
-   If you want to connect to the crawling database, where we save the raw data, you have to get the credentials from the [Notion](https://www.notion.so/firebase-admin-sdk-certificate-4279aa3b4e904e1b927619ed69537045).
-   Then create `.secrets` folder in the main directory (or use the existing one) and add the credentials in a new file named `la-famiglia-parma-ai-firebase-adminsdk.json`.
+- **Firestore DB**:
+  If you want to connect to the crawling database, where we save the raw data;
+  - Create a file named `la-famiglia-parma-ai-firebase-adminsdk.json` in the `.secrets` folder.
+  - Fill this file using this [Notion](https://www.notion.so/firebase-admin-sdk-certificate-4279aa3b4e904e1b927619ed69537045) page.
+- **Secret Manager**:
+  If you want to use the secret manager, which we save the secrets to;
+  - Create a file named `la-famiglia-parma-ai-secret-manager.json` in the `.secrets` folder.
+  - Fill this file using this [Notion](https://www.notion.so/GCP-Service-Account-Certificate-Secret-Manager-4252786a29e64cdcb2d8d359164a1731?pvs=4) page.
 
 ## Sendgrid
 
