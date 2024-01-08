@@ -1,7 +1,5 @@
 """Functions for fetching data from the database."""
 
-from pathlib import Path
-
 import polars as pl
 from sqlalchemy.sql import text
 
@@ -13,7 +11,7 @@ from parma_analytics.db.prod.queries.loader import read_query_file
 def fetch_data() -> pl.DataFrame:
     """Fetch data from the database."""
     with get_session() as db:
-        query_file_path = Path("parma_analytics/db/queries/fetch_report_data.sql")
+        query_file_path = QUERIES_DIR / "fetch_report_data.sql"
         query = text(query_file_path.read_text())
         result = db.execute(query)
         rows = [dict(zip(result.keys(), row)) for row in result.fetchall()]
