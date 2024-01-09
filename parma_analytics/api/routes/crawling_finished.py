@@ -21,17 +21,18 @@ router = APIRouter()
     ),
 )
 def crawling_finished(
-    done_message: ApiCrawlingFinishedCreateIn,
+    crawling_finished_data: ApiCrawlingFinishedCreateIn,
 ) -> ApiCrawlingFinishedCreateOut:
     """Endpoint to receive notifications when crawling job has completed.
 
     Args:
-        done_message: The status indicating the terminal state of the crawling job.
+        crawling_finished_data: Contains details about the completed crawling job.
 
     Returns:
         A simple receival confirmation message.
     """
     return ApiCrawlingFinishedCreateOut(
-        incoming_message=done_message.incoming_message,
+        task_id=crawling_finished_data.task_id,
+        errors=crawling_finished_data.errors,
         return_message="Notified about crawling finished",
     )

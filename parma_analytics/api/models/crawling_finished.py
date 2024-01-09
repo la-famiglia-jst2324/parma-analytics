@@ -24,7 +24,7 @@ class _ApiCrawlingFinishedBase(BaseModel):
 class _ApiCrawlingFinishedOutBase(_ApiCrawlingFinishedBase):
     """Output base model for the several endpoint."""
 
-    pass
+    return_message: str
 
 
 # ------------------------------------------------------------------------------------ #
