@@ -1,19 +1,22 @@
 """Database ORM models for source_measurement table."""
 
-from datetime import datetime
 
-from pydantic import BaseModel
+import sqlalchemy as sa
+
+from parma_analytics.db.prod.engine import Base
 
 
-class SourceMeasurement(BaseModel):
+class SourceMeasurement(Base):
     """Model for the source_measurement table in the database."""
 
     __tablename__ = "source_measurement"
 
-    id: int
-    type: str
-    measurement_name: str
-    source_module_id: int
-    parent_measurement_id: int | None
-    created_at: datetime
-    modified_at: datetime
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    type = sa.Column(sa.String, nullable=False)
+    measurement_name = sa.Column(sa.String, nullable=False)
+    source_module_id = sa.Column(sa.Integer, nullable=False)
+    parent_measurement_id = sa.Column(sa.Integer, nullable=True)
+    created_at = sa.Column(sa.DateTime, nullable=False, default=sa.func.now())
+    modified_at = sa.Column(
+        sa.DateTime, nullable=False, default=sa.func.now(), onupdate=sa.func.now()
+    )
