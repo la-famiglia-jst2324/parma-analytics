@@ -146,6 +146,59 @@ graph LR
 
 ```
 
+#### Process flow diagram: Mining Scheduling
+
+```mermaid
+graph TD
+
+        %% Subgraphs
+   subgraph FrontendContainer[FRONTEND]
+   end
+
+   subgraph ApiBackendContainer[API BACKEND]
+   end
+
+   subgraph WebLayer[Web Layer]
+      FrontendContainer
+      ApiBackendContainer
+   end
+
+   subgraph DatabaseLayer["PostgreSQL Database (Production)"]
+      TaskConfigurations["data_source"]
+      ScheduledTasks["scheduled_tasks"]
+   end
+
+   subgraph AnalyticsBackendContainer[Analytics Backend]
+      ScheduleEndpoint["/schedule"]
+      TriggerDataSourcesEndpoint["MiningModuleManager"]
+      CrawlingFinishedEndpoint["/crawling-finished"]
+   end
+
+   subgraph DataRetrievalModules[Data Mining Modules]
+   end
+
+   subgraph GoogleCloudScheduler[Google Cloud Scheduler]
+   end
+
+        %% Links
+   Users -->|1. Interacts with frontend| FrontendContainer
+   FrontendContainer -->|2. Send Configuration| ApiBackendContainer
+   ApiBackendContainer -->|3.a Add/Update Configuration| TaskConfigurations
+   ApiBackendContainer -->|"3.b Add a row (on-demand)"| ScheduledTasks
+   ApiBackendContainer -->|"3.b Trigger Scheduling (on-demand)"| ScheduleEndpoint
+   GoogleCloudScheduler -->|"4. Triggers Scheduling (every x time)"| ScheduleEndpoint
+   DatabaseLayer -->|"5.(a/b) Tables"| ScheduleEndpoint
+   ScheduleEndpoint -->|5.c Add a Row| ScheduledTasks
+   ScheduleEndpoint -->|5.d Trigger| TriggerDataSourcesEndpoint
+   TriggerDataSourcesEndpoint -->|6.a Reserve Task| ScheduledTasks
+   TriggerDataSourcesEndpoint -->|"6.b Call /companies endpoint"| DataRetrievalModules
+   DataRetrievalModules -->|7. Notify Mining is Finished| CrawlingFinishedEndpoint
+   CrawlingFinishedEndpoint -->|8. Set Task Status as Success| TriggerDataSourcesEndpoint
+
+        %% Link Styles
+   linkStyle default stroke:#9E9D91,stroke-width:2px;
+```
+
 ## How to add new data sources
 
 [ADDING_DATASOURCES.md](./docs/ADDING_DATASOURCES.md)
