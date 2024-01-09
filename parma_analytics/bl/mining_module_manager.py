@@ -103,7 +103,7 @@ class MiningModuleManager:
                     continue
 
                 data_source = cast(DataSource, task.data_source)
-                json_payload = self._construct_payload(data_source)
+                json_payload = self._construct_payload(data_source, task_id)
                 logger.debug(
                     f"Payload for data source {data_source.id}: {json_payload}"
                 )
@@ -174,7 +174,7 @@ class MiningModuleManager:
 
         return None
 
-    def _construct_payload(self, data_source: DataSource) -> str | None:
+    def _construct_payload(self, data_source: DataSource, task_id: int) -> str | None:
         """Construct the payload for the given data source."""
         json_payload = None
         if data_source.source_name == "affinity":
@@ -182,10 +182,18 @@ class MiningModuleManager:
             pass
         elif data_source.source_name == "github":
             logger.warning("Github payload not implemented yet.")
-            json_payload = json.dumps(GITHUB_PAYLOAD)
+            github_payload = {
+                "task_id": task_id,
+                "companies": GITHUB_PAYLOAD["companies"].copy(),
+            }
+            json_payload = json.dumps(github_payload)
         elif data_source.source_name == "reddit":
             logger.warning("Reddit payload not implemented yet.")
-            json_payload = json.dumps(REDDIT_PAYLOAD)
+            reddit_payload = {
+                "task_id": task_id,
+                "companies": REDDIT_PAYLOAD["companies"].copy(),
+            }
+            json_payload = json.dumps(reddit_payload)
         else:
             logger.warning("Other payload not implemented yet.")
             pass
