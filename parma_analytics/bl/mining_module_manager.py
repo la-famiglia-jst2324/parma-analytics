@@ -3,6 +3,7 @@
 import asyncio
 import json
 import logging
+import os
 import urllib.parse
 from contextlib import contextmanager
 from datetime import datetime
@@ -107,7 +108,7 @@ class MiningModuleManager:
                     f"Payload for data source {data_source.id}: {json_payload}"
                 )
 
-                invocation_endpoint = self._ensure_https(
+                invocation_endpoint = self._ensure_appropriate_scheme(
                     data_source.invocation_endpoint
                 )
                 if not invocation_endpoint:
@@ -191,25 +192,36 @@ class MiningModuleManager:
 
         return json_payload
 
-    def _ensure_https(self, url: str) -> str | None:
-        """Ensure that the given URL is HTTPS."""
+    def _ensure_appropriate_scheme(self, url: str) -> str | None:
+        """Adapt the URL scheme based on the deployment environment."""
         if not url:
             return None
 
         try:
             parsed_url = httpx.URL(url)
+            env = os.getenv("env", "local").lower()
 
-            # Check if the scheme is missing or not HTTPS
-            if parsed_url.scheme not in ["http", "https"]:
-                secure_url = "https://" + url
-                return secure_url
-            elif parsed_url.scheme == "http":
-                # Convert http to https
-                return parsed_url.copy_with(scheme="https").__str__()
+            if not parsed_url.scheme:
+                default_scheme = "https" if env in ["prod", "staging"] else "http"
+                logging.debug(
+                    f"URL without scheme provided. Defaulting to {default_scheme}."
+                )
+                return default_scheme + "://" + url
+
+            scheme_lower = parsed_url.scheme.lower()
+
+            if env in ["prod", "staging"]:
+                # Use HTTPS in production and staging
+                if scheme_lower != "https":
+                    return parsed_url.copy_with(scheme="https").__str__()
+            elif scheme_lower != "http":
+                # Use HTTP in other environments
+                logging.debug("Using HTTP in non-production environment.")
+                return parsed_url.copy_with(scheme="http").__str__()
 
             return url
         except httpx.InvalidURL:
-            # Return None if URL parsing fails, invalid URL
+            logging.error(f"Invalid URL: {url}")
             return None
 
     async def _trigger(
