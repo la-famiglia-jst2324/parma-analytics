@@ -27,9 +27,6 @@ This file contains all the types used in the production PostgreSQL database.
 Frequency = Literal["HOURLY", "DAILY", "WEEKLY", "MONTHLY"]
 HealthStatus = Literal["UP", "DOWN"]
 ScheduleType = Literal["ON_DEMAND", "REGULAR"]
-DataSourceType = Literal[
-    "REDDIT", "GITHUB", "LINKEDIN", "PEOPLEDATALABS", "CLEARBIT", "DISCORD", "AFFINITY"
-]
 TaskStatus = Literal["PENDING", "PROCESSING", "SUCCESS", "FAILED"]
 """Success and failed are terminal states."""
 
@@ -52,7 +49,6 @@ class DataSource(Base):
 
     id = Column(Integer, primary_key=True)
     source_name = Column(String)
-    source_type = Column(literal_to_enum(DataSourceType))
     is_active = Column(Boolean)
     frequency = Column(literal_to_enum(Frequency))
     health_status = Column(literal_to_enum(HealthStatus))

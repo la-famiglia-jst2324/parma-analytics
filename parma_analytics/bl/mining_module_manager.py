@@ -176,17 +176,17 @@ class MiningModuleManager:
     def _construct_payload(self, data_source: DataSource) -> str | None:
         """Construct the payload for the given data source."""
         json_payload = None
-        if data_source.source_type == "AFFINITY":
+        if data_source.source_name == "affinity":
             # For the Affinity module, we only have  GET /companies with no body
             pass
-        elif data_source.source_type == "GITHUB":
-            logger.warn("Github payload not implemented yet.")
+        elif data_source.source_name == "github":
+            logger.warning("Github payload not implemented yet.")
             json_payload = json.dumps(GITHUB_PAYLOAD)
-        elif data_source.source_type == "REDDIT":
-            logger.warn("Reddit payload not implemented yet.")
+        elif data_source.source_name == "reddit":
+            logger.warning("Reddit payload not implemented yet.")
             json_payload = json.dumps(REDDIT_PAYLOAD)
         else:
-            logger.warn("Other payload not implemented yet.")
+            logger.warning("Other payload not implemented yet.")
             pass
 
         return json_payload
