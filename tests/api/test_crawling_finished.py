@@ -17,22 +17,43 @@ def client():
 
 
 def test_crawling_finished(client):
-    incoming_msg = "Crawling job completed successfully"
-
-    test_data = {"incoming_message": incoming_msg}
+    test_data = {
+        "task_id": 12345,
+        "errors": None,
+    }
 
     response = client.post("/crawling-finished", json=test_data)
 
     assert response.status_code == status.HTTP_201_CREATED
     assert response.json() == {
-        "incoming_message": incoming_msg,
+        "task_id": test_data["task_id"],
+        "errors": test_data["errors"],
+        "return_message": "Notified about crawling finished",
+    }
+
+
+def test_crawling_finished_with_errors(client):
+    test_data = {
+        "task_id": 12345,
+        "errors": {
+            "error1": {"error_type": "Type1", "error_description": "Description1"},
+            "error2": {"error_type": "Type2", "error_description": "Description2"},
+        },
+    }
+
+    response = client.post("/crawling-finished", json=test_data)
+
+    assert response.status_code == status.HTTP_201_CREATED
+    assert response.json() == {
+        "task_id": test_data["task_id"],
+        "errors": test_data["errors"],
         "return_message": "Notified about crawling finished",
     }
 
 
 def test_crawling_finished_missing_field(client):
-    # Test with missing 'incoming_message' field
-    invalid_data = {"dummy_json": "empty"}
+    # Test with missing 'task_id' field
+    invalid_data = {"errors": None}
 
     response = client.post("/crawling-finished", json=invalid_data)
 
@@ -40,8 +61,8 @@ def test_crawling_finished_missing_field(client):
 
     response_json = response.json()
     assert "detail" in response_json
-    assert len(response_json) > 0
-    actual_errors = response.json()["detail"][0]
+    assert len(response_json["detail"]) > 0
+    actual_errors = response_json["detail"][0]
 
     logger.warning(f"Actual Errors in Response: {actual_errors}")
 
