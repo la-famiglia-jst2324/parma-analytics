@@ -7,7 +7,7 @@ from pydantic import BaseModel
 # ------------------------------------------------------------------------------------ #
 
 
-class CrawlingErrorInfo(BaseModel):
+class ErrorInfo(BaseModel):
     """Error info for the crawling_finished endpoint."""
 
     error_type: str
@@ -18,7 +18,7 @@ class _ApiCrawlingFinishedBase(BaseModel):
     """Internal base model for the crawling_finished endpoints."""
 
     task_id: int
-    errors: dict[str, CrawlingErrorInfo] | None = None
+    errors: dict[str, ErrorInfo] | None = None
 
 
 class _ApiCrawlingFinishedOutBase(_ApiCrawlingFinishedBase):
