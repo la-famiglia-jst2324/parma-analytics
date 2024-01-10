@@ -579,3 +579,5 @@ $RECYCLE.BIN/
 .image.name
 **/.terraform/
 **/*.tfstate.backup
+.firebaserc
+firebase.json
