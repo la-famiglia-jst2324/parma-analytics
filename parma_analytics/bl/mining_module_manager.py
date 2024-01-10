@@ -45,8 +45,17 @@ class MiningModuleManager:
     @staticmethod
     def set_task_status_success_with_id(
         task_id: int, result_summary: str | None
-    ) -> bool:
-        """Set the status of the task with the given task_id to success."""
+    ) -> None:
+        """Set the status of the task with the given task_id to success.
+
+        Args:
+            task_id: The ID of the task.
+            result_summary: A summary of the result, if any.
+
+        Raises:
+            Exception: If the task can not be found
+            Exception: If there's an error updating the task.
+        """
         with MiningModuleManager._manage_session() as session:
             try:
                 session.begin_nested()
@@ -58,19 +67,17 @@ class MiningModuleManager:
                 )
                 if not task:
                     logger.error(f"Task with id {task_id} not found.")
-                    return False
+                    raise Exception(f"Task with id {task_id} not found.")
 
                 task.status = "SUCCESS"
                 task.ended_at = datetime.now()
                 task.result_summary = result_summary or ""
                 session.commit()
                 logger.info(f"Task {task.task_id} successfully completed")
-                return True
             except Exception as e:
                 logger.error(f"Error setting task {task_id} status to success: {e}")
                 session.rollback()
-
-        return False
+                raise e
 
     def trigger_datasources(self, task_ids: list[int]) -> None:
         """Trigger the mining modules for the given task_ids.

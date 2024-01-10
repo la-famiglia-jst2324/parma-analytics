@@ -1,8 +1,9 @@
 """FastAPI routes for receiving notifications when crawling job finishes."""
 
 import json
+import logging
 
-from fastapi import APIRouter, status
+from fastapi import APIRouter, HTTPException, status
 from pydantic.json import pydantic_encoder
 
 from parma_analytics.api.models.crawling_finished import (
@@ -12,6 +13,8 @@ from parma_analytics.api.models.crawling_finished import (
 from parma_analytics.bl.mining_module_manager import MiningModuleManager
 
 router = APIRouter()
+
+logger = logging.getLogger(__name__)
 
 
 @router.post(
@@ -43,7 +46,14 @@ def crawling_finished(
         }
         result_summary = json.dumps(errors_dict, default=pydantic_encoder)
 
-    MiningModuleManager.set_task_status_success_with_id(task_id, result_summary)
+    try:
+        MiningModuleManager.set_task_status_success_with_id(task_id, result_summary)
+    except Exception as e:
+        logger.error(f"Error while processing task_id {task_id}, error: {str(e)}")
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Error while processing task_id {task_id}, error: {str(e)}",
+        )
 
     return ApiCrawlingFinishedCreateOut(
         task_id=crawling_finished_data.task_id,
