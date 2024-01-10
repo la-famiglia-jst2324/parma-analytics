@@ -49,10 +49,10 @@ def crawling_finished(
     try:
         MiningModuleManager.set_task_status_success_with_id(task_id, result_summary)
     except Exception as e:
-        logger.error(f"Error while processing task_id {task_id}, error: {str(e)}")
+        logger.error(f"Error setting task {task_id} status to success: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error while processing task_id {task_id}, error: {str(e)}",
+            detail=f"Error setting task {task_id} status to success: {str(e)}",
         )
 
     return ApiCrawlingFinishedCreateOut(

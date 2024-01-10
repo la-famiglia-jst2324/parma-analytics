@@ -66,8 +66,7 @@ class MiningModuleManager:
                     .first()
                 )
                 if not task:
-                    logger.error(f"Task with id {task_id} not found.")
-                    raise Exception(f"Task with id {task_id} not found.")
+                    raise Exception("Task not found!")
 
                 task.status = "SUCCESS"
                 task.ended_at = datetime.now()
@@ -75,7 +74,6 @@ class MiningModuleManager:
                 session.commit()
                 logger.info(f"Task {task.task_id} successfully completed")
             except Exception as e:
-                logger.error(f"Error setting task {task_id} status to success: {e}")
                 session.rollback()
                 raise e
 
@@ -213,25 +211,18 @@ class MiningModuleManager:
             return None
 
         try:
-            parsed_url = httpx.URL(url)
             env = os.getenv("env", "local").lower()
 
-            if not parsed_url.scheme:
+            if "://" not in url:
                 default_scheme = "https" if env in ["prod", "staging"] else "http"
-                logging.debug(
-                    f"URL without scheme provided. Defaulting to {default_scheme}."
-                )
-                return default_scheme + "://" + url
+                url = f"{default_scheme}://{url}"
+
+            parsed_url = httpx.URL(url)
 
             scheme_lower = parsed_url.scheme.lower()
-
-            if env in ["prod", "staging"]:
-                # Use HTTPS in production and staging
-                if scheme_lower != "https":
-                    return parsed_url.copy_with(scheme="https").__str__()
-            elif scheme_lower != "http":
-                # Use HTTP in other environments
-                logging.debug("Using HTTP in non-production environment.")
+            if env in ["prod", "staging"] and scheme_lower != "https":
+                return parsed_url.copy_with(scheme="https").__str__()
+            elif env not in ["prod", "staging"] and scheme_lower != "http":
                 return parsed_url.copy_with(scheme="http").__str__()
 
             return url
