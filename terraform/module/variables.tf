@@ -1,4 +1,4 @@
-variable "env" {
+variable "DEPLOYMENT_ENV" {
   description = "staging or prod environment"
   type        = string
 }

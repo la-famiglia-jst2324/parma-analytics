@@ -1,3 +1,8 @@
+variable "DEPLOYMENT_ENV" {
+  description = "staging or prod environment"
+  type        = string
+}
+
 variable "db_root_password" {
   description = "Password for the root user of the database"
   type        = string
