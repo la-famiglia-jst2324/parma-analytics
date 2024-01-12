@@ -211,7 +211,7 @@ class MiningModuleManager:
             return None
 
         try:
-            env = os.getenv("env", "local").lower()
+            env = os.getenv("DEPLOYMENT_ENV", "local").lower()
 
             if "://" not in url:
                 default_scheme = "https" if env in ["prod", "staging"] else "http"
