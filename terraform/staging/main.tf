@@ -33,7 +33,6 @@ module "main" {
   env              = "staging"
   project          = local.project
   region           = local.region
-  DEPLOYMENT_ENV   = "staging"
   db_root_password = var.db_root_password
   base_domain      = var.base_domain
   api_subdomain    = "staging."

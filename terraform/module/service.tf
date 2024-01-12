@@ -92,7 +92,7 @@ resource "google_cloud_run_service" "parma_analytics_cloud_run" {
         }
         env {
           name  = "DEPLOYMENT_ENV"
-          value = var.DEPLOYMENT_ENV
+          value = var.env
         }
       }
     }
