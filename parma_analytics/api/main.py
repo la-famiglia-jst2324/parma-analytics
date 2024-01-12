@@ -15,7 +15,6 @@ from .routes import (
     new_company_router,
     schedule_router,
     source_measurement_router,
-    update_task_status_router,
 )
 
 env = os.getenv("DEPLOYMENT_ENV", "local")
@@ -72,9 +71,4 @@ app.include_router(source_measurement_router, tags=["source_measurement"])
 app.include_router(
     schedule_router,
     tags=["schedule_mining_modules"],
-)
-
-app.include_router(
-    update_task_status_router,
-    tags=["update_task_status"],
 )
