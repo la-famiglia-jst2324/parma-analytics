@@ -18,7 +18,7 @@ from .routes import (
     update_task_status_router,
 )
 
-env = os.getenv("env", "local")
+env = os.getenv("DEPLOYMENT_ENV", "local")
 
 if env == "prod":
     logging.basicConfig(level=logging.INFO)
