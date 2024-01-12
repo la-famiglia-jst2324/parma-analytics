@@ -91,6 +91,10 @@ resource "google_cloud_run_service" "parma_analytics_cloud_run" {
           value = var.chatgpt_api_key
         }
         env {
+          name  = "DEPLOYMENT_ENV"
+          value = var.env
+        }
+        env {
           name  = "PARMA_SHARED_SECRET_KEY"
           value = var.PARMA_SHARED_SECRET_KEY
         }
