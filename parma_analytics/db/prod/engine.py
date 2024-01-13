@@ -12,8 +12,6 @@ from sqlalchemy.orm import Session, sessionmaker
 
 Base = declarative_base()
 
-engine = None
-
 
 def get_engine() -> Engine:
     """Get the database engine."""
@@ -30,10 +28,6 @@ def get_engine() -> Engine:
     return engine
 
 
-engine = get_engine()
-SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-
 @contextmanager
 def get_session() -> Iterator[Session]:
     """Get a database session.
@@ -41,7 +35,7 @@ def get_session() -> Iterator[Session]:
     Yields:
         A database session.
     """
-    db = SessionLocal()
+    db = sessionmaker(autocommit=False, autoflush=False, engine=True)()
     try:
         yield db
     except:
