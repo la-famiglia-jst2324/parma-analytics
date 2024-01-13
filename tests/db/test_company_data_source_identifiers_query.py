@@ -13,6 +13,7 @@ from models.company_data_source_identifier import (
     CompanyDataSourceIdentifier,
     IdentifierType,
 )
+from parma_analytics.bl.company_data_source_identifiers_bll import IdentifierData, IdentifierUpdateData
 
 
 @pytest.fixture
@@ -36,37 +37,36 @@ def test_get_company_data_source_identifiers(mock_db):
 def test_create_company_data_source_identifier(
     mock_db, mock_company_data_source_identifier
 ):
+    identifier_data = IdentifierData(
+        company_data_source_id=1,
+        identifier_key="key",
+        identifier_type=IdentifierType.AUTOMATICALLY_DISCOVERED,
+        property="property",
+        value="value",
+        validity=datetime.now(),
+    )
     with patch(
         "models.company_data_source_identifier.CompanyDataSourceIdentifier",
         return_value=mock_company_data_source_identifier,
     ):
-        result = create_company_data_source_identifier(
-            mock_db,
-            1,
-            "key",
-            IdentifierType.AUTOMATICALLY_DISCOVERED,
-            "property",
-            "value",
-            datetime.now(),
-        )
+        result = create_company_data_source_identifier(mock_db, identifier_data)
     assert isinstance(result, CompanyDataSourceIdentifier)
 
 
 def test_update_company_data_source_identifier(
     mock_db, mock_company_data_source_identifier
 ):
+    update_data = IdentifierUpdateData(
+        identifier_key="key",
+        identifier_type=IdentifierType.AUTOMATICALLY_DISCOVERED,
+        property="property",
+        value="value",
+        validity=datetime.now(),
+    )
     mock_db.query.return_value.filter.return_value.first.return_value = (
         mock_company_data_source_identifier
     )
-    result = update_company_data_source_identifier(
-        mock_db,
-        1,
-        "key",
-        IdentifierType.AUTOMATICALLY_DISCOVERED,
-        "property",
-        "value",
-        datetime.now(),
-    )
+    result = update_company_data_source_identifier(mock_db, 1, update_data)
     assert result is not None
 
 
