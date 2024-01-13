@@ -1,18 +1,10 @@
 """Company Data Source model."""
+
 import sqlalchemy as sa
-from sqlalchemy import Enum, ForeignKey
+from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
 from parma_analytics.db.prod.engine import Base
-
-
-class HealthStatus(sa.Enum):
-    """HealthStatus enum."""
-
-    __tablename__ = "health_status"
-
-    HEALTHY = "UP"
-    UNHEALTHY = "DOWN"
 
 
 class CompanyDataSource(Base):
@@ -24,15 +16,13 @@ class CompanyDataSource(Base):
     data_source_id = sa.Column(sa.Integer, ForeignKey("data_source.id"), nullable=False)
     company_id = sa.Column(sa.Integer, ForeignKey("company.id"), nullable=False)
     is_data_source_active = sa.Column(sa.Boolean, nullable=False)
-    health_status = sa.Column(Enum(HealthStatus), nullable=False)
+    health_status = sa.Column(sa.String, nullable=False)
     created_at = sa.Column(sa.DateTime, nullable=False, default=sa.func.now())
     modified_at = sa.Column(
         sa.DateTime, nullable=False, default=sa.func.now(), onupdate=sa.func.now()
     )
 
     # Relations
-    data_source = relationship("DataSource", back_populates="company_data_sources")
-    company = relationship("Company", back_populates="company_data_sources")
     company_data_source_identifiers = relationship(
         "CompanyDataSourceIdentifier", back_populates="company_data_source"
     )
