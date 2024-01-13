@@ -1,15 +1,15 @@
 """CompanyDataSourceIdentifier DB queries."""
 
-from models.company_data_source import CompanyDataSource
-from models.company_data_source_identifier import (
-    CompanyDataSourceIdentifier,
-)
 from sqlalchemy import Engine
 from sqlalchemy.orm.session import Session
 
 from parma_analytics.bl.company_data_source_identifiers_bll import (
     IdentifierData,
     IdentifierUpdateData,
+)
+from parma_analytics.db.prod.models.company_data_source import CompanyDataSource
+from parma_analytics.db.prod.models.company_data_source_identifier import (
+    CompanyDataSourceIdentifier,
 )
 
 

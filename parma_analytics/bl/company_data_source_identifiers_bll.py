@@ -2,18 +2,17 @@
 from dataclasses import dataclass
 from datetime import datetime
 
-from company_data_source_identifiers_query import (
+from parma_analytics.db.prod.company_data_source_identifiers_query import (
     create_company_data_source_identifier,
     delete_company_data_source_identifier,
     get_company_data_source_identifiers,
     update_company_data_source_identifier,
 )
-from models.company_data_source_identifier import (
+from parma_analytics.db.prod.engine import get_session
+from parma_analytics.db.prod.models.company_data_source_identifier import (
     CompanyDataSourceIdentifier,
     IdentifierType,
 )
-
-from parma_analytics.db.prod.engine import get_session
 
 
 @dataclass
