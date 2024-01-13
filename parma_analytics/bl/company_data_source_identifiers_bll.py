@@ -1,8 +1,8 @@
 """Business layer logic for company data source identifiers."""
-from dataclasses import dataclass
-from datetime import datetime
 
 from parma_analytics.db.prod.company_data_source_identifiers_query import (
+    IdentifierData,
+    IdentifierUpdateData,
     create_company_data_source_identifier,
     delete_company_data_source_identifier,
     get_company_data_source_identifiers,
@@ -11,31 +11,7 @@ from parma_analytics.db.prod.company_data_source_identifiers_query import (
 from parma_analytics.db.prod.engine import get_session
 from parma_analytics.db.prod.models.company_data_source_identifier import (
     CompanyDataSourceIdentifier,
-    IdentifierType,
 )
-
-
-@dataclass
-class IdentifierData:
-    """Class for creating identifiers."""
-
-    company_data_source_id: int
-    identifier_key: str
-    identifier_type: IdentifierType
-    property: str
-    value: str
-    validity: datetime
-
-
-@dataclass
-class IdentifierUpdateData:
-    """Class for updating identifiers."""
-
-    identifier_key: str | None
-    identifier_type: IdentifierType | None
-    property: str | None
-    value: str | None
-    validity: datetime | None
 
 
 def get_company_data_source_identifiers_bll(
