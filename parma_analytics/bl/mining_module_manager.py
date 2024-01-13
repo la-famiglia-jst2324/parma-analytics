@@ -18,6 +18,7 @@ from parma_analytics.db.prod.models.types import (
     DataSource,
     ScheduledTask,
 )
+from parma_analytics.utils.jwt_handler import JWTHandler
 
 logger = logging.getLogger(__name__)
 
@@ -118,17 +119,20 @@ class MiningModuleManager:
                 )
                 if not invocation_endpoint:
                     logger.error(
-                        f"Invalid invocation endpoint: {invocation_endpoint} "
+                        f"Invalid invocation endpoint: "
+                        f"{data_source.invocation_endpoint} "
                         f"for data source {data_source.id}"
                     )
                     continue
 
-                trigger_endpoint = urllib.parse.urljoin(
+                trigger_endpoint: str = urllib.parse.urljoin(
                     invocation_endpoint, "/companies"
                 )
 
+                data_source_id: int = data_source.id
+
                 trigger_task = loop.create_task(
-                    self._trigger(trigger_endpoint, json_payload)
+                    self._trigger(data_source_id, trigger_endpoint, json_payload)
                 )
                 trigger_tasks.append(trigger_task)
 
@@ -231,13 +235,17 @@ class MiningModuleManager:
             return None
 
     async def _trigger(
-        self, invocation_endpoint: str, json_payload: str | None
+        self, data_source_id: int, invocation_endpoint: str, json_payload: str | None
     ) -> None:
         """Trigger the mining module for the given invocation endpoint and payload."""
         try:
             logger.debug(f"Sending request to {invocation_endpoint}")
             async with httpx.AsyncClient(verify=False) as client:
-                headers = {"Content-Type": "application/json"}
+                token: str = JWTHandler.create_jwt(data_source_id)
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {token}",
+                }
                 response = None
                 if json_payload is None:
                     response = await client.get(

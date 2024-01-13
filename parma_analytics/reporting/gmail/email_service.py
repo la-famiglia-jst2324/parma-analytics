@@ -2,6 +2,7 @@
 import base64
 import logging
 import os
+from typing import Literal
 
 import requests
 from sendgrid import SendGridAPIClient
@@ -39,7 +40,9 @@ class EmailService:
 
     def _get_users_emails(self, message_type: MessageType) -> list[str]:
         """Get all user emails for notification or report."""
-        subscription_table = (
+        subscription_table: Literal[
+            "notification_subscription", "report_subscription"
+        ] = (
             "notification_subscription"
             if message_type == "notification"
             else "report_subscription"
