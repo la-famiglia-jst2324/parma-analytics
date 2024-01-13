@@ -2,11 +2,6 @@ from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
-from parma_analytics.db.prod.models.company_data_source import CompanyDataSource
-from parma_analytics.db.prod.models.company_data_source_identifier import (
-    CompanyDataSourceIdentifier,
-    IdentifierType,
-)
 
 from parma_analytics.bl.company_data_source_identifiers_bll import (
     IdentifierData,
@@ -17,6 +12,11 @@ from parma_analytics.db.prod.company_data_source_identifiers_query import (
     delete_company_data_source_identifier,
     get_company_data_source_identifiers,
     update_company_data_source_identifier,
+)
+from parma_analytics.db.prod.models.company_data_source import CompanyDataSource
+from parma_analytics.db.prod.models.company_data_source_identifier import (
+    CompanyDataSourceIdentifier,
+    IdentifierType,
 )
 
 
