@@ -1,5 +1,6 @@
 """This module contains SQLAlchemy ORM models for measurement value tables."""
 
+
 from sqlalchemy import Column, DateTime, Float, Integer, String, func
 
 from parma_analytics.db.prod.models.base import Base
@@ -80,3 +81,16 @@ class MeasurementNestedValue(MeasurementValueBase):
 
     __tablename__ = "measurement_nested_value"
     value = Column(String)
+
+
+MeasurementValueModels = (
+    MeasurementIntValue
+    | MeasurementFloatValue
+    | MeasurementTextValue
+    | MeasurementParagraphValue
+    | MeasurementCommentValue
+    | MeasurementLinkValue
+    | MeasurementImageValue
+    | MeasurementDateValue
+    | MeasurementNestedValue
+)
