@@ -61,12 +61,7 @@ def create_company_data_source_identifier_bll(
     """
     return create_company_data_source_identifier(
         get_session(),
-        identifier_data.company_data_source_id,
-        identifier_data.identifier_key,
-        identifier_data.identifier_type,
-        identifier_data.property,
-        identifier_data.value,
-        identifier_data.validity,
+        identifier_data,
     )
 
 
@@ -83,11 +78,7 @@ def update_company_data_source_identifier_bll(
     return update_company_data_source_identifier(
         get_session(),
         identifier_id,
-        update_data.identifier_key,
-        update_data.identifier_type,
-        update_data.property,
-        update_data.value,
-        update_data.validity,
+        update_data,
     )
 
 
