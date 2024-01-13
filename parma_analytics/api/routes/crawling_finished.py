@@ -3,9 +3,10 @@
 import json
 import logging
 
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status
 from pydantic.json import pydantic_encoder
 
+from parma_analytics.api.dependencies.sourcing_auth import authorize_sourcing_request
 from parma_analytics.api.models.crawling_finished import (
     ApiCrawlingFinishedCreateIn,
     ApiCrawlingFinishedCreateOut,
@@ -28,11 +29,13 @@ logger = logging.getLogger(__name__)
 )
 def crawling_finished(
     crawling_finished_data: ApiCrawlingFinishedCreateIn,
+    source_id: int = Depends(authorize_sourcing_request),
 ) -> ApiCrawlingFinishedCreateOut:
     """Endpoint to receive notifications when crawling job has completed.
 
     Args:
         crawling_finished_data: Contains details about the completed crawling job.
+        source_id: The id of the module sending the notification.
 
     Returns:
         A simple receival confirmation message.
