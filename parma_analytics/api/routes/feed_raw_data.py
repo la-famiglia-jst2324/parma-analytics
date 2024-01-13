@@ -2,9 +2,10 @@
 
 from datetime import datetime
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 from starlette import status
 
+from parma_analytics.api.dependencies.sourcing_auth import authorize_sourcing_request
 from parma_analytics.api.models.feed_raw_data import (
     ApiFeedRawDataCreateIn,
     ApiFeedRawDataCreateOut,
@@ -24,11 +25,15 @@ router = APIRouter()
     status_code=status.HTTP_201_CREATED,
     description=""" Endpoint to receive raw data from data mining modules """,
 )
-def feed_raw_data(body: ApiFeedRawDataCreateIn) -> ApiFeedRawDataCreateOut:
+def feed_raw_data(
+    body: ApiFeedRawDataCreateIn,
+    source_id: int = Depends(authorize_sourcing_request),
+) -> ApiFeedRawDataCreateOut:
     """Feed raw data from data mining modules to data normalization modules.
 
     Args:
         body: The raw data to be normalized.
+        source_id: The id of the data source.
 
     Returns:
         Acknowledgement message containing the raw data and the timestamp.

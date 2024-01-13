@@ -6,7 +6,16 @@ from fastapi.testclient import TestClient
 from starlette import status
 
 from parma_analytics.api import app
+from parma_analytics.api.dependencies.sourcing_auth import (
+    authenticate_sourcing_request,
+    authorize_sourcing_request,
+)
 from parma_analytics.bl.mining_module_manager import MiningModuleManager
+from tests.api.dependencies.mock_sourcing_auth import (
+    mock_authenticate_sourcing_request,
+    mock_authorization_header,
+    mock_authorize_sourcing_request,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -15,6 +24,12 @@ logger = logging.getLogger(__name__)
 @pytest.fixture
 def client():
     assert app
+    app.dependency_overrides.update(
+        {
+            authorize_sourcing_request: mock_authorize_sourcing_request,
+            authenticate_sourcing_request: mock_authenticate_sourcing_request,
+        }
+    )
     return TestClient(app)
 
 
@@ -27,7 +42,9 @@ def test_crawling_finished(client):
     with patch.object(
         MiningModuleManager, "set_task_status_success_with_id"
     ) as mock_method:
-        response = client.post("/crawling-finished", json=test_data)
+        response = client.post(
+            "/crawling-finished", json=test_data, headers=mock_authorization_header
+        )
 
     assert mock_method.called
     assert response.status_code == status.HTTP_201_CREATED
@@ -71,7 +88,9 @@ def test_crawling_finished_exception_handling(client):
         "set_task_status_success_with_id",
         side_effect=Exception("Test Exception"),
     ):
-        response = client.post("/crawling-finished", json=test_data)
+        response = client.post(
+            "/crawling-finished", json=test_data, headers=mock_authorization_header
+        )
 
     assert response.status_code == status.HTTP_500_INTERNAL_SERVER_ERROR
     assert "Test Exception" in response.json().get("detail", "")
@@ -81,7 +100,9 @@ def test_crawling_finished_missing_field(client):
     # Test with missing 'task_id' field
     invalid_data = {"errors": None}
 
-    response = client.post("/crawling-finished", json=invalid_data)
+    response = client.post(
+        "/crawling-finished", json=invalid_data, headers=mock_authorization_header
+    )
 
     assert response.status_code == status.HTTP_422_UNPROCESSABLE_ENTITY
 
