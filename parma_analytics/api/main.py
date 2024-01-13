@@ -1,6 +1,7 @@
 """Main entrypoint for the API routes in of parma-analytics."""
 
 import logging
+import os
 
 from fastapi import FastAPI
 
@@ -16,7 +17,15 @@ from .routes import (
     source_measurement_router,
 )
 
-logging.basicConfig(level=logging.INFO)
+env = os.getenv("DEPLOYMENT_ENV", "local")
+
+if env == "prod":
+    logging.basicConfig(level=logging.INFO)
+elif env in ["staging", "local"]:
+    logging.basicConfig(level=logging.DEBUG)
+else:
+    logging.warning(f"Unknown environment '{env}'. Defaulting to INFO level.")
+    logging.basicConfig(level=logging.INFO)
 
 
 app = FastAPI()
