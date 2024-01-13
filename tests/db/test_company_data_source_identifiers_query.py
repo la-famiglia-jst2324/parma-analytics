@@ -2,7 +2,7 @@ from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
-from company_data_source_identifiers_query import (
+from parma_analytics.db.prod.company_data_source_identifiers_query import (
     create_company_data_source_identifier,
     delete_company_data_source_identifier,
     get_company_data_source_identifiers,
