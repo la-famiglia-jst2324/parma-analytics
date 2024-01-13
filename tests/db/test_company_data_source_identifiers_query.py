@@ -44,7 +44,7 @@ def test_create_company_data_source_identifier(
     identifier_data = IdentifierData(
         company_data_source_id=1,
         identifier_key="key",
-        identifier_type=IdentifierType.AUTOMATICALLY_DISCOVERED,
+        identifier_type=IdentifierType(IdentifierType.AUTOMATICALLY_DISCOVERED),
         property="property",
         value="value",
         validity=datetime.now(),
@@ -62,7 +62,7 @@ def test_update_company_data_source_identifier(
 ):
     update_data = IdentifierUpdateData(
         identifier_key="key",
-        identifier_type=IdentifierType.AUTOMATICALLY_DISCOVERED,
+        identifier_type=IdentifierType(IdentifierType.AUTOMATICALLY_DISCOVERED),
         property="property",
         value="value",
         validity=datetime.now(),
