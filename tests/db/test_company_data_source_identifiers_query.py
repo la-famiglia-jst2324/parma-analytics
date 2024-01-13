@@ -50,7 +50,7 @@ def test_create_company_data_source_identifier(
         validity=datetime.now(),
     )
     with patch(
-        "models.company_data_source_identifier.CompanyDataSourceIdentifier",
+        "parma_analytics.db.prod.models.company_data_source_identifier.CompanyDataSourceIdentifier",
         return_value=mock_company_data_source_identifier,
     ):
         result = create_company_data_source_identifier(mock_db, identifier_data)
