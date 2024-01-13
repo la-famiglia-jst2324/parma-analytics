@@ -21,6 +21,9 @@ from parma_analytics.db.prod.models.measurement_paragraph_value import (
     MeasurementParagraphValue,
 )
 from parma_analytics.db.prod.models.measurement_text_value import MeasurementTextValue
+from parma_analytics.db.prod.models.measurement_value_models import (
+    MeasurementValueModels,
+)
 from parma_analytics.db.prod.models.notification_channel import NotificationChannel
 from parma_analytics.db.prod.models.notification_subscription import (
     NotificationSubscription,
@@ -110,6 +113,15 @@ def fetch_company_id_from_bucket(engine: Engine, bucket_id: int) -> int:
         )
 
 
+__TableModels: dict[str, MeasurementValueModels] = {
+    "measurement_int_value": MeasurementIntValue,
+    "measurement_float_value": MeasurementFloatValue,
+    "measurement_text_value": MeasurementTextValue,
+    "measurement_paragraph_value": MeasurementParagraphValue,
+    "measurement_comment_value": MeasurementCommentValue,
+}
+
+
 def fetch_measurement_data(
     engine: Engine, measurement_ids: list, measurement_table: str
 ) -> pl.DataFrame:
@@ -123,28 +135,12 @@ def fetch_measurement_data(
     Returns:
         A DataFrame containing the measurement data.
     """
-    table = (
-        MeasurementIntValue
-        if measurement_table == "measurement_int_value"
-        else (
-            MeasurementFloatValue
-            if measurement_table == "measurement_float_value"
-            else (
-                MeasurementTextValue
-                if measurement_table == "measurement_text_value"
-                else (
-                    MeasurementParagraphValue
-                    if measurement_table == "measurement_paragraph_value"
-                    else MeasurementCommentValue
-                )
-            )
-        )
-    )
+    table = __TableModels[measurement_table]
 
     query = (
-        sa.select(table.company_measurement_id, table.value, table.created_at)  # type: ignore
-        .where(table.company_measurement_id.in_(measurement_ids))  # type: ignore
-        .order_by(table.created_at.desc())  # type: ignore
+        sa.select(table.company_measurement_id, table.value, table.created_at)
+        .where(table.company_measurement_id.in_(measurement_ids))
+        .order_by(table.created_at.desc())
         .compile(engine)
     )
     return pl.read_database(query, connection=engine)
