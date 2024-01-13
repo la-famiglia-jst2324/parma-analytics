@@ -2,8 +2,8 @@ from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 import pytest
-from models.company_data_source import CompanyDataSource
-from models.company_data_source_identifier import (
+from parma_analytics.db.prod.models.company_data_source import CompanyDataSource
+from parma_analytics.db.prod.models.company_data_source_identifier import (
     CompanyDataSourceIdentifier,
     IdentifierType,
 )
