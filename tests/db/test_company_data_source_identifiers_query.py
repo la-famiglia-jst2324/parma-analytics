@@ -13,7 +13,11 @@ from models.company_data_source_identifier import (
     CompanyDataSourceIdentifier,
     IdentifierType,
 )
-from parma_analytics.bl.company_data_source_identifiers_bll import IdentifierData, IdentifierUpdateData
+
+from parma_analytics.bl.company_data_source_identifiers_bll import (
+    IdentifierData,
+    IdentifierUpdateData,
+)
 
 
 @pytest.fixture
