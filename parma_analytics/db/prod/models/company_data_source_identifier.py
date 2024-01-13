@@ -8,6 +8,8 @@ from parma_analytics.db.prod.engine import Base
 class IdentifierType(sa.Enum):
     """Enum for identifier types."""
 
+    __tablename__ = "identifier_type"
+
     AUTOMATICALLY_DISCOVERED = "AUTOMATICALLY_DISCOVERED"
     MANUALLY_ADDED = "MANUALLY_ADDED"
 
