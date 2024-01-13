@@ -29,7 +29,9 @@ def test_get_credentials(tmp_path_factory, monkeypatch):
         clear=True,
     ):
         if not CREDENTIALS_PATH.exists():
-            tmp_path = tmp_path_factory.mktemp(f"tmpfile-gcp-secrets-{generate_uuid()}")
+            tmp_path = tmp_path_factory.mktemp(
+                f"tmpfile-gcp-secrets-{generate_uuid()}.json"
+            )
             tmp_path.write_text(gcp_secret)
             monkeypatch.setattr(
                 "parma_analytics.vendor.gcp.CREDENTIALS_PATH", tmp_path.absolute()
