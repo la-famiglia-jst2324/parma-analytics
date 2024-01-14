@@ -1,6 +1,6 @@
 """Example of a model for the API."""
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 # ------------------------------------------------------------------------------------ #
 #                                       Internal                                       #
@@ -10,8 +10,8 @@ from pydantic import BaseModel
 class _ApiDummyBase(BaseModel):
     """Internal base model for the dummy endpoints."""
 
-    name: str
-    price: float
+    name: str = Field(..., min_length=1, max_length=255)
+    price: float = Field(..., ge=0)
     is_offer: bool | None = None
 
 
