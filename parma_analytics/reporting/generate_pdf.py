@@ -1,41 +1,21 @@
-"""Generate pdf files."""
+import io
 
-from io import BytesIO
-
-from xhtml2pdf import pisa
+from weasyprint import HTML
 
 
-def fetch_resources(uri: str):
-    """Callback function that validates uri.
+def generate_pdf(html_content, css_styles=None):
+    """Generate PDF."""
+    pdf_options = {
+        "page-size": "A4",
+        "margin-top": "5mm",
+        "margin-right": "1mm",
+        "margin-bottom": "10mm",
+        "margin-left": "1mm",
+    }
 
-    Args:
-        uri: The uri to validate.
-
-    Returns:
-        The uri if it is valid, None otherwise.
-    """
-    if uri.startswith("http") or uri.startswith("data:"):
-        return uri
-    return None
-
-
-def generate_pdf(html_content: str) -> None:
-    """Generates a PDF from the given HTML content.
-
-    Args:
-        html_content: The html source code to convert to PDF.
-
-    Returns:
-        The generated PDF as bytes.
-    """
-    pdf_buffer = BytesIO()
-    output_pdf = pisa.CreatePDF(
-        BytesIO(html_content.encode("utf-8")),
-        pdf_buffer,
-        link_callback=fetch_resources,
-    )
+    pdf_buffer = io.BytesIO()
+    html = HTML(string=html_content, base_url=".")
+    html.write_pdf(pdf_buffer, **pdf_options)
 
     pdf_buffer.seek(0)
-
-    with open(output_pdf, "wb") as f:
-        f.write(pdf_buffer.read())
+    return pdf_buffer.read()

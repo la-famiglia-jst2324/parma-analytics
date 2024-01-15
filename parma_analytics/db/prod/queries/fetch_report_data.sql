@@ -17,5 +17,6 @@ INNER JOIN
     source_measurement AS sm ON csm.source_measurement_id = sm.id
 INNER JOIN
     data_source AS ds ON sm.source_module_id = ds.id
+WHERE company_id IN :companies
 ORDER BY
     c.id, ds.id, sm.id

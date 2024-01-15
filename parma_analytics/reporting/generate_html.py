@@ -16,22 +16,21 @@ def generate_html_report(data_for_template, measurement_data) -> str:
         An HTML report.
     """
     env = Environment(loader=FileSystemLoader("parma_analytics/reporting"))
-    template = env.get_template("report_template.html")
+    template = env.get_template("report_template/report_template.html")
 
     template_context = {
         "data_for_template": data_for_template,
         "generate_chart": generate_chart,
         "get_value_for_measurement": get_value_for_measurement,
-        "int_measurement_data": measurement_data.get("int", pl.DataFrame()),
-        "float_measurement_data": measurement_data.get("float", pl.DataFrame()),
-        "comment_measurement_data": measurement_data.get("comment", pl.DataFrame()),
-        "text_measurement_data": measurement_data.get("text", pl.DataFrame()),
-        "paragraph_measurement_data": measurement_data.get("paragraph", pl.DataFrame()),
+        "int_measurement_data": measurement_data.get("Int", pl.DataFrame()),
+        "float_measurement_data": measurement_data.get("Float", pl.DataFrame()),
+        "comment_measurement_data": measurement_data.get("Comment", pl.DataFrame()),
+        "text_measurement_data": measurement_data.get("Text", pl.DataFrame()),
+        "paragraph_measurement_data": measurement_data.get("Paragraph", pl.DataFrame()),
     }
 
     html_content = template.render(**template_context)
-    # html_file_path = "data_analysis_report.html"
-    # with open(html_file_path, "w") as html_file:
+    # with open("some Path.html", "w") as html_file:
     #     html_file.write(html_content)
 
     return html_content
