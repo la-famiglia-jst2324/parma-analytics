@@ -3,6 +3,7 @@
 import asyncio
 import json
 import logging
+import os
 import urllib.parse
 from contextlib import contextmanager
 from datetime import datetime
@@ -17,6 +18,7 @@ from parma_analytics.db.prod.models.types import (
     DataSource,
     ScheduledTask,
 )
+from parma_analytics.utils.jwt_handler import JWTHandler
 
 logger = logging.getLogger(__name__)
 
@@ -44,8 +46,17 @@ class MiningModuleManager:
     @staticmethod
     def set_task_status_success_with_id(
         task_id: int, result_summary: str | None
-    ) -> bool:
-        """Set the status of the task with the given task_id to success."""
+    ) -> None:
+        """Set the status of the task with the given task_id to success.
+
+        Args:
+            task_id: The ID of the task.
+            result_summary: A summary of the result, if any.
+
+        Raises:
+            Exception: If the task can not be found
+            Exception: If there's an error updating the task.
+        """
         with MiningModuleManager._manage_session() as session:
             try:
                 session.begin_nested()
@@ -56,20 +67,16 @@ class MiningModuleManager:
                     .first()
                 )
                 if not task:
-                    logger.error(f"Task with id {task_id} not found.")
-                    return False
+                    raise Exception("Task not found!")
 
                 task.status = "SUCCESS"
                 task.ended_at = datetime.now()
                 task.result_summary = result_summary or ""
                 session.commit()
                 logger.info(f"Task {task.task_id} successfully completed")
-                return True
             except Exception as e:
-                logger.error(f"Error setting task {task_id} status to success: {e}")
                 session.rollback()
-
-        return False
+                raise e
 
     def trigger_datasources(self, task_ids: list[int]) -> None:
         """Trigger the mining modules for the given task_ids.
@@ -102,25 +109,30 @@ class MiningModuleManager:
                     continue
 
                 data_source = cast(DataSource, task.data_source)
-                json_payload = self._construct_payload(data_source)
+                json_payload = self._construct_payload(data_source, task_id)
                 logger.debug(
                     f"Payload for data source {data_source.id}: {json_payload}"
                 )
 
-                invocation_endpoint = data_source.invocation_endpoint
+                invocation_endpoint = self._ensure_appropriate_scheme(
+                    data_source.invocation_endpoint
+                )
                 if not invocation_endpoint:
                     logger.error(
-                        f"Invocation endpoint not found "
+                        f"Invalid invocation endpoint: "
+                        f"{data_source.invocation_endpoint} "
                         f"for data source {data_source.id}"
                     )
                     continue
 
-                trigger_endpoint = urllib.parse.urljoin(
+                trigger_endpoint: str = urllib.parse.urljoin(
                     invocation_endpoint, "/companies"
                 )
 
+                data_source_id: int = data_source.id
+
                 trigger_task = loop.create_task(
-                    self._trigger(trigger_endpoint, json_payload)
+                    self._trigger(data_source_id, trigger_endpoint, json_payload)
                 )
                 trigger_tasks.append(trigger_task)
 
@@ -171,32 +183,69 @@ class MiningModuleManager:
 
         return None
 
-    def _construct_payload(self, data_source: DataSource) -> str | None:
+    def _construct_payload(self, data_source: DataSource, task_id: int) -> str | None:
         """Construct the payload for the given data source."""
         json_payload = None
         if data_source.source_name == "affinity":
             # For the Affinity module, we only have  GET /companies with no body
             pass
         elif data_source.source_name == "github":
-            logger.warn("Github payload not implemented yet.")
-            json_payload = json.dumps(GITHUB_PAYLOAD)
+            logger.warning("Github payload not implemented yet.")
+            github_payload = {
+                "task_id": task_id,
+                "companies": GITHUB_PAYLOAD["companies"].copy(),
+            }
+            json_payload = json.dumps(github_payload)
         elif data_source.source_name == "reddit":
-            logger.warn("Reddit payload not implemented yet.")
-            json_payload = json.dumps(REDDIT_PAYLOAD)
+            logger.warning("Reddit payload not implemented yet.")
+            reddit_payload = {
+                "task_id": task_id,
+                "companies": REDDIT_PAYLOAD["companies"].copy(),
+            }
+            json_payload = json.dumps(reddit_payload)
         else:
-            logger.warn("Other payload not implemented yet.")
+            logger.warning("Other payload not implemented yet.")
             pass
 
         return json_payload
 
+    def _ensure_appropriate_scheme(self, url: str) -> str | None:
+        """Adapt the URL scheme based on the deployment environment."""
+        if not url:
+            return None
+
+        try:
+            env = os.getenv("DEPLOYMENT_ENV", "local").lower()
+
+            if "://" not in url:
+                default_scheme = "https" if env in ["prod", "staging"] else "http"
+                url = f"{default_scheme}://{url}"
+
+            parsed_url = httpx.URL(url)
+
+            scheme_lower = parsed_url.scheme.lower()
+            if env in ["prod", "staging"] and scheme_lower != "https":
+                return parsed_url.copy_with(scheme="https").__str__()
+            elif env not in ["prod", "staging"] and scheme_lower != "http":
+                return parsed_url.copy_with(scheme="http").__str__()
+
+            return url
+        except httpx.InvalidURL:
+            logging.error(f"Invalid URL: {url}")
+            return None
+
     async def _trigger(
-        self, invocation_endpoint: str, json_payload: str | None
+        self, data_source_id: int, invocation_endpoint: str, json_payload: str | None
     ) -> None:
         """Trigger the mining module for the given invocation endpoint and payload."""
         try:
             logger.debug(f"Sending request to {invocation_endpoint}")
             async with httpx.AsyncClient(verify=False) as client:
-                headers = {"Content-Type": "application/json"}
+                token: str = JWTHandler.create_jwt(data_source_id)
+                headers = {
+                    "Content-Type": "application/json",
+                    "Authorization": f"Bearer {token}",
+                }
                 response = None
                 if json_payload is None:
                     response = await client.get(

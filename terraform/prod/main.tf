@@ -47,4 +47,7 @@ module "main" {
 
   chatgpt_api_key = var.chatgpt_api_key
 
+  PARMA_SHARED_SECRET_KEY = var.PARMA_SHARED_SECRET_KEY
+  PARMA_ANALYTICS_SECRET_KEY = var.PARMA_ANALYTICS_SECRET_KEY
+
 }

@@ -17,6 +17,8 @@ router = APIRouter()
 def create_dummy(dummy: ApiDummyCreateIn) -> ApiDummyCreateOut:
     """Dummy POST entrpoint for the API.
 
+    Dummy is not persisted in the database.
+
     Args:
         dummy: The dummy object to create.
     """
@@ -37,7 +39,7 @@ def read_dummy(dummy_id: int) -> ApiDummyOut:
         dummy_id: The ID of the dummy.
     """
     # fetch from the database layer through the business logic layer
-    return ApiDummyOut(id=dummy_id, name="Foo", price=42, is_offer=True)
+    return ApiDummyOut(id=dummy_id, name="foo", price=42, is_offer=True)
 
 
 @router.put("/dummy/{dummy_id}", status_code=202)
@@ -61,5 +63,7 @@ def delete_dummy(dummy_id: int) -> None:
     Args:
         dummy_id: The ID of the dummy.
     """
+    if dummy_id < 0:
+        raise ValueError("Dummy ID must be positive!")
     # hand over to business logic layer
     pass

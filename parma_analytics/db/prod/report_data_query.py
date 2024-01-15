@@ -1,16 +1,10 @@
 """Functions for fetching data from the database."""
-import polars as pl
 
-from pathlib import Path
+import polars as pl
 
 from parma_analytics.bl.schedule_manager import QUERIES_DIR
 from parma_analytics.db.prod.engine import get_session
 from parma_analytics.db.prod.queries.loader import read_query_file
-
-QUERIES_DIR = Path(__file__).parent.parent / "db" / "prod" / "queries"
-
-
-# from sqlalchemy.sql import text
 
 
 def fetch_data(companies: list) -> pl.DataFrame:
