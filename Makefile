@@ -17,6 +17,7 @@ dev:
 
 test:
 	pytest tests/
+	coverage html && open htmlcov/index.html
 
 purge-db:
 	docker-compose down

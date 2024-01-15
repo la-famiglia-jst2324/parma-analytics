@@ -10,11 +10,31 @@ variable "firebase_adminsdk_certificate" {
   sensitive   = true
 }
 
+variable "gcp_secret_manager_certificate" {
+  description = "Certificate for the a gcp secret manager service account"
+  type        = string
+  sensitive   = true
+}
+
 variable "base_domain" {
   description = "Base domain for the project"
   type        = string
   sensitive   = false
   default     = "parma.software"
+}
+
+/* ------------------------ Analytics and Sourcing Auth Flow ------------------------ */
+
+variable "PARMA_SHARED_SECRET_KEY" {
+  description = "Shared secret key for the analytics and sourcing auth flow"
+  type        = string
+  sensitive   = true
+}
+
+variable "PARMA_ANALYTICS_SECRET_KEY" {
+  description = "Analytics secret key the analytics and sourcing auth flow"
+  type        = string
+  sensitive   = true
 }
 
 /* ------------------------------------ SendGrid ------------------------------------ */

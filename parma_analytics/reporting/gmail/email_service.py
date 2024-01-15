@@ -1,5 +1,6 @@
 """A service that handles the sending of emails."""
 import base64
+import logging
 import os
 
 import requests
@@ -17,6 +18,8 @@ from ..notification_service_manager import (
     Category,
     NotificationServiceManager,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class EmailService:
@@ -73,9 +76,9 @@ class EmailService:
 
             try:
                 self.sg.send(message)
-                print(f"Email sent to {email}")
+                logging.debug(f"Email sent to {email}")
             except Exception as e:
-                print(f"Failed to send email to {email}: {e}")
+                logging.error(f"Failed to send email to {email}: {e}")
 
     def send_notification_email(
         self, content: str, company_name=None, company_logo=None
@@ -124,7 +127,7 @@ class EmailService:
 
             try:
                 self.sg.send(message)
-                print(f"Email sent to {email}")
+                logger.debug(f"Email sent to {email}")
             except Exception as e:
                 print(f"Failed to send email to {email}: {e}")
 

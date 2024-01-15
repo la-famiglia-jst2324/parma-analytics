@@ -62,6 +62,11 @@ resource "google_cloud_run_service" "parma_analytics_cloud_run" {
         }
 
         env {
+          name  = "GCP_SECRET_MANAGER_CERTIFICATE"
+          value = var.gcp_secret_manager_certificate
+        }
+
+        env {
           name  = "SENDGRID_API_KEY"
           value = var.sendgrid_api_key
         }
@@ -85,7 +90,18 @@ resource "google_cloud_run_service" "parma_analytics_cloud_run" {
           name  = "CHATGPT_API_KEY"
           value = var.chatgpt_api_key
         }
-
+        env {
+          name  = "DEPLOYMENT_ENV"
+          value = var.env
+        }
+        env {
+          name  = "PARMA_SHARED_SECRET_KEY"
+          value = var.PARMA_SHARED_SECRET_KEY
+        }
+        env {
+          name  = "PARMA_ANALYTICS_SECRET_KEY"
+          value = var.PARMA_ANALYTICS_SECRET_KEY
+        }
       }
     }
   }
