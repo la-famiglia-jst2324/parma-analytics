@@ -5,14 +5,13 @@ from datetime import datetime
 from generate_html import generate_html_report
 from generate_pdf import generate_pdf
 
-from parma_analytics.bl.generate_report import generate_report, get_subscribed_companies
+from parma_analytics.bl.generate_report import generate_report
 from parma_analytics.storage.report_storage import FirebaseStorageManager
 
 
 def generate_reports(user_id) -> None:
     """Generates the report for the companies and sends it to them via email."""
-    companies = get_subscribed_companies(user_id)
-    df, measurement_data = generate_report(companies)
+    df, measurement_data = generate_report()
     grouped_data = {}
     for row in df.iter_rows():
         (
