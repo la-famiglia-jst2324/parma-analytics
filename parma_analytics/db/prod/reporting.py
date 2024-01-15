@@ -12,15 +12,6 @@ from parma_analytics.db.prod.models.company_bucket_membership import (
     CompanyBucketMembership,
 )
 from parma_analytics.db.prod.models.company_subscription import CompanySubscription
-from parma_analytics.db.prod.models.measurement_comment_value import (
-    MeasurementCommentValue,
-)
-from parma_analytics.db.prod.models.measurement_float_value import MeasurementFloatValue
-from parma_analytics.db.prod.models.measurement_int_value import MeasurementIntValue
-from parma_analytics.db.prod.models.measurement_paragraph_value import (
-    MeasurementParagraphValue,
-)
-from parma_analytics.db.prod.models.measurement_text_value import MeasurementTextValue
 from parma_analytics.db.prod.models.measurement_value_models import (
     MeasurementValueModels,
 )
@@ -114,11 +105,15 @@ def fetch_company_id_from_bucket(engine: Engine, bucket_id: int) -> int:
 
 
 __TableModels: dict[str, MeasurementValueModels] = {
-    "measurement_int_value": MeasurementIntValue,
-    "measurement_float_value": MeasurementFloatValue,
-    "measurement_text_value": MeasurementTextValue,
-    "measurement_paragraph_value": MeasurementParagraphValue,
-    "measurement_comment_value": MeasurementCommentValue,
+    "measurement_int_value": MeasurementValueModels.MeasurementIntValue,
+    "measurement_float_value": MeasurementValueModels.MeasurementFloatValue,
+    "measurement_text_value": MeasurementValueModels.MeasurementTextValue,
+    "measurement_paragraph_value": MeasurementValueModels.MeasurementParagraphValue,
+    "measurement_comment_value": MeasurementValueModels.MeasurementCommentValue,
+    "measurement_link_value": MeasurementValueModels.MeasurementLinkValue,
+    "measurement_image_value": MeasurementValueModels.MeasurementImageValue,
+    "measurement_date_value": MeasurementValueModels.MeasurementDateValue,
+    "measurement_nested_value": MeasurementValueModels.MeasurementNestedValue,
 }
 
 
