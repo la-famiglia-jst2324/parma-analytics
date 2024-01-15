@@ -16,10 +16,7 @@ from parma_analytics.db.prod.models.types import DataSource, ScheduledTask
 
 @pytest.fixture
 def mock_async_client():
-    client = MagicMock(spec=AsyncClient)
-    client.get = AsyncMock()
-    client.post = AsyncMock()
-    return client
+    return MagicMock(spec=AsyncClient, get=AsyncMock(), post=AsyncMock())
 
 
 @pytest.fixture
@@ -45,16 +42,7 @@ def mining_module_manager(db_session):
     yield manager
 
 
-def test_context_manager_enter_exit(mining_module_manager):
-    try:
-        with mining_module_manager as manager:
-            assert manager.session is not None
-    except Exception:
-        pytest.fail("Context manager raised an exception")
-
-
-def test_set_task_status_success_with_id_integration(db_session):
-    # Setup
+def create_data_source(db_session) -> DataSource:
     new_data_source = DataSource(
         source_name="Test Source",
         is_active=True,
@@ -69,16 +57,33 @@ def test_set_task_status_success_with_id_integration(db_session):
     )
     db_session.add(new_data_source)
     db_session.commit()
+    return new_data_source
 
+
+def create_scheduled_task(db_session, data_source) -> ScheduledTask:
     new_task = ScheduledTask(
-        data_source_id=new_data_source.id,
+        data_source_id=data_source.id,
         schedule_type="ON_DEMAND",
         scheduled_at=datetime.now(),
         status="PENDING",
     )
     db_session.add(new_task)
     db_session.commit()
+    return new_task
 
+
+def test_context_manager_enter_exit(mining_module_manager):
+    try:
+        with mining_module_manager as manager:
+            assert manager.session is not None
+    except Exception:
+        pytest.fail("Context manager raised an exception")
+
+
+def test_set_task_status_success_with_id_integration(db_session):
+    # Setup
+    new_data_source = create_data_source(db_session)
+    new_task = create_scheduled_task(db_session, new_data_source)
     task_id = new_task.task_id
 
     # Run the Test
@@ -97,29 +102,8 @@ def test_set_task_status_success_with_id_integration(db_session):
 
 def test_schedule_task_success(db_session, mining_module_manager):
     # Setup
-    new_data_source = DataSource(
-        source_name="Test Source",
-        is_active=True,
-        frequency="DAILY",
-        health_status="UP",
-        description="Test data source",
-        created_at=datetime.now(),
-        modified_at=datetime.now(),
-        max_run_seconds=300,
-        version="1.0",
-        invocation_endpoint="http://test-endpoint.com",
-    )
-    db_session.add(new_data_source)
-    db_session.commit()
-
-    new_task = ScheduledTask(
-        data_source_id=new_data_source.id,
-        schedule_type="ON_DEMAND",
-        scheduled_at=datetime.now(),
-        status="PENDING",
-    )
-    db_session.add(new_task)
-    db_session.commit()
+    new_data_source = create_data_source(db_session)
+    new_task = create_scheduled_task(db_session, new_data_source)
 
     # Run the Test
     mining_module_manager._schedule_task(new_task)
@@ -136,29 +120,8 @@ def test_schedule_task_success(db_session, mining_module_manager):
 
 def test_schedule_task_error(db_session, mining_module_manager):
     # Setup
-    new_data_source = DataSource(
-        source_name="Test Source",
-        is_active=True,
-        frequency="DAILY",
-        health_status="UP",
-        description="Test data source",
-        created_at=datetime.now(),
-        modified_at=datetime.now(),
-        max_run_seconds=300,
-        version="1.0",
-        invocation_endpoint="http://test-endpoint.com",
-    )
-    db_session.add(new_data_source)
-    db_session.commit()
-
-    new_task = ScheduledTask(
-        data_source_id=new_data_source.id,
-        schedule_type="ON_DEMAND",
-        scheduled_at=datetime.now(),
-        status="PENDING",
-    )
-    db_session.add(new_task)
-    db_session.commit()
+    new_data_source = create_data_source(db_session)
+    new_task = create_scheduled_task(db_session, new_data_source)
 
     # Run the Test
     with patch.object(db_session, "commit", side_effect=Exception("Commit error")):
@@ -179,32 +142,9 @@ def test_trigger_datasources_success(
 ):
     mock_trigger.return_value = None
 
-    data_source = DataSource(
-        source_name="Test Source",
-        is_active=True,
-        frequency="DAILY",
-        health_status="UP",
-        description="Test data source",
-        created_at=datetime.now(),
-        modified_at=datetime.now(),
-        max_run_seconds=300,
-        version="1.0",
-        invocation_endpoint="http://test-endpoint.com",
-    )
-    db_session.add(data_source)
-    db_session.commit()
-
-    db_session.refresh(data_source)
+    data_source = create_data_source(db_session)
     data_source_id = data_source.id
-
-    scheduled_task = ScheduledTask(
-        data_source_id=data_source.id,
-        schedule_type="ON_DEMAND",
-        scheduled_at=datetime.now(),
-        status="PENDING",
-    )
-    db_session.add(scheduled_task)
-    db_session.commit()
+    scheduled_task = create_scheduled_task(db_session, data_source)
 
     task_id = scheduled_task.task_id
     task_ids = [scheduled_task.task_id]
