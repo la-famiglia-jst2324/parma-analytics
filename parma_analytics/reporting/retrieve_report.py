@@ -5,15 +5,16 @@ from datetime import datetime, timedelta
 from parma_analytics.storage.report_storage import FirebaseStorageManager
 
 
-def retrieve_reports(user_id):
+def retrieve_reports(user_id: str):
     """Retrieve the reports for a user and send it via email."""
     firebase_storage_manager = FirebaseStorageManager()
     user_folder_path = f"reports/users/{user_id}/"
+    blobs = firebase_storage_manager.get_existing_blobs(user_folder_path)
     latest_report = None
     latest_timestamp = 0
     one_week_ago = datetime.now() - timedelta(days=7)
     one_week_ago_timestamp = int(one_week_ago.strftime("%Y%m%d%H%M%S"))
-    blobs = firebase_storage_manager.get_existing_blobs(user_folder_path)
+
     if blobs is not None:
         for blob in blobs:
             timestamp_str = (

@@ -9,7 +9,7 @@ from parma_analytics.bl.generate_report import generate_report
 from parma_analytics.storage.report_storage import FirebaseStorageManager
 
 
-def generate_reports(user_id) -> None:
+def generate_reports(user_id: str) -> None:
     """Generates the report for the companies and sends it to them via email."""
     df, measurement_data = generate_report()
     grouped_data = {}
@@ -59,4 +59,3 @@ def generate_reports(user_id) -> None:
     firebase_storage_manager.upload_string_to_user(
         user_id, pdf, file_name, content_type
     )
-    firebase_storage_manager.get_existing_blobs("549")
