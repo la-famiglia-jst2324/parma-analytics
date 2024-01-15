@@ -2,27 +2,12 @@
 
 import polars as pl
 
-from parma_analytics.db.prod.report_data_query import fetch_data, fetch_measurement_data
-from parma_analytics.db.prod.subscribed_companies import (
-    get_subscribed_companies as fetch_subscribed_companies,
-)
+from parma_analytics.db.prod.report_data import fetch_data, fetch_measurement_data
 
 
-def get_subscribed_companies(user_id: str):
-    """Gets subscribed companies for a particular user.
-
-    Args:
-        user_id: The id for a particular user
-
-    Returns:
-        list: The list of the subscribed companies for that user
-    """
-    return fetch_subscribed_companies(user_id)
-
-
-def generate_report(companies) -> pl.DataFrame:
+def generate_report() -> pl.DataFrame:
     """Generate a report."""
-    df = fetch_data(companies)
+    df = fetch_data()
     measurement_types = df["measurement_type"].unique().to_list()
     measurement_data = {}
     for measurement_type in measurement_types:
@@ -30,6 +15,6 @@ def generate_report(companies) -> pl.DataFrame:
         company_measurement_ids = measurements["company_measurement_id"].to_list()
         measurement_table = f"measurement_{measurement_type}_value"
         measurement_data[measurement_type] = fetch_measurement_data(
-            company_measurement_ids, measurement_table.lower()
+            company_measurement_ids, measurement_table
         )
     return df, measurement_data
