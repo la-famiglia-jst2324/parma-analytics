@@ -5,7 +5,7 @@ from parma_analytics.db.prod.engine import get_session
 from parma_analytics.db.prod.models.subscribed_companies import CompanySubscription
 
 
-def get_subscribed_companies(user_id: int) -> list[int]:
+def get_subscribed_companies(user_id: str) -> list[int]:
     """Gets subscribed companies for a particular user.
 
     Args:

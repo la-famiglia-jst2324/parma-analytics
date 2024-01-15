@@ -8,20 +8,19 @@ from parma_analytics.db.prod.subscribed_companies import (
 )
 
 
-def get_subscribed_companies(user_id):
+def get_subscribed_companies(user_id: str):
     """Gets subscribed companies for a particular user.
 
     Args:
-        userId: The id for a particular user
+        user_id: The id for a particular user
 
     Returns:
         list: The list of the subscribed companies for that user
     """
-    user_id = 549
     return fetch_subscribed_companies(user_id)
 
 
-def generate_report(companies: list) -> pl.DataFrame:
+def generate_report(companies) -> pl.DataFrame:
     """Generate a report."""
     df = fetch_data(companies)
     measurement_types = df["measurement_type"].unique().to_list()

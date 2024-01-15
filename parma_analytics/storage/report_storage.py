@@ -67,6 +67,18 @@ class FirebaseStorageManager:
         else:
             return None
 
+    def get_existing_blobs(self, folder_path: str) -> Blob | None:
+        """Retrieve existing blobs (files) in the specified user's folder.
+
+        Args:
+            folder_path: The folder path.
+
+        Returns:
+            The list of blobs
+        """
+        blobs = self.bucket.list_blobs(prefix=folder_path)
+        return blobs
+
     def get_download_url(
         self, blob: Blob, validity: timedelta = timedelta(days=1)
     ) -> str:
@@ -100,9 +112,43 @@ class FirebaseStorageManager:
             "download_url": blob.generate_signed_url(timedelta(days=1)),
         }
 
+    def upload_string_to_user(
+        self, user_id: str, file_content: str, file_name: str, content_type: str
+    ) -> str:
+        """Upload a file content as string to the user's folder.
+
+        Args:
+            user_id: The id of the user.
+            file_content: The content of the file to upload as a string.
+            file_name: The name of the file.
+            content_type: The type of file to upload
+
+        Returns:
+            The uploaded file.
+        """
+        blob_path = f"reports/users/{user_id}/{file_name}"
+        return self._upload_string(blob_path, file_content, content_type)
+
     # ----------------------------------- Internal ----------------------------------- #
 
     def _upload_file(self, blob_path: str, file_path: str) -> Blob:
         blob = self.bucket.blob(blob_path)
         blob.upload_from_filename(file_path)
+        return blob
+
+    def _upload_string(
+        self, blob_path: str, file_content: str, content_type: str
+    ) -> str:
+        """Upload a file content as string to Firebase Cloud Storage.
+
+        Args:
+            blob_path: The destination path for the file in the storage bucket.
+            file_content: The content of the file to upload as a string.
+            content_type: The type of file to upload
+
+        Returns:
+            The uploaded file.
+        """
+        blob = self.bucket.blob(blob_path)
+        blob.upload_from_string(file_content, content_type)
         return blob
