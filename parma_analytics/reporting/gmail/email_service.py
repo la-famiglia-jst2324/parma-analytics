@@ -15,7 +15,6 @@ from sendgrid.helpers.mail import (
 
 from ..notification_service_manager import (
     Category,
-    MessageType,
     NotificationServiceManager,
 )
 
@@ -34,18 +33,11 @@ class EmailService:
         self.category: Category = bucket_or_company
         self.company_or_bucket_id: int = company_or_bucket_id
 
-    def _get_users_emails(self, message_type: MessageType) -> list[str]:
+    def _get_users_emails(self) -> list[str]:
         """Get all user emails for notification or report."""
-        subscription_table = (
-            "notification_subscription"
-            if message_type == "notification"
-            else "report_subscription"
-        )
-
         channel_manager = NotificationServiceManager(
             self.company_or_bucket_id,
-            subscription_table,
-            message_type,
+            "notification_subscription",
             "email",
             self.category,
         )
@@ -89,7 +81,7 @@ class EmailService:
         self, content: str, company_name=None, company_logo=None
     ):
         """Sends a notification email."""
-        emails = self._get_users_emails(message_type="notification")
+        emails = self._get_users_emails()
         dynamic_template_data = {
             "company_name": company_name,
             "company_logo": company_logo,
@@ -97,10 +89,10 @@ class EmailService:
         }
         self._send_email(emails, self.notification_template_id, dynamic_template_data)
 
-    def send_report_email(self, company_bucket_name: str, attachments=None):
+    def send_report_email(self, company_name: str, attachments=None):
         """Sends a report email."""
-        emails = self._get_users_emails(message_type="report")
-        dynamic_template_data = {"company_bucket": company_bucket_name}
+        emails = self._get_users_emails()
+        dynamic_template_data = {"company_bucket": company_name}
         self._send_email(
             emails, self.report_template_id, dynamic_template_data, attachments
         )
@@ -135,3 +127,11 @@ class EmailService:
                 print(f"Email sent to {email}")
             except Exception as e:
                 print(f"Failed to send email to {email}: {e}")
+
+
+EmailService("company", 1).send_report_email(
+    "company name",
+    attachments=[
+        "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
+    ],
+)
