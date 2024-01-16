@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 from parma_analytics.bl.mining_module_manager import MiningModuleManager
 from parma_analytics.bl.mining_trigger_payloads import GITHUB_PAYLOAD, REDDIT_PAYLOAD
 from parma_analytics.db.prod.engine import get_engine
+from parma_analytics.db.prod.models.base import Base
 from parma_analytics.db.prod.models.types import DataSource, ScheduledTask
 
 
@@ -31,6 +32,7 @@ def db_session():
     engine = get_engine()
     _session = sessionmaker(bind=engine)
     session = _session()
+    Base.metadata.create_all(engine)
     yield session
     session.close()
 
