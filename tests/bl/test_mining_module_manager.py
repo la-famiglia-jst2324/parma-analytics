@@ -7,7 +7,6 @@ from unittest.mock import ANY, AsyncMock, MagicMock, patch
 
 import pytest
 from httpx import AsyncClient, HTTPStatusError, InvalidURL, Request, RequestError
-from sqlalchemy import text
 from sqlalchemy.orm import sessionmaker
 
 from parma_analytics.bl.mining_module_manager import MiningModuleManager
@@ -16,11 +15,7 @@ from parma_analytics.db.prod.engine import get_engine
 from parma_analytics.db.prod.models.base import Base
 from parma_analytics.db.prod.models.types import (
     DataSource,
-    Frequency,
-    HealthStatus,
-    ScheduleType,
     ScheduledTask,
-    TaskStatus,
 )
 
 
@@ -41,24 +36,31 @@ def get_enum_values(literal):
 
 
 def create_enums(engine):
-    enums = {
-        "Frequency": get_enum_values(Frequency),
-        "HealthStatus": get_enum_values(HealthStatus),
-        "ScheduleType": get_enum_values(ScheduleType),
-        "TaskStatus": get_enum_values(TaskStatus),
-    }
+    enum_commands = [
+        """
+        DO $$
+        BEGIN
+            IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'healthstatus') THEN
+                DROP TYPE HealthStatus;
+            END IF;
+            CREATE TYPE HealthStatus AS ENUM ('UP', 'DOWN');
+        END
+        $$;
+        """
+    ]
 
-    for enum_name, values in enums.items():
-        values_list = ", ".join(f"'{value}'" for value in values)
-        check_enum_exists = text(
-            f"SELECT EXISTS "
-            f"(SELECT 1 FROM pg_type WHERE typname = '{enum_name.lower()}');"
-        )
-        create_enum = text(f"CREATE TYPE {enum_name} AS ENUM ({values_list});")
-        with engine.begin() as conn:
-            result = conn.execute(check_enum_exists).scalar()
-            if not result:
-                conn.execute(create_enum)
+    conn = engine.raw_connection()
+    try:
+        cursor = conn.cursor()
+        for command in enum_commands:
+            cursor.execute(command)
+        conn.commit()
+    except Exception as e:
+        print(f"An error occurred: {e}")
+        conn.rollback()
+    finally:
+        cursor.close()
+        conn.close()
 
 
 @pytest.fixture(scope="function")
