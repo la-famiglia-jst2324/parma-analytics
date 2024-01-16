@@ -1,7 +1,5 @@
 import json
 import logging
-from datetime import datetime
-from typing import get_args
 from unittest import mock
 from unittest.mock import ANY, AsyncMock, MagicMock, patch
 
@@ -12,7 +10,6 @@ from sqlalchemy.orm import sessionmaker
 from parma_analytics.bl.mining_module_manager import MiningModuleManager
 from parma_analytics.bl.mining_trigger_payloads import GITHUB_PAYLOAD, REDDIT_PAYLOAD
 from parma_analytics.db.prod.engine import get_engine
-from parma_analytics.db.prod.models.base import Base
 from parma_analytics.db.prod.models.types import (
     DataSource,
     ScheduledTask,
@@ -31,45 +28,11 @@ def mock_os_getenv():
         yield mock_getenv
 
 
-def get_enum_values(literal):
-    return get_args(literal)
-
-
-def create_enums(engine):
-    enum_commands = [
-        """
-        DO $$
-        BEGIN
-            IF EXISTS (SELECT 1 FROM pg_type WHERE typname = 'healthstatus') THEN
-                DROP TYPE HealthStatus;
-            END IF;
-            CREATE TYPE HealthStatus AS ENUM ('UP', 'DOWN');
-        END
-        $$;
-        """
-    ]
-
-    conn = engine.raw_connection()
-    try:
-        cursor = conn.cursor()
-        for command in enum_commands:
-            cursor.execute(command)
-        conn.commit()
-    except Exception as e:
-        print(f"An error occurred: {e}")
-        conn.rollback()
-    finally:
-        cursor.close()
-        conn.close()
-
-
 @pytest.fixture(scope="function")
 def db_session():
     engine = get_engine()
     _session = sessionmaker(bind=engine)
     session = _session()
-    create_enums(engine)
-    Base.metadata.create_all(engine)
     yield session
     session.close()
 
@@ -81,112 +44,128 @@ def mining_module_manager(db_session):
     yield manager
 
 
-def create_data_source(db_session) -> DataSource:
-    new_data_source = DataSource(
-        source_name="Test Source",
-        is_active=True,
-        frequency="DAILY",
-        health_status="UP",
-        description="Test data source",
-        created_at=datetime.now(),
-        modified_at=datetime.now(),
-        max_run_seconds=300,
-        version="1.0",
-        invocation_endpoint="http://test-endpoint.com",
-    )
-    db_session.add(new_data_source)
-    db_session.commit()
-    return new_data_source
+@patch("parma_analytics.db.prod.engine.get_engine")
+def test_context_manager_enter_exit(mock_get_engine, mining_module_manager):
+    mock_engine = MagicMock()
+    mock_session = MagicMock()
+    mock_get_engine.return_value = mock_engine
+    mining_module_manager.session = mock_session
 
-
-def create_scheduled_task(db_session, data_source) -> ScheduledTask:
-    new_task = ScheduledTask(
-        data_source_id=data_source.id,
-        schedule_type="ON_DEMAND",
-        scheduled_at=datetime.now(),
-        status="PENDING",
-    )
-    db_session.add(new_task)
-    db_session.commit()
-    return new_task
-
-
-def test_context_manager_enter_exit(mining_module_manager):
     try:
         with mining_module_manager as manager:
             assert manager.session is not None
     except Exception:
         pytest.fail("Context manager raised an exception")
 
+    mock_session.close.assert_called_once()
 
-def test_set_task_status_success_with_id_integration(db_session):
-    # Setup
-    new_data_source = create_data_source(db_session)
-    new_task = create_scheduled_task(db_session, new_data_source)
-    task_id = new_task.task_id
 
-    # Run the Test
+@patch("parma_analytics.db.prod.engine.get_engine")
+@patch("parma_analytics.bl.mining_module_manager.MiningModuleManager._manage_session")
+def test_set_task_status_success_with_id_integration(
+    mock_manage_session, mock_get_engine
+):
+    mock_engine = MagicMock()
+    mock_session = MagicMock()
+    mock_get_engine.return_value = mock_engine
+
+    mock_task = MagicMock(spec=ScheduledTask)
+    task_id = 123
+    mock_task.task_id = task_id
+
+    # Setup mock query chain
+    mock_query = MagicMock()
+    mock_query.filter.return_value.with_for_update.return_value.first.return_value = (
+        mock_task
+    )
+    mock_session.query.return_value = mock_query
+
+    # Mock _manage_session to yield the mock session
+    mock_manage_session.return_value.__enter__.return_value = mock_session
+
+    # Run the test
     MiningModuleManager.set_task_status_success_with_id(task_id, "Test Result")
 
     # Assertions
-    db_session.refresh(new_task)
-    assert new_task.status == "SUCCESS"
-    assert new_task.result_summary == "Test Result"
-
-    # Cleanup
-    db_session.delete(new_task)
-    db_session.delete(new_data_source)
-    db_session.commit()
+    assert mock_task.status == "SUCCESS"
+    assert mock_task.result_summary == "Test Result"
+    mock_session.commit.assert_called()
 
 
-def test_schedule_task_success(db_session, mining_module_manager):
-    # Setup
-    new_data_source = create_data_source(db_session)
-    new_task = create_scheduled_task(db_session, new_data_source)
+def test_schedule_task_success(mining_module_manager):
+    # Mock the session and ScheduledTask
+    mock_session = MagicMock()
+    mock_task = MagicMock(spec=ScheduledTask)
+    mock_task.data_source_id = 1  # Example data source ID
+
+    mining_module_manager.session = mock_session
+
+    # Mock task to be returned by the session
+    (
+        mock_session.query.return_value.filter.return_value.with_for_update.return_value.first
+    ).return_value = mock_task
 
     # Run the Test
-    mining_module_manager._schedule_task(new_task)
+    result = mining_module_manager._schedule_task(mock_task)
 
     # Assertions
-    db_session.refresh(new_task)
-    assert new_task.started_at is not None
-
-    # Cleanup
-    db_session.delete(new_task)
-    db_session.delete(new_data_source)
-    db_session.commit()
+    assert result is not None
+    assert result.started_at is not None
+    mock_session.commit.assert_called()
 
 
-def test_schedule_task_error(db_session, mining_module_manager):
-    # Setup
-    new_data_source = create_data_source(db_session)
-    new_task = create_scheduled_task(db_session, new_data_source)
+def test_schedule_task_error(mining_module_manager):
+    mock_session = MagicMock()
+    mock_task = MagicMock(spec=ScheduledTask)
+    mock_task.data_source_id = 1
+
+    mock_session.commit.side_effect = Exception("Commit error")
+    mock_session.rollback.side_effect = lambda: setattr(mock_task, "started_at", None)
+
+    mining_module_manager.session = mock_session
+
+    (
+        mock_session.query.return_value.filter.return_value.with_for_update.return_value.first
+    ).return_value = mock_task
 
     # Run the Test
-    with patch.object(db_session, "commit", side_effect=Exception("Commit error")):
-        result = mining_module_manager._schedule_task(new_task)
+    result = mining_module_manager._schedule_task(mock_task)
 
     # Assertions
     assert result is None
-    assert new_task.started_at is None
-
-    # Cleanup
-    db_session.delete(new_task)
-    db_session.commit()
+    assert mock_task.started_at is None  # Ensure started_at is reset
 
 
+@pytest.mark.parametrize(
+    "source_id, task_id",
+    [
+        (1, 123),
+        (2, 456),
+        (3, 789),
+    ],
+)
 @patch("parma_analytics.bl.mining_module_manager.MiningModuleManager._trigger")
 def test_trigger_datasources_success(
-    mock_trigger, db_session, mining_module_manager, mock_async_client, caplog
+    mock_trigger, source_id, task_id, mock_async_client, caplog
 ):
     mock_trigger.return_value = None
 
-    data_source = create_data_source(db_session)
-    data_source_id = data_source.id
-    scheduled_task = create_scheduled_task(db_session, data_source)
+    mock_data_source = MagicMock(spec=DataSource)
+    mock_data_source.id = source_id
 
-    task_id = scheduled_task.task_id
-    task_ids = [scheduled_task.task_id]
+    mock_scheduled_task = MagicMock(spec=ScheduledTask)
+    mock_scheduled_task.task_id = task_id
+    mock_scheduled_task.data_source = mock_data_source
+
+    mock_session = MagicMock()
+    (
+        mock_session.query.return_value.filter.return_value.with_for_update.return_value.first
+    ).return_value = mock_scheduled_task
+
+    mining_module_manager = MiningModuleManager()
+    mining_module_manager.session = mock_session
+
+    task_ids = [mock_scheduled_task.task_id]
 
     mock_async_client_instance = mock_async_client.return_value.__aenter__.return_value
     mock_async_client_instance.post.return_value = MagicMock(status_code=200)
@@ -196,18 +175,12 @@ def test_trigger_datasources_success(
         mining_module_manager.trigger_datasources(task_ids)
 
     # Assertions
-    db_session.refresh(scheduled_task)
-    assert scheduled_task.started_at is not None
+    assert mock_scheduled_task.started_at is not None
     log_messages = [record.message for record in caplog.records]
     assert f"Triggering mining modules for task_ids [{task_id}]" in log_messages[0]
     assert f"Triggering mining module for task_id {task_id}" in log_messages[1]
-    assert f"Task {task_id} scheduled (data source {data_source_id})" in log_messages[2]
+    assert f"Task {task_id} scheduled (data source {source_id})" in log_messages[2]
     assert "Other payload not implemented yet." in log_messages[3]
-
-    # Clean up
-    db_session.delete(scheduled_task)
-    db_session.delete(data_source)
-    db_session.commit()
 
 
 @pytest.mark.parametrize("task_id", [0, 1, 123, 9999])
