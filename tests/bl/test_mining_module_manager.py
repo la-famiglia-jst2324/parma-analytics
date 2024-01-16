@@ -65,6 +65,7 @@ def test_context_manager_enter_exit(mock_get_engine, mining_module_manager):
 def test_set_task_status_success_with_id_integration(
     mock_manage_session, mock_get_engine
 ):
+    # Setup
     mock_engine = MagicMock()
     mock_session = MagicMock()
     mock_get_engine.return_value = mock_engine
@@ -73,14 +74,12 @@ def test_set_task_status_success_with_id_integration(
     task_id = 123
     mock_task.task_id = task_id
 
-    # Setup mock query chain
     mock_query = MagicMock()
     mock_query.filter.return_value.with_for_update.return_value.first.return_value = (
         mock_task
     )
     mock_session.query.return_value = mock_query
 
-    # Mock _manage_session to yield the mock session
     mock_manage_session.return_value.__enter__.return_value = mock_session
 
     # Run the test
@@ -93,14 +92,13 @@ def test_set_task_status_success_with_id_integration(
 
 
 def test_schedule_task_success(mining_module_manager):
-    # Mock the session and ScheduledTask
+    # Setup
     mock_session = MagicMock()
     mock_task = MagicMock(spec=ScheduledTask)
-    mock_task.data_source_id = 1  # Example data source ID
+    mock_task.data_source_id = 1
 
     mining_module_manager.session = mock_session
 
-    # Mock task to be returned by the session
     (
         mock_session.query.return_value.filter.return_value.with_for_update.return_value.first
     ).return_value = mock_task
@@ -115,6 +113,7 @@ def test_schedule_task_success(mining_module_manager):
 
 
 def test_schedule_task_error(mining_module_manager):
+    # Setup
     mock_session = MagicMock()
     mock_task = MagicMock(spec=ScheduledTask)
     mock_task.data_source_id = 1
@@ -133,7 +132,7 @@ def test_schedule_task_error(mining_module_manager):
 
     # Assertions
     assert result is None
-    assert mock_task.started_at is None  # Ensure started_at is reset
+    assert mock_task.started_at is None
 
 
 @pytest.mark.parametrize(
@@ -148,6 +147,7 @@ def test_schedule_task_error(mining_module_manager):
 def test_trigger_datasources_success(
     mock_trigger, source_id, task_id, mock_async_client, caplog
 ):
+    # Setup
     mock_trigger.return_value = None
 
     mock_data_source = MagicMock(spec=DataSource)
