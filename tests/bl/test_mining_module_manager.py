@@ -1,6 +1,7 @@
 import json
 import logging
 from datetime import datetime
+from typing import get_args
 from unittest import mock
 from unittest.mock import ANY, AsyncMock, MagicMock, patch
 
@@ -12,7 +13,14 @@ from parma_analytics.bl.mining_module_manager import MiningModuleManager
 from parma_analytics.bl.mining_trigger_payloads import GITHUB_PAYLOAD, REDDIT_PAYLOAD
 from parma_analytics.db.prod.engine import get_engine
 from parma_analytics.db.prod.models.base import Base
-from parma_analytics.db.prod.models.types import DataSource, ScheduledTask
+from parma_analytics.db.prod.models.types import (
+    DataSource,
+    Frequency,
+    HealthStatus,
+    ScheduleType,
+    ScheduledTask,
+    TaskStatus,
+)
 
 
 @pytest.fixture
@@ -27,11 +35,34 @@ def mock_os_getenv():
         yield mock_getenv
 
 
+def get_enum_values(literal):
+    return get_args(literal)
+
+
+def create_enums(engine):
+    enums = {
+        "Frequency": get_enum_values(Frequency),
+        "HealthStatus": get_enum_values(HealthStatus),
+        "ScheduleType": get_enum_values(ScheduleType),
+        "TaskStatus": get_enum_values(TaskStatus),
+    }
+
+    with engine.connect() as connection:
+        for enum_name, values in enums.items():
+            values_list = ", ".join(f"'{value}'" for value in values)
+            sql_command = f"CREATE TYPE {enum_name} AS ENUM ({values_list});"
+            try:
+                connection.execute(sql_command)
+            except Exception as e:
+                print(f"Error creating enum {enum_name}: {e}")
+
+
 @pytest.fixture(scope="function")
 def db_session():
     engine = get_engine()
     _session = sessionmaker(bind=engine)
     session = _session()
+    create_enums(engine)
     Base.metadata.create_all(engine)
     yield session
     session.close()
