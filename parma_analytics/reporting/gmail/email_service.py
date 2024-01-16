@@ -15,7 +15,6 @@ from sendgrid.helpers.mail import (
 )
 
 from ..notification_service_manager import (
-    Category,
     NotificationServiceManager,
 )
 
@@ -25,25 +24,18 @@ logger = logging.getLogger(__name__)
 class EmailService:
     """A service that handles the sending of emails."""
 
-    def __init__(self, bucket_or_company: Category, company_or_bucket_id: int):
+    def __init__(self, company_id: int):
         self.sg: SendGridAPIClient = SendGridAPIClient(os.environ["SENDGRID_API_KEY"])
         self.notification_template_id: str | None = os.environ[
             "SENDGRID_NOTIFICATION_TEMPLATE_ID"
         ]
         self.report_template_id: str | None = os.environ["SENDGRID_REPORT_TEMPLATE_ID"]
-
         self.from_email: str | None = os.environ["SENDGRID_FROM_EMAIL"]
-        self.category: Category = bucket_or_company
-        self.company_or_bucket_id: int = company_or_bucket_id
+        self.company_id: int = company_id
 
     def _get_users_emails(self) -> list[str]:
         """Get all user emails for notification or report."""
-        channel_manager = NotificationServiceManager(
-            self.company_or_bucket_id,
-            "notification_subscription",
-            "email",
-            self.category,
-        )
+        channel_manager = NotificationServiceManager(self.company_id, "email")
         return channel_manager.get_notification_destinations()
 
     def _send_email(
@@ -130,11 +122,4 @@ class EmailService:
                 logger.debug(f"Email sent to {email}")
             except Exception as e:
                 print(f"Failed to send email to {email}: {e}")
-
-
-EmailService("company", 1).send_report_email(
-    "company name",
-    attachments=[
-        "https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf"
-    ],
-)
+                logger.error(f"Failed to send email to {email}: {e}")
