@@ -16,7 +16,7 @@ dev:
 	uvicorn parma_analytics.api:app --reload
 
 test:
-	pytest tests/api/routes/test_data_source_handshake.py
+	pytest tests/
 	coverage html && open htmlcov/index.html
 
 purge-db:
