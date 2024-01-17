@@ -6,7 +6,8 @@ from pathlib import Path
 from typing import Any
 
 import sqlalchemy as sa
-from sqlalchemy import Engine, func, or_
+from sqlalchemy import func, or_
+from sqlalchemy.engine import Engine
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 

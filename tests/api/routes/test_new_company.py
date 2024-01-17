@@ -16,7 +16,7 @@ def client():
     return TestClient(app)
 
 
-def test_register_new_company(client):
+def test_register_new_company_success(client):
     # Replace this dictionary with your test data
     test_data = {
         "id": "123",

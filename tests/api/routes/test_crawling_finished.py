@@ -33,7 +33,7 @@ def client():
     return TestClient(app)
 
 
-def test_crawling_finished(client):
+def test_crawling_finished_success(client):
     test_data = {
         "task_id": 12345,
         "errors": None,

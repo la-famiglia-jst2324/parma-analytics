@@ -2,7 +2,7 @@
 
 from pathlib import Path
 
-from sqlalchemy import Engine
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm.session import Session
 
 from parma_analytics.db.prod.models.source_measurement import SourceMeasurement
