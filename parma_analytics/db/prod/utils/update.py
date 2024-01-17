@@ -5,8 +5,6 @@ from typing import TypeVar
 
 from sqlalchemy.engine import Engine
 
-# from sqlalchemy import Engine
-
 ResponseModel = TypeVar("ResponseModel")
 TCallable = TypeVar("TCallable", bound=Callable)
 

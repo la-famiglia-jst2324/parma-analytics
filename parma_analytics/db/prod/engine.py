@@ -5,8 +5,7 @@ from collections.abc import Iterator
 from contextlib import contextmanager
 from urllib.parse import quote
 
-from sqlalchemy import Engine
-from sqlalchemy.engine import create_engine
+from sqlalchemy.engine import Engine, create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session, sessionmaker
 
