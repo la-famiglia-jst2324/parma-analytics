@@ -1,6 +1,6 @@
 """Business logic layer for SourceMeasurement CRUD operations."""
 
-from sqlalchemy import Engine
+from sqlalchemy.engine import Engine
 
 from parma_analytics.api.models.source_measurement import (
     ApiSourceMeasurementCreateIn,
