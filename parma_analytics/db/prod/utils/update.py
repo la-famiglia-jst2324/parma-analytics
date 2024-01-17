@@ -3,7 +3,7 @@
 from collections.abc import Callable
 from typing import TypeVar
 
-from sqlalchemy import Engine
+from sqlalchemy.engine import Engine
 
 ResponseModel = TypeVar("ResponseModel")
 TCallable = TypeVar("TCallable", bound=Callable)
