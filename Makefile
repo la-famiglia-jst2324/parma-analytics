@@ -16,7 +16,7 @@ dev:
 	uvicorn parma_analytics.api:app --reload
 
 test:
-	pytest tests/
+	PYTHONPATH=. pytest tests/
 	coverage html && open htmlcov/index.html
 
 purge-db:
