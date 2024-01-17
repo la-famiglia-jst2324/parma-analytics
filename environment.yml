@@ -21,6 +21,7 @@ dependencies:
   # Testing
   - pytest >=6 # --import-mode option
   - pytest-cov
+  - pytest-asyncio
   # Dependencies (core)
   - fastapi >=0.104.0
   - httpx
