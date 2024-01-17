@@ -34,7 +34,7 @@ def get_session() -> Iterator[Session]:
     Yields:
         A database session.
     """
-    db = sessionmaker(autocommit=False, autoflush=False, engine=True)()
+    db = sessionmaker(engine=get_engine(), autocommit=False, autoflush=False)()
     try:
         yield db
     except:
