@@ -1,3 +1,4 @@
+from dataclasses import dataclass
 from unittest.mock import patch
 
 import pytest
@@ -39,16 +40,7 @@ def test_authenticate_valid_token(token, expected_return):
 
 @pytest.mark.parametrize(
     "authorization, payload",
-    [
-        (
-            "Bearer valid_token",
-            {
-                "sourcing_id": {
-                    "sourcing_id": "1",
-                },
-            },
-        ),
-    ],
+    [("Bearer valid_token", {"sourcing_id": {"sourcing_id": "1"}})],
 )
 def test_authenticate_sourcing_request_valid_token(authorization, payload):
     with patch(
@@ -66,14 +58,7 @@ def test_authenticate_sourcing_request_valid_token(authorization, payload):
 
 @pytest.mark.parametrize(
     "authorization, payload",
-    [
-        (
-            "Bearer valid_token",
-            {
-                "x": "y",
-            },
-        ),
-    ],
+    [("Bearer valid_token", {"x": "y"})],
 )
 def test_authenticate_sourcing_request_invalid_token_first(authorization, payload):
     with patch(
@@ -86,114 +71,63 @@ def test_authenticate_sourcing_request_invalid_token_first(authorization, payloa
         assert "Invalid shared token or expired token" in str(exc.value.detail)
 
 
+@dataclass
+class AuthorizeRequestTestConfig:
+    """Configure test cases for authorize_sourcing_request."""
+
+    # expected output
+    http_status_code: int
+    error_description: str
+
+    # input
+    payload: dict
+    fake_verify_response: bool = False
+
+
 @pytest.mark.parametrize(
-    "authorization, payload",
+    "test_config",
     [
-        (
-            "Bearer valid_token",
-            {
-                "x": "y",
-            },
+        AuthorizeRequestTestConfig(
+            payload={"x": "y"},
+            http_status_code=status.HTTP_400_BAD_REQUEST,
+            error_description="Authorization token not found in shared token",
+        ),
+        AuthorizeRequestTestConfig(
+            payload={"sourcing_id": {"x": "y"}},
+            http_status_code=status.HTTP_400_BAD_REQUEST,
+            error_description="source_id not found in authorization token",
+        ),
+        AuthorizeRequestTestConfig(
+            payload={"sourcing_id": {"sourcing_id": "abc"}},
+            http_status_code=status.HTTP_400_BAD_REQUEST,
+            error_description="source_id in authorization token is not a valid integer",
+        ),
+        AuthorizeRequestTestConfig(
+            payload={"sourcing_id": {"sourcing_id": "abc"}},
+            fake_verify_response=True,
+            http_status_code=status.HTTP_401_UNAUTHORIZED,
+            error_description="Invalid authorization token or expired token",
         ),
     ],
 )
-def test_authorize_sourcing_request_bad_request(authorization, payload):
+def test_authorize_sourcing_request(
+    test_config: AuthorizeRequestTestConfig,
+):
     with patch(
         "parma_analytics.api.dependencies.sourcing_auth.JWTHandler.verify_jwt",
-        return_value=payload.get("sourcing_id"),
+        return_value=None
+        if test_config.fake_verify_response
+        else test_config.payload.get("sourcing_id"),
     ):
         with pytest.raises(HTTPException) as exc:
-            authorize_sourcing_request(payload)
-        assert exc.value.status_code == status.HTTP_400_BAD_REQUEST
-        assert "Authorization token not found in shared token" in str(exc.value.detail)
+            authorize_sourcing_request(test_config.payload)
+        assert exc.value.status_code == test_config.http_status_code
+        assert test_config.error_description in str(exc.value.detail)
 
 
 @pytest.mark.parametrize(
-    "authorization, payload",
-    [
-        (
-            "Bearer valid_token",
-            {
-                "sourcing_id": {
-                    "x": "y",
-                },
-            },
-        ),
-    ],
-)
-def test_authorize_sourcing_request_invalid_token_second(authorization, payload):
-    with patch(
-        "parma_analytics.api.dependencies.sourcing_auth.JWTHandler.verify_jwt",
-        return_value=payload.get("sourcing_id"),
-    ):
-        with pytest.raises(HTTPException) as exc:
-            authorize_sourcing_request(payload)
-        assert exc.value.status_code == status.HTTP_400_BAD_REQUEST
-        assert "source_id not found in authorization token" in str(exc.value.detail)
-
-
-@pytest.mark.parametrize(
-    "authorization, payload",
-    [
-        (
-            "Bearer valid_token",
-            {
-                "sourcing_id": {
-                    "sourcing_id": "abc",
-                },
-            },
-        ),
-    ],
-)
-def test_authorize_sourcing_request_invalid_token_third(authorization, payload):
-    with patch(
-        "parma_analytics.api.dependencies.sourcing_auth.JWTHandler.verify_jwt",
-        return_value=payload.get("sourcing_id"),
-    ):
-        with pytest.raises(HTTPException) as exc:
-            authorize_sourcing_request(payload)
-        assert exc.value.status_code == status.HTTP_400_BAD_REQUEST
-        assert "source_id in authorization token is not a valid integer" in str(
-            exc.value.detail
-        )
-
-
-@pytest.mark.parametrize(
-    "authorization, payload",
-    [
-        (
-            "Bearer valid_token",
-            {
-                "sourcing_id": {
-                    "sourcing_id": "abc",
-                },
-            },
-        ),
-    ],
-)
-def test_authorize_sourcing_request_invalid_token_forth(authorization, payload):
-    with patch(
-        "parma_analytics.api.dependencies.sourcing_auth.JWTHandler.verify_jwt",
-        return_value=None,
-    ):
-        with pytest.raises(HTTPException) as exc:
-            authorize_sourcing_request(payload)
-        assert exc.value.status_code == status.HTTP_401_UNAUTHORIZED
-        assert "Invalid authorization token or expired token" in str(exc.value.detail)
-
-
-@pytest.mark.parametrize(
-    "authorization, payload",
-    [
-        (
-            "Bearer valid_token",
-            {
-                "sourcing_id": {
-                    "sourcing_id": "123",
-                },
-            },
-        ),
-    ],
+    "payload",
+    [{"sourcing_id": {"sourcing_id": "123"}}],
 )
 def test_authorize_sourcing_request_valid_token(authorization, payload):
     with patch(
