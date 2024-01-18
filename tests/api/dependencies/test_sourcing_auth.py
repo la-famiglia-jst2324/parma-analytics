@@ -30,7 +30,7 @@ def test_authenticate_sourcing_request_invalid_token():
         ("xya", "xya"),
     ],
 )
-def test_authenticate_valid_token(token, expected_return):
+def test_authenticate_valid_token(token: str, expected_return: str):
     with patch(
         "parma_analytics.api.dependencies.sourcing_auth.JWTHandler.verify_jwt",
         return_value=expected_return,
@@ -39,7 +39,7 @@ def test_authenticate_valid_token(token, expected_return):
 
 
 @pytest.mark.parametrize(
-    "authorization, payload",
+    "authorization,payload",
     [("Bearer valid_token", {"sourcing_id": {"sourcing_id": "1"}})],
 )
 def test_authenticate_sourcing_request_valid_token(authorization, payload):
@@ -57,10 +57,12 @@ def test_authenticate_sourcing_request_valid_token(authorization, payload):
 
 
 @pytest.mark.parametrize(
-    "authorization, payload",
+    "authorization,payload",
     [("Bearer valid_token", {"x": "y"})],
 )
-def test_authenticate_sourcing_request_invalid_token_first(authorization, payload):
+def test_authenticate_sourcing_request_invalid_token_first(
+    authorization: str, payload: dict
+):
     with patch(
         "parma_analytics.api.dependencies.sourcing_auth.JWTHandler.verify_jwt",
         return_value=payload.get("sourcing_id"),
@@ -127,12 +129,12 @@ def test_authorize_sourcing_request(
 
 @pytest.mark.parametrize(
     "payload",
-    [{"sourcing_id": {"sourcing_id": "123"}}],
+    [{"sourcing_id": "123"}],
 )
-def test_authorize_sourcing_request_valid_token(authorization, payload):
+def test_authorize_sourcing_request_valid_token(payload: dict[str, str]):
     with patch(
         "parma_analytics.api.dependencies.sourcing_auth.JWTHandler.verify_jwt",
-        return_value=payload.get("sourcing_id"),
+        return_value=payload,
     ):
         response = authorize_sourcing_request(payload)
-        assert str(response) == payload.get("sourcing_id").get("sourcing_id")
+        assert str(response) == payload.get("sourcing_id")
