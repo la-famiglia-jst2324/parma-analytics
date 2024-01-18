@@ -53,6 +53,7 @@ class MeasurementCommentValue(MeasurementValueBase):
 
     __tablename__ = "measurement_comment_value"
     value = Column(String)
+    sentiment_score = Column(String)
 
 
 class MeasurementLinkValue(MeasurementValueBase):
@@ -94,3 +95,12 @@ MeasurementValueModels = (
     | MeasurementDateValue
     | MeasurementNestedValue
 )
+# event listener can be placed directly after the model definition
+# from sqlalchemy import event
+# from parma_analytics.analytics.sentiment_analysis.gpt_api import get_sentiment_async
+
+# def analyze_comment(mapper, connection, target):
+#     sentiment_score = get_sentiment_async(target.value)
+#     target.sentiment_score = sentiment_score
+
+# event.listen(MeasurementCommentValue, 'after_insert', analyze_comment)
