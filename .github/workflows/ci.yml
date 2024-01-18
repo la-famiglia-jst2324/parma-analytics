@@ -39,15 +39,6 @@ jobs:
     name: Testing CI
     runs-on: ubuntu-latest
     timeout-minutes: 30
-    services:
-      postgres-db:
-        image: postgres:16-alpine
-        ports:
-          - 5432:5432
-        env:
-          POSTGRES_USER: parma-prod-db
-          POSTGRES_PASSWORD: parma-prod-db
-          POSTGRES_DB: parma-prod-db
     steps:
       - uses: actions/checkout@v4
       - name: conda env setup
@@ -60,11 +51,11 @@ jobs:
       - name: Run unit tests
         run: python -m pytest --cov-report=xml
         env:
-          POSTGRES_HOST: localhost
-          POSTGRES_PORT: 5432
-          POSTGRES_USER: parma-prod-db
-          POSTGRES_PASSWORD: parma-prod-db
-          POSTGRES_DB: parma-prod-db
+          POSTGRES_HOST: ${{ vars.STAGING_POSTGRES_HOST }}
+          POSTGRES_PORT: ${{ vars.STAGING_POSTGRES_PORT }}
+          POSTGRES_USER: ${{ vars.STAGING_POSTGRES_USER }}
+          POSTGRES_PASSWORD: ${{ secrets.STAGING_POSTGRES_PASSWORD }}
+          POSTGRES_DB: ${{ vars.STAGING_POSTGRES_DB }}
           FIREBASE_ADMINSDK_CERTIFICATE: ${{ secrets.STAGING_FIREBASE_ADMINSDK_CERTIFICATE}}
           GCP_SECRET_MANAGER_CERTIFICATE: ${{ secrets.GCP_SECRET_MANAGER_KEY}}
       - name: Get Cover
