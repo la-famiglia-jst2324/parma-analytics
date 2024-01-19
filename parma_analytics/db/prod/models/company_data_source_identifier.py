@@ -1,14 +1,14 @@
 """CompanyDataSourceIdentifier model."""
+from enum import Enum
+
 import sqlalchemy as sa
 from sqlalchemy.orm import relationship
 
 from parma_analytics.db.prod.engine import Base
 
 
-class IdentifierType(sa.Enum):
+class IdentifierType(Enum):
     """Enum for identifier types."""
-
-    __tablename__ = "identifier_type"
 
     AUTOMATICALLY_DISCOVERED = "AUTOMATICALLY_DISCOVERED"
     MANUALLY_ADDED = "MANUALLY_ADDED"
