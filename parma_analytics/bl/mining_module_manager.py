@@ -187,8 +187,11 @@ class MiningModuleManager:
         """Construct the payload for the given data source."""
         json_payload = None
         if data_source.source_name == "affinity":
-            # For the Affinity module, we only have  GET /companies with no body
-            pass
+            # For the Affinity module, we only have companies field in the payload
+            affinity_payload = {
+                "task_id": task_id,
+            }
+            json_payload = json.dumps(affinity_payload)
         elif data_source.source_name == "github":
             logger.warning("Github payload not implemented yet.")
             github_payload = {
@@ -246,18 +249,12 @@ class MiningModuleManager:
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {token}",
                 }
-                response = None
-                if json_payload is None:
-                    response = await client.get(
-                        invocation_endpoint, headers=headers, timeout=None
-                    )
-                else:
-                    response = await client.post(
-                        invocation_endpoint,
-                        headers=headers,
-                        content=json_payload,
-                        timeout=None,
-                    )
+                response = await client.post(
+                    invocation_endpoint,
+                    headers=headers,
+                    content=json_payload,
+                    timeout=None,
+                )
                 response.raise_for_status()
         except httpx.RequestError as exc:
             logger.error(
