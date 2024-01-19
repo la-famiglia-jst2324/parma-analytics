@@ -17,7 +17,6 @@ class IdentifierData:
     """Class for creating identifiers."""
 
     company_data_source_id: int
-    identifier_key: str
     identifier_type: IdentifierType
     property: str
     value: str
@@ -28,7 +27,6 @@ class IdentifierData:
 class IdentifierUpdateData:
     """Class for updating identifiers."""
 
-    identifier_key: str | None = None
     identifier_type: IdentifierType | None = None
     property: str | None = None
     value: str | None = None
@@ -62,7 +60,6 @@ def create_company_data_source_identifier(
     with db_session as session:
         new_identifier = CompanyDataSourceIdentifier(
             company_data_source_id=identifier_data.company_data_source_id,
-            identifier_key=identifier_data.identifier_key,
             identifier_type=identifier_data.identifier_type,
             property=identifier_data.property,
             value=identifier_data.value,
@@ -87,8 +84,6 @@ def update_company_data_source_identifier(
         )
 
         if identifier:
-            if identifier_data.identifier_key is not None:
-                identifier.identifier_key = identifier_data.identifier_key
             if identifier_data.identifier_type is not None:
                 identifier.identifier_type = identifier_data.identifier_type
             if identifier_data.property is not None:

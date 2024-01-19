@@ -19,14 +19,13 @@ from parma_analytics.utils.jwt_handler import JWTHandler
 logger = logging.getLogger(__name__)
 
 
+# TODO: Retrieve module url by source_id -> store url during handshake
 def call_discover_endpoint(
-    invocation_endpoint: str, data_source_id: int, query_data: list[DiscoveryQueryData]
+    module_url: str, data_source_id: int, query_data: list[DiscoveryQueryData]
 ) -> DiscoveryResponseModel:
     """Call the discovery of the module to store the identifiers in the db."""
-    if not invocation_endpoint.startswith(
-        "http://"
-    ) and not invocation_endpoint.startswith("https://"):
-        invocation_endpoint = "https://" + invocation_endpoint
+    if not module_url.startswith("http://") and not module_url.startswith("https://"):
+        module_url = "https://" + module_url
 
     token: str = JWTHandler.create_jwt(data_source_id)
     header = {"Authorization": f"Bearer {token}"}
@@ -35,7 +34,7 @@ def call_discover_endpoint(
 
     try:
         response = requests.post(
-            f"{invocation_endpoint}/discover", data=request_payload, headers=header
+            f"{module_url}/discover", data=request_payload, headers=header
         )
         response.raise_for_status()
 
@@ -58,8 +57,8 @@ def process_discovery_response(discovery_response: DiscoveryResponseModel):
         for property_key, values in data.items():
             for value in values:
                 identifier_data = IdentifierData(
-                    company_data_source_id=1,  # Hardcoded for now
-                    identifier_key=value,
+                    # TODO: Retrieve id by company_id and data_source_id
+                    company_data_source_id=1,
                     identifier_type=IdentifierType.AUTOMATICALLY_DISCOVERED,
                     property=property_key,
                     value=value,

@@ -23,7 +23,6 @@ class CompanyDataSourceIdentifier(Base):
     company_data_source_id = sa.Column(
         sa.Integer, sa.ForeignKey("company_data_source.id"), nullable=False
     )
-    identifier_key = sa.Column(sa.String, nullable=False)
     identifier_type = sa.Column(sa.String, nullable=False)
     property = sa.Column(sa.String, nullable=False)
     value = sa.Column(sa.String, nullable=False)
