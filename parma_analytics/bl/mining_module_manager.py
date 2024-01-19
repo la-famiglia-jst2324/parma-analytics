@@ -3,7 +3,6 @@
 import asyncio
 import json
 import logging
-import os
 import urllib.parse
 from contextlib import contextmanager
 from datetime import datetime
@@ -12,6 +11,7 @@ from typing import Any, cast
 import httpx
 from sqlalchemy.orm import Session
 
+from parma_analytics.bl.data_source_helper import ensure_appropriate_scheme
 from parma_analytics.bl.mining_trigger_payloads import GITHUB_PAYLOAD, REDDIT_PAYLOAD
 from parma_analytics.db.prod.engine import get_engine
 from parma_analytics.db.prod.models.types import (
@@ -114,7 +114,7 @@ class MiningModuleManager:
                     f"Payload for data source {data_source.id}: {json_payload}"
                 )
 
-                invocation_endpoint = self._ensure_appropriate_scheme(
+                invocation_endpoint = ensure_appropriate_scheme(
                     data_source.invocation_endpoint
                 )
                 if not invocation_endpoint:
@@ -211,31 +211,6 @@ class MiningModuleManager:
             pass
 
         return json_payload
-
-    def _ensure_appropriate_scheme(self, url: str) -> str | None:
-        """Adapt the URL scheme based on the deployment environment."""
-        if not url:
-            return None
-
-        try:
-            env = os.getenv("DEPLOYMENT_ENV", "local").lower()
-
-            if "://" not in url:
-                default_scheme = "https" if env in ["prod", "staging"] else "http"
-                url = f"{default_scheme}://{url}"
-
-            parsed_url = httpx.URL(url)
-
-            scheme_lower = parsed_url.scheme.lower()
-            if env in ["prod", "staging"] and scheme_lower != "https":
-                return parsed_url.copy_with(scheme="https").__str__()
-            elif env not in ["prod", "staging"] and scheme_lower != "http":
-                return parsed_url.copy_with(scheme="http").__str__()
-
-            return url
-        except httpx.InvalidURL:
-            logging.error(f"Invalid URL: {url}")
-            return None
 
     async def _trigger(
         self, data_source_id: int, invocation_endpoint: str, json_payload: str | None

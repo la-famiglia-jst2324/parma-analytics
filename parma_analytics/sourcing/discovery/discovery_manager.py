@@ -8,8 +8,10 @@ import requests
 from parma_analytics.bl.company_data_source_identifiers_bll import (
     create_company_data_source_identifier_bll,
 )
+from parma_analytics.bl.data_source_helper import ensure_appropriate_scheme
 from parma_analytics.db.prod.company_data_source_identifiers_query import IdentifierData
 from parma_analytics.db.prod.models.company_data_source_identifier import IdentifierType
+from parma_analytics.db.prod.models.types import DataSource
 from parma_analytics.sourcing.discovery.discovery_model import (
     DiscoveryQueryData,
     DiscoveryResponseModel,
@@ -19,22 +21,26 @@ from parma_analytics.utils.jwt_handler import JWTHandler
 logger = logging.getLogger(__name__)
 
 
-# TODO: Retrieve module url by source_id -> store url during handshake
 def call_discover_endpoint(
-    module_url: str, data_source_id: int, query_data: list[DiscoveryQueryData]
+    data_source: DataSource, query_data: list[DiscoveryQueryData]
 ) -> DiscoveryResponseModel:
     """Call the discovery of the module to store the identifiers in the db."""
-    if not module_url.startswith("http://") and not module_url.startswith("https://"):
-        module_url = "https://" + module_url
+    invocation_endpoint = ensure_appropriate_scheme(data_source.invocation_endpoint)
+    if not invocation_endpoint:
+        logger.error(
+            f"Invalid invocation endpoint: "
+            f"{data_source.invocation_endpoint} "
+            f"for data source {data_source.id}"
+        )
 
-    token: str = JWTHandler.create_jwt(data_source_id)
+    token: str = JWTHandler.create_jwt(data_source.id)
     header = {"Authorization": f"Bearer {token}"}
 
     request_payload = json.dumps([query.dict() for query in query_data])
 
     try:
         response = requests.post(
-            f"{module_url}/discover", data=request_payload, headers=header
+            f"{invocation_endpoint}/discover", data=request_payload, headers=header
         )
         response.raise_for_status()
 
