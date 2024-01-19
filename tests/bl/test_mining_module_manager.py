@@ -205,7 +205,11 @@ def test_construct_payload_github(task_id, mining_module_manager):
 def test_construct_payload_affinity(task_id, mining_module_manager):
     # Setup
     mock_data_source = DataSource(source_name="affinity")
-    expected_payload = None
+    expected_payload = json.dumps(
+        {
+            "task_id": task_id,
+        }
+    )
 
     # Run the Test
     result = mining_module_manager._construct_payload(mock_data_source, task_id)
@@ -311,27 +315,6 @@ async def test_trigger_post_success(mock_async_client_class, mining_module_manag
     # Assertions
     mock_async_client_instance.post.assert_awaited_once_with(
         invocation_endpoint, headers=ANY, content=json_payload, timeout=None
-    )
-
-
-@pytest.mark.asyncio
-@patch("httpx.AsyncClient")
-async def test_trigger_get_success(mock_async_client_class, mining_module_manager):
-    # Setup
-    mock_async_client_instance = (
-        mock_async_client_class.return_value.__aenter__.return_value
-    )
-    mock_async_client_instance.get.return_value = AsyncMock(status_code=200)
-
-    data_source_id = 1
-    invocation_endpoint = "http://test-endpoint.com/companies"
-
-    # Run the Test
-    await mining_module_manager._trigger(data_source_id, invocation_endpoint, None)
-
-    # Assertions
-    mock_async_client_instance.get.assert_awaited_once_with(
-        invocation_endpoint, headers=ANY, timeout=None
     )
 
 

@@ -18,7 +18,7 @@ from parma_analytics.db.prod.utils.paginate import ListPaginationResult
 def create_source_measurement_bll(
     engine: Engine,
     source_measurement: ApiSourceMeasurementCreateIn,
-) -> int:
+) -> SourceMeasurement:
     """Business logic function for creating a SourceMeasurement.
 
     Args:
@@ -28,7 +28,13 @@ def create_source_measurement_bll(
     Returns:
         The created source measurement.
     """
-    return create_source_measurement_query(engine, source_measurement)
+    source_measurement_instance = SourceMeasurement(
+        type=source_measurement.type,
+        measurement_name=source_measurement.measurement_name,
+        source_module_id=source_measurement.source_module_id,
+        parent_measurement_id=source_measurement.parent_measurement_id,
+    )
+    return create_source_measurement_query(engine, source_measurement_instance)
 
 
 def read_source_measurement_bll(
