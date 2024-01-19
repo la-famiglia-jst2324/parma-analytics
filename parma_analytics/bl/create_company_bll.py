@@ -7,7 +7,7 @@ from parma_analytics.db.prod.models.company import Company
 
 def create_company_if_not_exist_bll(
     name: str, description: str, added_by: int
-) -> Company | None:
+) -> Company:
     """Business Logic Layer for creating Company instances based on.
 
     name, description and added_by.
