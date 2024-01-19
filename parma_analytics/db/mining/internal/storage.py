@@ -40,17 +40,14 @@ def resolve_document_from_path(
     return _resolve_from_path(engine, path, document=True)
 
 
-def resolve_document_template_from_path(
-    engine: firestore_types.Client, path: str
-) -> DocTemplate:
+def resolve_document_template_from_path(path: str) -> DocTemplate:
     """Resolve a document template from a path.
 
     Args:
-        engine: The database engine.
         path: The path to resolve. (e.g. "mining/mining")
     """
     path_parts = _split_path(path)
-    assert len(path_parts) % 2 == 0, "Path must be odd length to lead to a collection"
+    assert len(path_parts) % 2 == 0, "Path must be even length to lead to a document"
     assert path_parts[0] == "parma", "Path must start with 'parma'"
     path_parts = path_parts[1:]
 
@@ -163,7 +160,7 @@ def save_document_from_template(
     Returns:
         The firestore document.
     """
-    doc_template = resolve_document_template_from_path(engine, path)
+    doc_template = resolve_document_template_from_path(path)
     fs_doc: firestore_types.DocumentReference = resolve_document_from_path(engine, path)
     return save_validated_document(fs_doc, doc_template.fields, instance.values)
 
@@ -194,7 +191,6 @@ def read_document_from_path(
     Returns:
         The document payload.
     """
-    resolve_document_template_from_path(engine, path)
     fs_doc: firestore_types.DocumentReference = resolve_document_from_path(engine, path)
     return read_document(fs_doc)
 
