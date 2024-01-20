@@ -25,6 +25,7 @@ def create_company_if_not_exist(
             session.refresh(new_company)
             return new_company
 
+
 def create_company(db: Session, name: str, added_by: int, description: str | None):
     """Creates a company."""
     new_company = Company(name=name, added_by=added_by, description=description)
