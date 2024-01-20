@@ -40,11 +40,12 @@ async def create_source_measurement(
     Returns:
         The created source measurement.
     """
-    created_source_measurement_id = create_source_measurement_bll(
+    created_source_measurement = create_source_measurement_bll(
         get_engine(), source_measurement
     )
+
     return ApiSourceMeasurementCreateOut(
-        id=created_source_measurement_id,
+        id=created_source_measurement.id,
         creation_msg="Source Measurement successfully created",
     )
 

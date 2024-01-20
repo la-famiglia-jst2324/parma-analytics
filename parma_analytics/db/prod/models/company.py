@@ -1,18 +1,23 @@
-"""DB model for Company."""
-from sqlalchemy import Column, DateTime, ForeignKey, Integer, String
-from sqlalchemy.sql import func
+"""Company model."""
+import sqlalchemy as sa
 
 from parma_analytics.db.prod.engine import Base
 
 
 class Company(Base):
-    """DB model of a company."""
+    """Model for the company table in the database."""
 
     __tablename__ = "company"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    name = Column(String, nullable=False)
-    description = Column(String)
-    added_by = Column(Integer, ForeignKey("user.id"), nullable=False)
-    created_at = Column(DateTime, default=func.now())
-    modified_at = Column(DateTime, default=func.now(), onupdate=func.now())
+    id = sa.Column(sa.Integer, primary_key=True, autoincrement=True)
+    name = sa.Column(sa.String, nullable=False)
+    description = sa.Column(sa.String, nullable=True)
+    added_by = sa.Column(sa.Integer, nullable=False)
+    created_at = sa.Column(sa.DateTime, nullable=False, default=sa.func.now())
+    modified_at = sa.Column(
+        sa.DateTime, nullable=False, default=sa.func.now(), onupdate=sa.func.now()
+    )
+
+    def __repr__(self):
+        """Return a string representation of the Company object."""
+        return f"<Company(id={self.id}, name={self.name})>"
