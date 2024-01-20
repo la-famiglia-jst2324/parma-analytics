@@ -7,7 +7,7 @@ from parma_analytics.bl.fetch_crm_companies import get_new_crm_companies_bll
 class TestGetNewCrmCompaniesBll(unittest.TestCase):
     """Test class."""
 
-    @patch("parma_analytics.db.prod.company_query.get_session")
+    @patch("parma_analytics.db.prod.engine.get_session")
     @patch("parma_analytics.db.prod.company_query.company_exists_by_name")
     @patch("parma_analytics.db.prod.company_query.create_company")
     def test_no_new_companies(
