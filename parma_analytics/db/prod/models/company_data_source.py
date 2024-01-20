@@ -23,7 +23,7 @@ class CompanyDataSource(Base):
         sa.DateTime, nullable=False, default=sa.func.now(), onupdate=sa.func.now()
     )
 
-        # Relations
+    # Relations
     company_data_source_identifiers = relationship(
         "CompanyDataSourceIdentifier", back_populates="company_data_source"
     )
