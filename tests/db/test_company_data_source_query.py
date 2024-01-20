@@ -45,10 +45,6 @@ def test_get_all_company_data_sources_by_data_source_id(mock_db):
     res_length = 2
     data1 = CompanyDataSourceData(1, 1, True, "healthy")
     data2 = CompanyDataSourceData(1, 2, True, "healthy")
-    create_company_data_source(mock_db, data1)
-    create_company_data_source(mock_db, data2)
-
-    # Mock setup
     mock_db.query.return_value.filter.return_value.all.return_value = [data1, data2]
 
     # Exercise

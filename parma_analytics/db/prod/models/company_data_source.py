@@ -4,7 +4,6 @@ import sqlalchemy as sa
 from sqlalchemy import ForeignKey
 from sqlalchemy.orm import relationship
 
-
 from parma_analytics.db.prod.engine import Base
 
 
