@@ -1,32 +1,38 @@
 """Pydantic REST models for the notifications endpoint."""
 
-from typing import Optional
-from pydantic import BaseModel
 from datetime import datetime
+
+from pydantic import BaseModel
 
 # ------------------------------------------------------------------------------------ #
 #                                       Internal                                       #
 # ------------------------------------------------------------------------------------ #
 
 
-class _ApiNewsIn(BaseModel):
+class _NewsBase(BaseModel):
     """Internal base model for the new company endpoints."""
 
-    id: int
     message: str
     company_id: int
     data_source_id: int
-    trigger_factor: Optional[str] = None
-    title: Optional[str] = None
+    trigger_factor: str | None = None
+    title: str | None = None
     timestamp: datetime
     source_measurement_id: int
-    
-    
+
+
 # ------------------------------------------------------------------------------------ #
 #                                     Create Models                                    #
 # ------------------------------------------------------------------------------------ #
 
-class ApiNewsIn(_ApiNewsIn):
+
+class NewsCreate(_NewsBase):
     """Input model for the NewCompany creation endpoint."""
 
     pass
+
+
+class NewsReturn(_NewsBase):
+    """Return model for the NewCompany creation endpoint."""
+
+    ID: int
