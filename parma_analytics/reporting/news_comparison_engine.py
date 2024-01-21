@@ -38,6 +38,7 @@ from parma_analytics.db.prod.notification_rules_query import (
 from parma_analytics.db.prod.source_measurement_query import (
     get_source_measurement_query,
 )
+from parma_analytics.reporting.notification_rule_helper import compare_to_threshold
 
 
 # NewsComparisonEngineReturn
@@ -170,27 +171,6 @@ def check_notification_rules(
                     )
 
     return NewsComparisonEngineReturn(threshold=threshold, is_rules_satisfied=False)
-
-
-def compare_to_threshold(
-    previous_value: int | float, new_value: int | float, threshold: float
-) -> bool:
-    """Compares the previous value to the new value.
-
-    Args:
-        previous_value (any): The previous value.
-        new_value (any): The new value.
-        threshold (float): The threshold.
-
-    Returns:
-        bool: True if the difference between the previous value
-        and the new value is greater than the threshold, False otherwise.
-    """
-    print(
-        "inside compare_to_threshold: ",
-        abs(new_value - previous_value) / previous_value * 100,
-    )
-    return abs(new_value - previous_value) / previous_value * 100 > threshold
 
 
 def create_news(
