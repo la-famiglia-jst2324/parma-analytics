@@ -183,9 +183,6 @@ def apply_aggregation_method(
             # Add the new value to the list
             values.append(new_value)
             return getattr(np, aggregation_method)(values)
-
-            # Create a subquery to fetch the values
-
     elif aggregation_method and not num_aggregation_entries:
         # Perform aggregation without limiting the number of entries
         with Session(engine) as session:
@@ -206,6 +203,5 @@ def apply_aggregation_method(
             # Add the new value to the list
             values.append(new_value)
             return getattr(np, aggregation_method)(values)
-
     elif not aggregation_method:
         return new_value
