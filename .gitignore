@@ -581,3 +581,4 @@ $RECYCLE.BIN/
 **/*.tfstate.backup
 .firebaserc
 firebase.json
+*.env
