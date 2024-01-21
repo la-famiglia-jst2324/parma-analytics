@@ -18,6 +18,7 @@ dependencies:
   - types-pyyaml
   - google-cloud-sdk
   - ipykernel
+  - openai=1.8.0
   # Testing
   - pytest >=6 # --import-mode option
   - pytest-cov
