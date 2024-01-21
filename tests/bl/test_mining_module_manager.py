@@ -96,6 +96,8 @@ def test_create_payload(task_id, identifiers, expected_payload, mining_module_ma
 async def test_trigger_with_valid_payload(mining_module_manager, mock_async_client):
     # Setup
     mock_data_source = MagicMock(spec=DataSource)
+    mock_data_source.id = 1
+    mock_data_source.name = "name"
     task_id = 123
 
     # Mocking _create_payload to return a valid payload
@@ -206,6 +208,7 @@ def test_trigger_datasources_success(
 
     mock_data_source = MagicMock(spec=DataSource)
     mock_data_source.id = source_id
+    mock_data_source.source_name = "name"
 
     mock_scheduled_task = MagicMock(spec=ScheduledTask)
     mock_scheduled_task.task_id = task_id
@@ -261,13 +264,15 @@ async def test_trigger_errors(
 ):
     # Setup
     mock_data_source = MagicMock(spec=DataSource)
+    mock_data_source.id = 1
+    mock_data_source.source_name = "name"
     mock_data_source.invocation_endpoint = "http://test-endpoint.com/companies"
+
     task_id = 123
+    expected_payload = json.dumps({"some": "payload"})
 
     # Mocking _create_payload to return a valid payload
-    mining_module_manager._create_payload = mock.MagicMock(
-        return_value={"some": "payload"}
-    )
+    mining_module_manager._create_payload = MagicMock(return_value=expected_payload)
 
     mock_async_client_instance = (
         mock_async_client_class.return_value.__aenter__.return_value
@@ -281,5 +286,8 @@ async def test_trigger_errors(
     # Assertions
     assert log_message_part in caplog.text
     mock_async_client_instance.post.assert_awaited_once_with(
-        ANY, headers=ANY, content=json.dumps({"some": "payload"}), timeout=None
+        mock_data_source.invocation_endpoint + "/companies",
+        headers=ANY,
+        content=expected_payload,
+        timeout=None,
     )

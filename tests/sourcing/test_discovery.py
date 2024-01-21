@@ -55,7 +55,9 @@ def test_call_discover_endpoint_success(mock_requests_post):
 def test_process_discovery_response(mock_create_identifier):
     discovery_response = DiscoveryResponseModel(**mock_discovery_response)
 
-    process_discovery_response(discovery_response)
+    company_data_source_id = 1
+
+    process_discovery_response(discovery_response, company_data_source_id)
 
     assert mock_create_identifier.call_count == len(
         discovery_response.identifiers["1"]["domain"]
