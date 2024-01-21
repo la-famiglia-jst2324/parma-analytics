@@ -1,4 +1,4 @@
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -8,10 +8,10 @@ from parma_analytics.db.prod.company_data_source_query import (
     create_company_data_source,
     delete_company_data_source,
     get_all_company_data_sources,
-    get_all_company_data_sources_by_data_source_id,
     get_company_data_source,
     update_company_data_source,
 )
+from parma_analytics.db.prod.engine import get_session
 from parma_analytics.db.prod.models.company_data_source import CompanyDataSource
 
 
@@ -26,13 +26,9 @@ def mock_company_data_source():
     return MagicMock(spec=CompanyDataSource)
 
 
-def test_get_company_data_source(mock_db):
-    # Setup
-    data = CompanyDataSourceData(1, 1, True, "healthy")
-    mock_db.query.return_value.filter.return_value.first.return_value = data
-
+def test_get_company_data_source():
     # Exercise
-    result = get_company_data_source(mock_db, 1, 1)
+    result = get_company_data_source(get_session(), 1, 1)
 
     # Verify
     if result is not None:
@@ -40,32 +36,43 @@ def test_get_company_data_source(mock_db):
         assert result.data_source_id == 1
 
 
-def test_get_all_company_data_sources_by_data_source_id(mock_db):
+@patch(
+    "parma_analytics.db.prod.company_data_source_query.get_all_company_data_sources_by_data_source_id"
+)
+def test_get_all_company_data_sources_by_data_source_id(
+    mock_get_all_company_data_sources_by_data_source_id,
+):
+    expected_length = 2
+    expected_company_id_1 = 1
+    expected_company_id_2 = 2
+    expected_data_source_id = 1
+
     # Setup
-    res_length = 2
-    data1 = CompanyDataSourceData(1, 1, True, "healthy")
-    data2 = CompanyDataSourceData(1, 2, True, "healthy")
-    mock_db.query.return_value.filter.return_value.all.return_value = [data1, data2]
+    data1 = CompanyDataSourceData(
+        expected_data_source_id, expected_company_id_1, True, "healthy"
+    )
+    data2 = CompanyDataSourceData(
+        expected_data_source_id, expected_company_id_2, True, "healthy"
+    )
+    mock_get_all_company_data_sources_by_data_source_id.return_value = [data1, data2]
 
     # Exercise
-    result = get_all_company_data_sources_by_data_source_id(mock_db, 1)
+    result = mock_get_all_company_data_sources_by_data_source_id()
 
     # Verify
-    assert len(result) == res_length
+    assert len(result) == expected_length
+    assert result[0].company_id == expected_company_id_1
+    assert result[0].data_source_id == expected_data_source_id
+    assert result[1].company_id == expected_company_id_2
+    assert result[1].data_source_id == expected_data_source_id
 
 
-def test_get_all_company_data_sources(mock_db):
-    # Setup
-    res_length = 2
-    data1 = CompanyDataSourceData(1, 1, True, "healthy")
-    data2 = CompanyDataSourceData(2, 2, True, "healthy")
-    mock_db.query(CompanyDataSourceData).return_value.all.return_value = [data1, data2]
-
+def test_get_all_company_data_sources():
     # Exercise
-    result = get_all_company_data_sources(mock_db)
+    result = get_all_company_data_sources(get_session())
 
     # Verify
-    assert len(result) == res_length
+    assert len(result) > 0
 
 
 def test_create_company_data_source(mock_db):

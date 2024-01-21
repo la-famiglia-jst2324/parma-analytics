@@ -2,7 +2,6 @@
 from enum import Enum
 
 import sqlalchemy as sa
-from sqlalchemy.orm import relationship
 
 from parma_analytics.db.prod.engine import Base
 
@@ -27,8 +26,3 @@ class CompanyDataSourceIdentifier(Base):
     property = sa.Column(sa.String, nullable=False)
     value = sa.Column(sa.String, nullable=False)
     validity = sa.Column(sa.DateTime, nullable=False)
-
-    # Relations
-    company_data_source = relationship(
-        "CompanyDataSource", back_populates="company_data_source_identifiers"
-    )
