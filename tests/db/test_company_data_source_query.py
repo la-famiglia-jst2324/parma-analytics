@@ -14,6 +14,12 @@ from parma_analytics.db.prod.company_data_source_query import (
 )
 
 
+# Setup test database and session
+@pytest.fixture
+def mock_db():
+    return MagicMock()
+
+
 def test_get_company_data_source(mock_db):
     # Setup
     data = CompanyDataSourceData(1, 1, True, "healthy")
