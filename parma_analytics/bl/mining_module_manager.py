@@ -1,7 +1,6 @@
 """Manage the interaction with the mining modules."""
 
 import asyncio
-import json
 import logging
 import urllib.parse
 from contextlib import contextmanager
@@ -11,9 +10,14 @@ from typing import Any, cast
 import httpx
 from sqlalchemy.orm import Session
 
+from parma_analytics.bl.company_data_source_bll import get_all_by_data_source_id_bll
+from parma_analytics.bl.company_data_source_identifiers_bll import (
+    get_company_data_source_identifiers_bll,
+)
 from parma_analytics.bl.data_source_helper import ensure_appropriate_scheme
-from parma_analytics.bl.mining_trigger_payloads import GITHUB_PAYLOAD, REDDIT_PAYLOAD
+from parma_analytics.bl.scraping_model import ScrapingPayloadModel
 from parma_analytics.db.prod.engine import get_engine
+from parma_analytics.db.prod.models.company_data_source import CompanyDataSource
 from parma_analytics.db.prod.models.types import (
     DataSource,
     ScheduledTask,
@@ -103,16 +107,14 @@ class MiningModuleManager:
                     logger.error(f"Task with id {task_id} not found.")
                     continue
 
+                # todo: check if discovery is necessary
+
                 task = self._schedule_task(task)
                 if not task:
                     logger.error(f"Error scheduling task {task_id}")
                     continue
 
                 data_source = cast(DataSource, task.data_source)
-                json_payload = self._construct_payload(data_source, task_id)
-                logger.debug(
-                    f"Payload for data source {data_source.id}: {json_payload}"
-                )
 
                 invocation_endpoint = ensure_appropriate_scheme(
                     data_source.invocation_endpoint
@@ -125,15 +127,7 @@ class MiningModuleManager:
                     )
                     continue
 
-                trigger_endpoint: str = urllib.parse.urljoin(
-                    invocation_endpoint, "/companies"
-                )
-
-                data_source_id: int = data_source.id
-
-                trigger_task = loop.create_task(
-                    self._trigger(data_source_id, trigger_endpoint, json_payload)
-                )
+                trigger_task = loop.create_task(self._trigger(data_source, task_id))
                 trigger_tasks.append(trigger_task)
 
             except Exception as e:
@@ -183,53 +177,82 @@ class MiningModuleManager:
 
         return None
 
-    def _construct_payload(self, data_source: DataSource, task_id: int) -> str | None:
-        """Construct the payload for the given data source."""
-        json_payload = None
-        if data_source.source_name == "affinity":
-            # For the Affinity module, we only have companies field in the payload
-            affinity_payload = {
-                "task_id": task_id,
-            }
-            json_payload = json.dumps(affinity_payload)
-        elif data_source.source_name == "github":
-            logger.warning("Github payload not implemented yet.")
-            github_payload = {
-                "task_id": task_id,
-                "companies": GITHUB_PAYLOAD["companies"].copy(),
-            }
-            json_payload = json.dumps(github_payload)
-        elif data_source.source_name == "reddit":
-            logger.warning("Reddit payload not implemented yet.")
-            reddit_payload = {
-                "task_id": task_id,
-                "companies": REDDIT_PAYLOAD["companies"].copy(),
-            }
-            json_payload = json.dumps(reddit_payload)
-        else:
-            logger.warning("Other payload not implemented yet.")
-            pass
+    def _fetch_identifiers(
+        self, company_id: int, data_source_id: int
+    ) -> dict[str, list[str]]:
+        """Fetch identifiers for a given company and data source."""
+        identifiers = get_company_data_source_identifiers_bll(
+            company_id, data_source_id
+        )
+        if identifiers is None:
+            return {}
 
-        return json_payload
+        result: dict[str, list[str]] = {}
+        for identifier in identifiers:
+            if identifier.validity and identifier.validity < datetime.now():
+                # todo: rediscover
+                continue
+            key = identifier.property
+            if key not in result:
+                result[key] = []
+            result[key].append(identifier.value)
+        return result
 
-    async def _trigger(
-        self, data_source_id: int, invocation_endpoint: str, json_payload: str | None
-    ) -> None:
+    def _create_payload(
+        self, task_id: int, companies: list[CompanyDataSource], data_source_id: int
+    ) -> ScrapingPayloadModel:
+        """Create payload for the discovery endpoint."""
+        companies_dict = {}
+        for company in companies:
+            identifiers = self._fetch_identifiers(company.company_id, data_source_id)
+            # Do discovery if no identifier is found
+            if not identifiers:
+                # todo: call discovery if identifiers are None
+                identifiers = self._fetch_identifiers(
+                    company.company_id, data_source_id
+                )
+            if identifiers:
+                companies_dict[str(company.company_id)] = identifiers
+
+        payload = ScrapingPayloadModel(task_id=task_id, companies=companies_dict)
+        return payload
+
+    async def _trigger(self, data_source: DataSource, task_id: int) -> None:
         """Trigger the mining module for the given invocation endpoint and payload."""
+        trigger_endpoint: str = urllib.parse.urljoin(
+            data_source.invocation_endpoint, "/companies"
+        )
+
+        data_source_id: int = data_source.id
+
+        companies = get_all_by_data_source_id_bll(data_source_id)
+
+        # Create payload
+        # todo: Retrieve all company ids for a data source
+        json_payload = self._create_payload(task_id, companies, data_source_id)
+
+        logger.debug(f"Payload for data source {data_source.id}: {json_payload}")
+
         try:
-            logger.debug(f"Sending request to {invocation_endpoint}")
+            logger.debug(f"Sending request to {trigger_endpoint}")
             async with httpx.AsyncClient(verify=False) as client:
-                token: str = JWTHandler.create_jwt(data_source_id)
+                token: str = JWTHandler.create_jwt(data_source.id)
                 headers = {
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {token}",
                 }
-                response = await client.post(
-                    invocation_endpoint,
-                    headers=headers,
-                    content=json_payload,
-                    timeout=None,
-                )
+                response = None
+                if json_payload is None:
+                    logger.debug(
+                        f"Missing payload for datasource {data_source.source_name}"
+                    )
+                else:
+                    response = await client.post(
+                        trigger_endpoint,
+                        headers=headers,
+                        content=json_payload,
+                        timeout=None,
+                    )
                 response.raise_for_status()
         except httpx.RequestError as exc:
             logger.error(
