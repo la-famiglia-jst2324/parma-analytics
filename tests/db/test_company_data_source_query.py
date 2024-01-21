@@ -12,18 +12,6 @@ from parma_analytics.db.prod.company_data_source_query import (
     get_company_data_source,
     update_company_data_source,
 )
-from parma_analytics.db.prod.models.company_data_source import CompanyDataSource
-
-
-# Setup test database and session
-@pytest.fixture
-def mock_db():
-    return MagicMock()
-
-
-@pytest.fixture
-def mock_company_data_source():
-    return MagicMock(spec=CompanyDataSource)
 
 
 def test_get_company_data_source(mock_db):
