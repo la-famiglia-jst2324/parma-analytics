@@ -9,7 +9,7 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-async def get_sentiment(text: str) -> str:
+async def get_sentiment(text: str) -> str | None:
     """Analyze and score the comment measurement value.
 
     Args:
@@ -44,18 +44,23 @@ async def get_sentiment(text: str) -> str:
         "Authorization": f"Bearer {api_key}",
         "Content-Type": "application/json",
     }
+    retries = 0
+    sentiment = None
+    max_retries = 3
+    while retries < max_retries and sentiment is None:
+        async with httpx.AsyncClient() as client:
+            response = await client.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers=headers,
+                data=json.dumps(data),
+            )
+            response.raise_for_status()  # raise an exception for HTTP error responses
 
-    async with httpx.AsyncClient() as client:
-        response = await client.post(
-            "https://api.openai.com/v1/chat/completions",
-            headers=headers,
-            data=json.dumps(data),
-        )
-        response.raise_for_status()  # raise an exception for HTTP error responses
+        sentiment = response.json()["choices"][0]["message"]["content"]
+        if (
+            not sentiment.isdigit()
+        ):  # If score is not a digit, set sentiment to None and retry
+            sentiment = None
+            retries += 1
 
-    sentiment = response.json()["choices"][0]["message"]["content"]
-    if sentiment.isdigit():  # score
-        return sentiment
-    else:
-        sentiment = None
-        return sentiment
+    return sentiment
