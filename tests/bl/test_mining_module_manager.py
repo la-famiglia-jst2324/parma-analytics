@@ -8,7 +8,6 @@ from httpx import AsyncClient, HTTPStatusError, InvalidURL, Request, RequestErro
 from sqlalchemy.orm import sessionmaker
 
 from parma_analytics.bl.mining_module_manager import MiningModuleManager
-from parma_analytics.bl.mining_trigger_payloads import GITHUB_PAYLOAD, REDDIT_PAYLOAD
 from parma_analytics.db.prod.engine import get_engine
 from parma_analytics.db.prod.models.types import (
     DataSource,
@@ -184,48 +183,12 @@ def test_trigger_datasources_success(
 
 
 @pytest.mark.parametrize("task_id", [0, 1, 123, 9999])
-def test_construct_payload_github(task_id, mining_module_manager):
-    # Setup
-    mock_data_source = DataSource(source_name="github")
-    expected_payload = json.dumps(
-        {
-            "task_id": task_id,
-            "companies": GITHUB_PAYLOAD["companies"].copy(),
-        }
-    )
-
-    # Run the Test
-    result = mining_module_manager._construct_payload(mock_data_source, task_id)
-
-    # Assertions
-    assert result == expected_payload
-
-
-@pytest.mark.parametrize("task_id", [0, 1, 123, 9999])
 def test_construct_payload_affinity(task_id, mining_module_manager):
     # Setup
     mock_data_source = DataSource(source_name="affinity")
     expected_payload = json.dumps(
         {
             "task_id": task_id,
-        }
-    )
-
-    # Run the Test
-    result = mining_module_manager._construct_payload(mock_data_source, task_id)
-
-    # Assertions
-    assert result == expected_payload
-
-
-@pytest.mark.parametrize("task_id", [0, 1, 123, 9999])
-def test_construct_payload_reddit(task_id, mining_module_manager):
-    # Setup
-    mock_data_source = DataSource(source_name="reddit")
-    expected_payload = json.dumps(
-        {
-            "task_id": task_id,
-            "companies": REDDIT_PAYLOAD["companies"].copy(),
         }
     )
 
