@@ -42,8 +42,7 @@ def generate_report(
             "timeframe": timestamp_difference,
         }
         report_generator = ReportGenerator()
-        summary = report_generator.generate_report_summary(report_params)
-        return summary
+        return report_generator.generate_report_summary(report_params)
     except SQLAlchemyError as e:
         logging.error(f"Database error occurred: {e}")
         raise e

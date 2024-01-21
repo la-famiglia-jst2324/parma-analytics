@@ -49,14 +49,20 @@ class ReportGenerator:
         metric_name = report_params["metric_name"]
         trigger_change = report_params["trigger_change"]
         current_value = report_params["current_value"]
-        gpt_prompt = f"""I want you to act as a summary generator. Generate a
-                     concise 1-2 linesexpressive summary for a
-                     company {company_name} who recently witnessed a change
-                     within the {timeframe} days on the {source_name}platform
-                     for {metric_name}  of {trigger_change}  %  and its current
-                     value of is now {current_value}. Adjust the timeframe
-                     representation to yeasrs if days > 365 or months if
-                     days > 28 if necessary or weeks if days > 7"""
+
+        with open(
+            "parma_analytics/reporting/prompts/summary_generator.txt"
+        ) as prompt_file:
+            prompt = f"{prompt_file.read()}"
+
+        gpt_prompt = prompt.format(
+            company_name=company_name,
+            timeframe=timeframe,
+            source_name=source_name,
+            metric_name=metric_name,
+            trigger_change=trigger_change,
+            current_value=current_value,
+        )
 
         response = self._make_openai_request(gpt_prompt)
         return response.choices[0].text
