@@ -18,8 +18,4 @@ def compare_to_threshold(
         bool: True if the difference between the previous value
         and the new value is greater than the threshold, False otherwise.
     """
-    print(
-        "inside compare_to_threshold: ",
-        abs(new_value - previous_value) / previous_value * 100,
-    )
     return abs(new_value - previous_value) / previous_value * 100 >= threshold

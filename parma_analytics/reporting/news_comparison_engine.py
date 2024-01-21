@@ -116,9 +116,6 @@ def check_notification_rules(
                 company_measurement_id=company_measurement_id,
                 notification_rule=notification_rule,
             )
-            print("previous_value: ", previous_value)
-            print("value: ", value)
-            print("table: ", data_table)
             if aggregation_method is None and num_aggregation_entries is None:
                 if compare_to_threshold(previous_value, value, threshold):
                     return NewsComparisonEngineReturn(
@@ -184,8 +181,6 @@ def create_news(
     Returns:
         News: The created News object.
     """
-    print("inside create_news")
-
     return create_news_query(
         engine=get_engine(),
         news_data=news_data,

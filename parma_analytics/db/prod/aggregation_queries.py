@@ -75,11 +75,8 @@ def get_most_recent_measurement_values(
     if notification_rule:
         aggregation_method = notification_rule.aggregation_method
         num_aggregation_entries = notification_rule.num_aggregation_entries
-    print("=========inside get_most_recent_measurement_values=========")
-    print("aggregation_method: ", aggregation_method)
-    print("num_aggregation_entries: ", num_aggregation_entries)
+
     if aggregation_method and num_aggregation_entries:
-        print("======================================")
         aggregation_function = getattr(func, aggregation_method)
         with Session(engine) as session:
             subquery = (
@@ -97,7 +94,6 @@ def get_most_recent_measurement_values(
             aggregated_value = session.query(
                 aggregation_function(subquery.c.value)
             ).scalar()
-            print("aggregated_value: ", aggregated_value)
 
             return aggregated_value
     # if num_aggregation_entries is not provided, but aggregation_method is provided,
@@ -158,7 +154,6 @@ def apply_aggregation_method(
         If neither aggregation_method nor num_aggregation_entries are provided,
         returns the new value.
     """
-    print("=========inside apply_aggregation_method=========")
     new_value = incoming_data.value
     timestamp = incoming_data.timestamp
     company_measurement_id = incoming_data.company_measurement_id
@@ -186,11 +181,7 @@ def apply_aggregation_method(
             values = [row[0] for row in session.query(subquery.c.value).all()]
 
             # Add the new value to the list
-            print("values: ", values)
             values.append(new_value)
-            print("values: ", values)
-            result = getattr(np, aggregation_method)(values)
-            print("result: ", result)
             return getattr(np, aggregation_method)(values)
 
             # Create a subquery to fetch the values
@@ -213,11 +204,7 @@ def apply_aggregation_method(
             values = [row[0] for row in session.query(subquery.c.value).all()]
 
             # Add the new value to the list
-            print("values before the new one: ", values)
             values.append(new_value)
-            print("values after the new item: ", values)
-            result = getattr(np, aggregation_method)(values)
-            print("aggregation result: ", result)
             return getattr(np, aggregation_method)(values)
 
     elif not aggregation_method:
