@@ -32,6 +32,15 @@ resource "google_cloud_run_service" "parma_analytics_cloud_run" {
     spec {
       containers {
         image = data.local_file.image_name.content
+
+        resources {
+          limits = {
+            # 0.5 vCPU, 256 MB RAM for ${var.env} == staging, else 1 vCPU, 512 MB RAM
+            cpu    = var.env == "staging" ? "1" : "1"
+            memory = var.env == "staging" ? "256Mi" : "512Mi"
+          }
+        }
+
         ports {
           container_port = 8080
         }
@@ -102,6 +111,12 @@ resource "google_cloud_run_service" "parma_analytics_cloud_run" {
           name  = "PARMA_ANALYTICS_SECRET_KEY"
           value = var.PARMA_ANALYTICS_SECRET_KEY
         }
+      }
+    }
+
+    metadata {
+      annotations = {
+        "autoscaling.knative.dev/maxScale" = "10"
       }
     }
   }

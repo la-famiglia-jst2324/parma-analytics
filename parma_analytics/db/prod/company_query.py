@@ -1,7 +1,8 @@
 """Company DB queries."""
 
 
-from sqlalchemy.orm import Session
+from sqlalchemy.engine import Engine
+from sqlalchemy.orm.session import Session
 
 from parma_analytics.db.prod.models.company import Company
 
@@ -80,3 +81,10 @@ def delete_company(db: Session, company_id: int):
 def company_exists_by_name(db: Session, name: str) -> bool:
     """Checks if a company with the given name exists."""
     return bool(db.query(Company).filter(Company.name.ilike(name)).first())
+
+
+def get_company_name(engine: Engine, company_id: int) -> str:
+    """Get Company Name from the company_id."""
+    with Session(engine) as session:
+        company = session.query(Company).filter(Company.id == company_id).first()
+        return company.name

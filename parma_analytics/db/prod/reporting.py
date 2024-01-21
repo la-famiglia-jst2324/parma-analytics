@@ -148,3 +148,31 @@ def fetch_measurement_data(
         .compile(engine)
     )
     return pl.read_database(query, connection=engine)
+
+
+def fetch_recent_value(
+    engine: Engine, company_measurement_id: int, measurement_table: str
+):
+    """Fetch the most recent value from measurement_tables.
+
+    Args:
+        engine: database engine.
+        company_measurement_id: value of company measurement ids.
+        measurement_table: name of the table containing the measurement data.
+
+    Returns:
+        dict: A dictionary containing the most recent value and timestamp.
+    """
+    table = __TableModels[measurement_table]
+    with Session(engine) as session:
+        most_recent_entry = (
+            session.query(table)
+            .filter(table.company_measurement_id == company_measurement_id)
+            .order_by(sa.desc(table.timestamp))
+            .first()
+        )
+
+        return {
+            "value": most_recent_entry.value,
+            "timestamp": most_recent_entry.timestamp,
+        }
