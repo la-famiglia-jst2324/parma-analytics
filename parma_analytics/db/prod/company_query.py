@@ -1,6 +1,7 @@
 """CompanyDataSourceIdentifier DB queries."""
 
 
+from sqlalchemy.engine import Engine
 from sqlalchemy.orm.session import Session
 
 from parma_analytics.db.prod.models.company import Company
@@ -24,3 +25,10 @@ def create_company_if_not_exist(
 
             session.refresh(new_company)
             return new_company
+
+
+def get_company_name(engine: Engine, company_id: int) -> str:
+    """Get Company Name from the company_id."""
+    with Session(engine) as session:
+        company = session.query(Company).filter(Company.id == company_id).first()
+        return company.name
