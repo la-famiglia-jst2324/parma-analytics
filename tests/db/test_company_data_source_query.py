@@ -13,7 +13,6 @@ from parma_analytics.db.prod.company_data_source_query import (
     update_company_data_source,
 )
 
-
 # Setup test database and session
 @pytest.fixture
 def mock_db():
@@ -23,7 +22,7 @@ def mock_db():
 def test_get_company_data_source(mock_db):
     # Setup
     data = CompanyDataSourceData(1, 1, True, "healthy")
-    mock_db.query.filter().first.return_value = data
+    mock_db.query(CompanyDataSourceData).filter().first.return_value = data
 
     # Exercise
     result = get_company_data_source(mock_db, 1, 1)
@@ -33,13 +32,12 @@ def test_get_company_data_source(mock_db):
         assert result.company_id == 1
         assert result.data_source_id == 1
 
-
 def test_get_all_company_data_sources_by_data_source_id(mock_db):
     # Setup
     res_length = 2
     data1 = CompanyDataSourceData(1, 1, True, "healthy")
     data2 = CompanyDataSourceData(1, 2, True, "healthy")
-    mock_db.query.filter().all.return_value = [data1, data2]
+    mock_db.query(CompanyDataSourceData).filter().all.return_value = [data1, data2]
 
     # Exercise
     result = get_all_company_data_sources_by_data_source_id(mock_db, 1)
@@ -47,13 +45,12 @@ def test_get_all_company_data_sources_by_data_source_id(mock_db):
     # Verify
     assert len(result) == res_length
 
-
 def test_get_all_company_data_sources(mock_db):
     # Setup
     res_length = 2
     data1 = CompanyDataSourceData(1, 1, True, "healthy")
     data2 = CompanyDataSourceData(2, 2, True, "healthy")
-    mock_db.query.all.return_value = [data1, data2]
+    mock_db.query(CompanyDataSourceData).all.return_value = [data1, data2]
 
     # Exercise
     result = get_all_company_data_sources(mock_db)
