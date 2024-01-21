@@ -12,3 +12,4 @@ services:
       POSTGRES_USER: parma-prod-db
       POSTGRES_PASSWORD: parma-prod-db
       POSTGRES_DB: parma-prod-db
+      POSTGRES_MAX_CONNECTIONS: 10
