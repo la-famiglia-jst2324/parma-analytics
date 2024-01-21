@@ -234,7 +234,7 @@ class MiningModuleManager:
 
     async def _trigger(self, data_source: DataSource, task_id: int) -> None:
         """Trigger the mining module for the given invocation endpoint and payload."""
-        trigger_endpoint: str = urllib.parse.urljoin(
+        trigger_endpoint = urllib.parse.urljoin(
             data_source.invocation_endpoint, "/companies"
         )
 

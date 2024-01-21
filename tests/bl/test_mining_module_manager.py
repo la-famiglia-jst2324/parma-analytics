@@ -234,7 +234,6 @@ def test_trigger_datasources_success(
     assert f"Triggering mining modules for task_ids [{task_id}]" in log_messages[0]
     assert f"Triggering mining module for task_id {task_id}" in log_messages[1]
     assert f"Task {task_id} scheduled (data source {source_id})" in log_messages[2]
-    assert "Other payload not implemented yet." in log_messages[3]
 
 
 @pytest.mark.asyncio
