@@ -10,7 +10,10 @@ from typing import Any, cast
 import httpx
 from sqlalchemy.orm import Session
 
-from parma_analytics.bl.company_data_source_bll import get_all_by_data_source_id_bll
+from parma_analytics.bl.company_data_source_bll import (
+    get_all_by_data_source_id_bll,
+    get_company_id_bll,
+)
 from parma_analytics.bl.company_data_source_identifiers_bll import (
     get_company_data_source_identifiers_bll,
 )
@@ -22,6 +25,12 @@ from parma_analytics.db.prod.models.types import (
     DataSource,
     ScheduledTask,
 )
+from parma_analytics.sourcing.discovery.discovery_manager import (
+    call_discover_endpoint,
+    process_discovery_response,
+    rediscover_identifiers,
+)
+from parma_analytics.sourcing.discovery.discovery_model import DiscoveryQueryData
 from parma_analytics.utils.jwt_handler import JWTHandler
 
 logger = logging.getLogger(__name__)
@@ -107,8 +116,6 @@ class MiningModuleManager:
                     logger.error(f"Task with id {task_id} not found.")
                     continue
 
-                # todo: check if discovery is necessary
-
                 task = self._schedule_task(task)
                 if not task:
                     logger.error(f"Error scheduling task {task_id}")
@@ -178,11 +185,11 @@ class MiningModuleManager:
         return None
 
     def _fetch_identifiers(
-        self, company_id: int, data_source_id: int
+        self, company_id: int, data_source: DataSource
     ) -> dict[str, list[str]]:
         """Fetch identifiers for a given company and data source."""
         identifiers = get_company_data_source_identifiers_bll(
-            company_id, data_source_id
+            company_id, data_source.id
         )
         if identifiers is None:
             return {}
@@ -190,8 +197,10 @@ class MiningModuleManager:
         result: dict[str, list[str]] = {}
         for identifier in identifiers:
             if identifier.validity and identifier.validity < datetime.now():
-                # todo: rediscover
-                continue
+                # rediscover all identifiers for the company if not valid anymore
+                rediscover_identifiers(data_source, company_id)
+                result = self._fetch_identifiers(company_id, data_source)
+                break
             key = identifier.property
             if key not in result:
                 result[key] = []
@@ -199,20 +208,26 @@ class MiningModuleManager:
         return result
 
     def _create_payload(
-        self, task_id: int, companies: list[CompanyDataSource], data_source_id: int
+        self, task_id: int, companies: list[CompanyDataSource], data_source: DataSource
     ) -> ScrapingPayloadModel:
         """Create payload for the discovery endpoint."""
         companies_dict = {}
         for company in companies:
-            identifiers = self._fetch_identifiers(company.company_id, data_source_id)
+            company_id = company.company_id
+            identifiers = self._fetch_identifiers(company_id, data_source.id)
             # Do discovery if no identifier is found
             if not identifiers:
-                # todo: call discovery if identifiers are None
-                identifiers = self._fetch_identifiers(
-                    company.company_id, data_source_id
+                company_entity = get_company_id_bll(company_id)
+                query_data = [
+                    DiscoveryQueryData(company_id=company_id, name=company_entity.name)
+                ]
+                process_discovery_response(
+                    call_discover_endpoint(data_source, query_data), company.id
                 )
+                # Get identifiers after they are updated
+                identifiers = self._fetch_identifiers(company_id, data_source.id)
             if identifiers:
-                companies_dict[str(company.company_id)] = identifiers
+                companies_dict[str(company_id)] = identifiers
 
         payload = ScrapingPayloadModel(task_id=task_id, companies=companies_dict)
         return payload
@@ -228,8 +243,7 @@ class MiningModuleManager:
         companies = get_all_by_data_source_id_bll(data_source_id)
 
         # Create payload
-        # todo: Retrieve all company ids for a data source
-        json_payload = self._create_payload(task_id, companies, data_source_id)
+        json_payload = self._create_payload(task_id, companies, data_source)
 
         logger.debug(f"Payload for data source {data_source.id}: {json_payload}")
 

@@ -10,7 +10,9 @@ from parma_analytics.db.prod.company_data_source_query import (
     get_company_data_source,
     update_company_data_source,
 )
+from parma_analytics.db.prod.company_query import get_company
 from parma_analytics.db.prod.engine import get_session
+from parma_analytics.db.prod.models.company import Company
 from parma_analytics.db.prod.models.company_data_source import (
     CompanyDataSource,
 )
@@ -58,3 +60,8 @@ def update_company_data_source_bll(
 def delete_company_data_source_bll(data_source_id: int) -> bool:
     """Business Logic Layer for deleting a CompanyDataSource instance."""
     return delete_company_data_source(get_session(), data_source_id)
+
+
+def get_company_id_bll(company_id: int) -> Company:
+    """Business Logic Layer for retrieving company by id."""
+    return get_company(get_session(), company_id)
