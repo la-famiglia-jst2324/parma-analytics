@@ -10,9 +10,9 @@ from typing import Any, cast
 import httpx
 from sqlalchemy.orm import Session
 
+from parma_analytics.bl.company_bll import get_company_id_bll
 from parma_analytics.bl.company_data_source_bll import (
     get_all_by_data_source_id_bll,
-    get_company_id_bll,
 )
 from parma_analytics.bl.company_data_source_identifiers_bll import (
     get_company_data_source_identifiers_bll,
@@ -243,7 +243,7 @@ class MiningModuleManager:
         companies = get_all_by_data_source_id_bll(data_source_id)
 
         # Create payload
-        json_payload = self._create_payload(task_id, companies, data_source)
+        json_payload = self._create_payload(task_id, companies, data_source).json()
 
         logger.debug(f"Payload for data source {data_source.id}: {json_payload}")
 
@@ -255,7 +255,6 @@ class MiningModuleManager:
                     "Content-Type": "application/json",
                     "Authorization": f"Bearer {token}",
                 }
-                response = None
                 if json_payload is None:
                     logger.debug(
                         f"Missing payload for datasource {data_source.source_name}"
@@ -267,7 +266,7 @@ class MiningModuleManager:
                         content=json_payload,
                         timeout=None,
                     )
-                response.raise_for_status()
+                    response.raise_for_status()
         except httpx.RequestError as exc:
             logger.error(
                 f"An error occurred while requesting {exc.request.url!r}. Err: {exc}"

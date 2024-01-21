@@ -5,9 +5,9 @@ import logging
 
 import requests
 
+from parma_analytics.bl.company_bll import get_company_id_bll
 from parma_analytics.bl.company_data_source_bll import (
     get_company_data_source_bll,
-    get_company_id_bll,
 )
 from parma_analytics.bl.company_data_source_identifiers_bll import (
     create_company_data_source_identifier_bll,
