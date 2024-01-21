@@ -29,7 +29,7 @@ def mock_company_data_source():
 def test_get_company_data_source(mock_db):
     # Setup
     data = CompanyDataSourceData(1, 1, True, "healthy")
-    mock_db.query.return_value.filter.return_value.first.return_value = data
+    mock_db.query.filter().first.return_value = data
 
     # Exercise
     result = get_company_data_source(mock_db, 1, 1)
@@ -45,7 +45,7 @@ def test_get_all_company_data_sources_by_data_source_id(mock_db):
     res_length = 2
     data1 = CompanyDataSourceData(1, 1, True, "healthy")
     data2 = CompanyDataSourceData(1, 2, True, "healthy")
-    mock_db.query.return_value.filter.return_value.all.return_value = [data1, data2]
+    mock_db.query.filter().all.return_value = [data1, data2]
 
     # Exercise
     result = get_all_company_data_sources_by_data_source_id(mock_db, 1)
@@ -59,7 +59,7 @@ def test_get_all_company_data_sources(mock_db):
     res_length = 2
     data1 = CompanyDataSourceData(1, 1, True, "healthy")
     data2 = CompanyDataSourceData(2, 2, True, "healthy")
-    mock_db.query(CompanyDataSourceData).return_value.all.return_value = [data1, data2]
+    mock_db.query.all.return_value = [data1, data2]
 
     # Exercise
     result = get_all_company_data_sources(mock_db)
