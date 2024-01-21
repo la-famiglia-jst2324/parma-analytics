@@ -1,60 +1,62 @@
-"""Generates the report for the companies and sends it to them via email."""
+"""Generates the report for the companies using GPT."""
 
-from generate_html import generate_html_report
-from generate_pdf import generate_pdf
-from gmail.email_service import EmailService
+import logging
+import os
 
-from parma_analytics.bl.generate_report import generate_report
+from openai import OpenAI
 
 
-def generate_reports() -> None:
-    """Generates the report for the companies and sends it to them via email."""
-    df, measurement_data = generate_report()
-    grouped_data = {}
-    for row in df.iter_rows():
-        (
-            company_measurement_id,
-            company_id,
-            company_description,
-            company_name,
-            source_module_id,
-            source_name,
-            measurement_id,
-            measurement_name,
-            measurement_type,
-        ) = row
+class ReportGenerator:
+    """Class to generate reports."""
 
-        if company_id not in grouped_data:
-            grouped_data[company_id] = {
-                "company_name": company_name,
-                "company_description": company_description,
-                "sources": {},
-            }
+    def __init__(self):
+        self.api_key = os.environ.get("OPENAI_API_KEY")
+        self.client = OpenAI(api_key=self.api_key)
 
-        if source_module_id not in grouped_data[company_id]["sources"]:
-            grouped_data[company_id]["sources"][source_module_id] = {
-                "source_name": source_name,
-                "measurements": [],
-            }
+    def _make_openai_request(self, prompt):
+        """Make a request to the OpenAI API.
 
-        grouped_data[company_id]["sources"][source_module_id]["measurements"].append(
-            {
-                "measurement_id": measurement_id,
-                "measurement_name": measurement_name,
-                "measurement_type": measurement_type,
-                "company_measurement_id": company_measurement_id,
-            }
-        )
+        Args:
+            prompt (str): The prompt to be used in the API request.
 
-    grouped_data_list = list(grouped_data.values())
+        Returns:
+            dict: The response from the OpenAI API.
+        """
+        try:
+            response = self.client.completions.create(
+                prompt=prompt, model="gpt-3.5-turbo-instruct", max_tokens=200
+            )
+            return response
 
-    html_content = generate_html_report(grouped_data_list, measurement_data)
-    pdf = generate_pdf(html_content, "Analysis Report for Companies.pdf")
+        except Exception as e:
+            logging.error(f"An error occurred while calling GPT: {e}")
+            raise e
 
-    # Need to remove hard-coded values later
-    EmailService("company", 1).send_temp_email(
-        to_emails=["hamza.chaouki@tum.de"],
-        dynamic_template_data={"name": "John Doe"},
-        attachments=[pdf],
-        local_attachment=True,
-    )
+    def generate_report_summary(self, report_params) -> str:
+        """Generates the report content using GPT.
+
+        Args:
+            report_params: An object containing information to generate a  prompt
+
+        Returns:
+            str: A summary string containing information about the
+                report, including trigger change,
+                current value, metric name, timeframe, etc.
+        """
+        company_name = report_params["company_name"]
+        source_name = report_params["source_name"]
+        timeframe = report_params["timeframe"]
+        metric_name = report_params["metric_name"]
+        trigger_change = report_params["trigger_change"]
+        current_value = report_params["current_value"]
+        gpt_prompt = f"""I want you to act as a summary generator. Generate a
+                     concise 1-2 linesexpressive summary for a
+                     company {company_name} who recently witnessed a change
+                     within the {timeframe} days on the {source_name}platform
+                     for {metric_name}  of {trigger_change}  %  and its current
+                     value of is now {current_value}. Adjust the timeframe
+                     representation to yeasrs if days > 365 or months if
+                     days > 28 if necessary or weeks if days > 7"""
+
+        response = self._make_openai_request(gpt_prompt)
+        return response.choices[0].text
