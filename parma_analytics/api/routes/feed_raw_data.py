@@ -10,6 +10,7 @@ from parma_analytics.api.models.feed_raw_data import (
     ApiFeedRawDataCreateIn,
     ApiFeedRawDataCreateOut,
 )
+from parma_analytics.bl.create_company_bll import create_company_if_not_exist_bll
 from parma_analytics.db.mining.models import NormalizationSchema, RawData, RawDataIn
 from parma_analytics.db.mining.service import (
     read_normalization_schema_by_datasource,
@@ -38,12 +39,22 @@ def feed_raw_data(
     Returns:
         Acknowledgement message containing the raw data and the timestamp.
     """
+    company_id: str = body.company_id
+
+    # Check if the module is affinity and if so,
+    # save the company name to the company table if it does not exist
+    if body.source_name == "affinity":
+        company = create_company_if_not_exist_bll(
+            body.raw_data["name"], body.raw_data["domain"], 1
+        )
+        company_id = str(company.id)
+
     saved_document = store_raw_data(
         datasource=body.source_name,
         raw_data=RawDataIn(
             mining_trigger="",
             status="success",
-            company_id=body.company_id,
+            company_id=company_id,
             data=body.raw_data,
         ),
     )
@@ -65,7 +76,7 @@ def feed_raw_data(
         raw_data=RawData(
             mining_trigger="",
             status="success",
-            company_id=body.company_id,
+            company_id=company_id,
             data=body.raw_data,
             create_time=timestamp,
             id="",
@@ -75,13 +86,11 @@ def feed_raw_data(
         mapping_schema=latest_mapping_schema,
     )
 
-    # TODO: Write normalized_data(_) to the PROD DB
-
     return ApiFeedRawDataCreateOut(
         return_message=return_message,
         source_name=body.source_name,
         timestamp=timestamp,
         document_id=saved_document.id,
-        company_id=body.company_id,
+        company_id=company_id,
         raw_data=body.raw_data,
     )
