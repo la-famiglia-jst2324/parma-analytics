@@ -2,7 +2,6 @@
 
 import sqlalchemy as sa
 from sqlalchemy import ForeignKey
-from sqlalchemy.orm import relationship
 
 from parma_analytics.db.prod.engine import Base
 
@@ -20,11 +19,6 @@ class CompanyDataSource(Base):
     created_at = sa.Column(sa.DateTime, nullable=False, default=sa.func.now())
     modified_at = sa.Column(
         sa.DateTime, nullable=False, default=sa.func.now(), onupdate=sa.func.now()
-    )
-
-    # Relations
-    company_data_source_identifiers = relationship(
-        "CompanyDataSourceIdentifier", back_populates="company_data_source"
     )
 
     __table_args__ = (sa.UniqueConstraint("data_source_id", "company_id"),)
