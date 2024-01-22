@@ -46,8 +46,6 @@ def test_create_company_data_source_identifier(
         property="property",
         value="value",
         validity=datetime.now(),
-        # TODO: REMOVE identifier_key
-        identifier_key="property_value",
     )
     with patch(
         "parma_analytics.db.prod.models.company_data_source_identifier.CompanyDataSourceIdentifier",

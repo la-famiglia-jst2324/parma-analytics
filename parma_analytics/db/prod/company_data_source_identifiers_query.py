@@ -18,8 +18,6 @@ class IdentifierData:
 
     company_data_source_id: int
     identifier_type: str
-    # TODO: REMOVE identifier_key
-    identifier_key: str
     property: str
     value: str
     validity: datetime
@@ -75,8 +73,6 @@ def create_company_data_source_identifier(
             property=identifier_data.property,
             value=identifier_data.value,
             validity=identifier_data.validity,
-            # TODO: REMOVE identifier_key
-            identifier_key=identifier_data.identifier_key,
         )
 
         session.add(new_identifier)

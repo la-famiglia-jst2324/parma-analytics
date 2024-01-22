@@ -19,8 +19,6 @@ class CompanyDataSourceIdentifier(Base):
         sa.Integer, sa.ForeignKey("company_data_source.id"), nullable=False
     )
     identifier_type = sa.Column(literal_to_enum(IdentifierType), nullable=False)
-    # TODO: REMOVE identifier_key
-    identifier_key = sa.Column(sa.String, nullable=False)
     property = sa.Column(sa.String, nullable=False)
     value = sa.Column(sa.String, nullable=False)
     validity = sa.Column(sa.DateTime, nullable=False)

@@ -89,8 +89,6 @@ def process_discovery_response(
                     property=property_key,
                     value=value,
                     validity=discovery_response.validity,
-                    # TODO: REMOVE identifier_key
-                    identifier_key=property_key + "_" + value,
                 )
                 create_company_data_source_identifier_bll(identifier_data)
 
