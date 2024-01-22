@@ -42,7 +42,7 @@ def call_discover_endpoint(
     token: str = JWTHandler.create_jwt(data_source.id)
     header = {"Authorization": f"Bearer {token}"}
 
-    request_payload = json.dumps([query.dict() for query in query_data])
+    request_payload = json.dumps([query.model_dump() for query in query_data])
 
     try:
         response = requests.post(
