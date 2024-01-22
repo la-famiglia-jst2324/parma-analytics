@@ -199,11 +199,12 @@ class MiningModuleManager:
     def _create_payload(
         self, task_id: int, companies: list[CompanyDataSource], data_source: DataSource
     ) -> ScrapingPayloadModel:
-        """Create payload for the discovery endpoint."""
+        """Create payload for triggering the mining module."""
         companies_dict = {}
         for company in companies:
             company_id = company.company_id
             identifiers = self._fetch_identifiers(company_id, data_source)
+
             # Do discovery if no identifier is found
             if not identifiers:
                 company_entity = get_company_id_bll(company_id)
@@ -215,6 +216,7 @@ class MiningModuleManager:
                 )
                 # Get identifiers after they are updated
                 identifiers = self._fetch_identifiers(company_id, data_source)
+
             if identifiers:
                 companies_dict[str(company_id)] = identifiers
 
