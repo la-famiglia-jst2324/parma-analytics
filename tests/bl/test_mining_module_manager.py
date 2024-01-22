@@ -1,6 +1,6 @@
 import logging
 from datetime import datetime
-from unittest.mock import AsyncMock, MagicMock, patch
+from unittest.mock import ANY, AsyncMock, MagicMock, patch
 
 import pytest
 from httpx import AsyncClient
@@ -351,29 +351,68 @@ def test_create_payload(task_id, identifiers, expected_payload, mining_module_ma
     # Assertions
     assert result.dict() == expected_payload
 """
-"""
+
+
 @pytest.mark.asyncio
-async def test_trigger_with_valid_payload(mining_module_manager, mock_async_client):
+@patch("httpx.AsyncClient")
+async def test_trigger_success(mock_async_client_class, mining_module_manager):
     # Setup
+    mock_async_client_instance = (
+        mock_async_client_class.return_value.__aenter__.return_value
+    )
+    mock_async_client_instance.post.return_value = AsyncMock(status_code=200)
     mock_data_source = MagicMock(spec=DataSource)
     mock_data_source.id = 1
     mock_data_source.name = "name"
+    mock_data_source.invocation_endpoint = "http://example.com"
+    invocation_endpoint = mock_data_source.invocation_endpoint + "/companies"
     task_id = 123
+    companies_dict: dict[str, dict[str, list[str]]] = {}
+    scraping_payload = ScrapingPayloadModel(task_id=task_id, companies=companies_dict)
 
-    # Mocking _create_payload to return a valid payload
-    mining_module_manager._create_payload = mock.MagicMock(
-        return_value={"some": "payload"}
-    )
-    mock_async_client_instance = mock_async_client.return_value.__aenter__.return_value
-    mock_async_client_instance.post.return_value = AsyncMock(status_code=200)
+    mining_module_manager._create_payload = MagicMock(return_value=scraping_payload)
 
     # Run the Test
     await mining_module_manager._trigger(mock_data_source, task_id)
 
     # Assertions
     mock_async_client_instance.post.assert_awaited_once_with(
-        ANY, headers=ANY, content=json.dumps({"some": "payload"}), timeout=None
+        invocation_endpoint,
+        headers=ANY,
+        content='{"task_id":123,"companies":{}}',
+        timeout=None,
     )
+
+
+"""
+@pytest.mark.asyncio
+@patch("httpx.AsyncClient")
+@patch("parma_analytics.bl.mining_module_manager.MiningModuleManager._create_payload")
+async def test_trigger_no_payload(
+        mock_create_payload, mock_async_client_class, mining_module_manager
+):
+    # Setup
+    mock_create_payload.return_value = None
+    mock_async_client_instance = (
+        mock_async_client_class.return_value.__aenter__.return_value
+    )
+    mock_async_client_instance.post.return_value = AsyncMock(status_code=200)
+    mock_data_source = MagicMock(spec=DataSource)
+    mock_data_source.id = 1
+    mock_data_source.name = "name"
+    mock_data_source.invocation_endpoint = "http://example.com"
+    invocation_endpoint = mock_data_source.invocation_endpoint + "/companies"
+    task_id = 123
+    companies_dict = {}
+    scraping_payload = ScrapingPayloadModel(task_id=task_id, companies=companies_dict)
+
+    mining_module_manager._create_payload = MagicMock(return_value=scraping_payload)
+
+    # Run the Test
+    await mining_module_manager._trigger(mock_data_source, task_id)
+
+    # Assertions
+    mock_async_client_instance.post.assert_not_awaited()
 """
 
 
