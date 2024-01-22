@@ -2,6 +2,7 @@ import logging
 from datetime import datetime
 from unittest.mock import ANY, AsyncMock, MagicMock, patch
 
+import httpx
 import pytest
 from httpx import AsyncClient
 from sqlalchemy.orm import sessionmaker
@@ -349,36 +350,88 @@ async def test_trigger_success(mock_async_client_class, mining_module_manager):
     )
 
 
-"""
 @pytest.mark.asyncio
+@pytest.mark.parametrize(
+    "exception, expected_error_log_message",
+    [
+        (
+            httpx.RequestError(
+                "Request error", request=httpx.Request("POST", "http://test")
+            ),
+            "An error occurred while requesting 'http://test'. Err: Request error",
+        ),
+        (
+            httpx.HTTPStatusError(
+                "HTTP error",
+                request=httpx.Request("POST", "http://example.com/companies"),
+                response=AsyncMock(),
+            ),
+            "Error response <AsyncMock name='mock.status_code'"
+            " id='...' while requesting 'http://example.com/companies'.",
+        ),
+        (
+            Exception("Unexpected error"),
+            "An unexpected error occurred while sending request: Unexpected error",
+        ),
+    ],
+)
 @patch("httpx.AsyncClient")
-@patch("parma_analytics.bl.mining_module_manager.MiningModuleManager._create_payload")
-async def test_trigger_no_payload(
-        mock_create_payload, mock_async_client_class, mining_module_manager
+async def test_trigger_errors(
+    mock_async_client_class,
+    mining_module_manager,
+    caplog,
+    exception,
+    expected_error_log_message,
 ):
     # Setup
-    mock_create_payload.return_value = None
     mock_async_client_instance = (
         mock_async_client_class.return_value.__aenter__.return_value
     )
-    mock_async_client_instance.post.return_value = AsyncMock(status_code=200)
+    mock_async_client_instance.post.side_effect = exception
     mock_data_source = MagicMock(spec=DataSource)
     mock_data_source.id = 1
     mock_data_source.name = "name"
     mock_data_source.invocation_endpoint = "http://example.com"
-    invocation_endpoint = mock_data_source.invocation_endpoint + "/companies"
     task_id = 123
-    companies_dict = {}
+    companies_dict: dict[str, dict[str, list[str]]] = {}
     scraping_payload = ScrapingPayloadModel(task_id=task_id, companies=companies_dict)
 
     mining_module_manager._create_payload = MagicMock(return_value=scraping_payload)
 
     # Run the Test
-    await mining_module_manager._trigger(mock_data_source, task_id)
+    with caplog.at_level(logging.ERROR):
+        await mining_module_manager._trigger(mock_data_source, task_id)
 
     # Assertions
-    mock_async_client_instance.post.assert_not_awaited()
-"""
+    assert any(
+        expected_error_log_message in record.message for record in caplog.records
+    )
+
+
+@patch("httpx.AsyncClient")
+@patch("parma_analytics.bl.mining_module_manager.MiningModuleManager._create_payload")
+async def test_trigger_no_payload(
+    mock_create_payload, mock_async_client_class, mining_module_manager, caplog
+):
+    # Setup
+    scraping_payload = ScrapingPayloadModel(task_id=123, companies={})
+    scraping_payload.model_dump_json = MagicMock(
+        return_value=None
+    )  # Mocking to return None
+    mock_create_payload.return_value = scraping_payload
+
+    mock_data_source = MagicMock(spec=DataSource)
+    mock_data_source.source_name = "DataSourceName"
+    task_id = 123
+
+    # Run the Test
+    # Run the Test
+    with caplog.at_level(logging.INFO):
+        await mining_module_manager._trigger(mock_data_source, task_id)
+
+    # Assertions
+    log_messages = [record.message for record in caplog.records]
+    assert "Missing payload for datasource DataSourceName" in log_messages[0]
 
 
 @patch("parma_analytics.db.prod.engine.get_engine")
