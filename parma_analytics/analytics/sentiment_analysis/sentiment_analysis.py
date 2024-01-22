@@ -31,7 +31,7 @@ async def get_sentiment(text: str) -> int | None:
             "stop": ["\n"],
             "messages": [{"role": "system", "content": prompt}],
         }
-        api_key = os.getenv("OPENAI_API_KEY")
+        api_key = os.getenv("CHATGPT_API_KEY")
         headers = {
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
