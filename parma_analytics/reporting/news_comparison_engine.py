@@ -50,7 +50,7 @@ class NewsComparisonEngineReturn(BaseModel):
         is_rules_satisfied (bool): Indicates whether the comparison rules are satisfied.
         is_aggregated (bool): Indicates whether the values are aggregated.
         aggregation_method (Optional[str]): The method used for aggregation.
-        aggregated_value (Optional[float]): The aggregated value.
+        previous_value (Optional[float]): The aggregated value.
         num_aggregation_entries (Optional[int]): # of entries used for aggregation.
         percentage_difference (Optional[float]): % difference between values.
     """
@@ -59,7 +59,7 @@ class NewsComparisonEngineReturn(BaseModel):
     is_rules_satisfied: bool = False
     is_aggregated: bool = False
     aggregation_method: str | None = None
-    aggregated_value: float | None = None
+    previous_value: float | None = None
     num_aggregation_entries: int | None = None
     percentage_difference: float | None = None
 
@@ -88,7 +88,9 @@ def check_notification_rules(
     measurement_type = measurement_type.lower()
     data_table = get_measurement_value_table(measurement_type)
     company_measurement_id = company_measurement.company_measurement_id
-    if measurement_type not in ["int", "float"]:
+
+    # Contains measurement types for which we want to ignore changes
+    if measurement_type not in ["int", "float", "comment", "link", "date"]:
         previous_value = get_most_recent_measurement_values(
             get_engine(),
             data_table=data_table,
@@ -117,11 +119,16 @@ def check_notification_rules(
                 notification_rule=notification_rule,
             )
             if aggregation_method is None and num_aggregation_entries is None:
-                if compare_to_threshold(previous_value, value, threshold):
+                percentage_difference = compare_to_threshold(
+                    previous_value, value, threshold
+                )
+                if percentage_difference >= 0:
                     return NewsComparisonEngineReturn(
                         threshold=threshold,
                         is_rules_satisfied=True,
                         is_aggregated=False,
+                        percentage_difference=percentage_difference,
+                        previous_value=previous_value,
                     )
             elif aggregation_method is not None and num_aggregation_entries is None:
                 new_aggregated_value = apply_aggregation_method(
@@ -134,15 +141,17 @@ def check_notification_rules(
                     ),
                     notification_rule=notification_rule,
                 )
-                if compare_to_threshold(
+                percentage_difference = compare_to_threshold(
                     previous_value, new_aggregated_value, threshold
-                ):
+                )
+                if percentage_difference >= 0:
                     return NewsComparisonEngineReturn(
                         threshold=threshold,
                         is_rules_satisfied=True,
                         is_aggregated=True,
                         aggregation_method=aggregation_method,
-                        aggregated_value=new_aggregated_value,
+                        previous_value=new_aggregated_value,
+                        percentage_difference=percentage_difference,
                     )
             elif aggregation_method is not None and num_aggregation_entries is not None:
                 new_aggregated_value = apply_aggregation_method(
@@ -155,16 +164,18 @@ def check_notification_rules(
                     ),
                     notification_rule=notification_rule,
                 )
-                if compare_to_threshold(
+                percentage_difference = compare_to_threshold(
                     previous_value, new_aggregated_value, threshold
-                ):
+                )
+                if percentage_difference >= 0:
                     return NewsComparisonEngineReturn(
                         threshold=threshold,
                         is_rules_satisfied=True,
                         is_aggregated=True,
                         aggregation_method=aggregation_method,
-                        aggregated_value=new_aggregated_value,
+                        previous_value=new_aggregated_value,
                         num_aggregation_entries=num_aggregation_entries,
+                        percentage_difference=percentage_difference,
                     )
 
     return NewsComparisonEngineReturn(threshold=threshold, is_rules_satisfied=False)
