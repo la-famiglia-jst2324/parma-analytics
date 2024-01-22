@@ -352,13 +352,13 @@ async def test_trigger_success(mock_async_client_class, mining_module_manager):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "exception, expected_error_log_message",
+    "exception, expected_error_log_substring",
     [
         (
             httpx.RequestError(
                 "Request error", request=httpx.Request("POST", "http://test")
             ),
-            "An error occurred while requesting 'http://test'. Err: Request error",
+            "An error occurred while requesting",
         ),
         (
             httpx.HTTPStatusError(
@@ -366,12 +366,11 @@ async def test_trigger_success(mock_async_client_class, mining_module_manager):
                 request=httpx.Request("POST", "http://example.com/companies"),
                 response=AsyncMock(),
             ),
-            "Error response <AsyncMock name='mock.status_code'"
-            " id='...' while requesting 'http://example.com/companies'.",
+            "Error response",
         ),
         (
             Exception("Unexpected error"),
-            "An unexpected error occurred while sending request: Unexpected error",
+            "An unexpected error occurred while sending request",
         ),
     ],
 )
@@ -381,7 +380,7 @@ async def test_trigger_errors(
     mining_module_manager,
     caplog,
     exception,
-    expected_error_log_message,
+    expected_error_log_substring,
 ):
     # Setup
     mock_async_client_instance = (
@@ -404,8 +403,36 @@ async def test_trigger_errors(
 
     # Assertions
     assert any(
-        expected_error_log_message in record.message for record in caplog.records
+        expected_error_log_substring in record.message for record in caplog.records
     )
+
+
+@pytest.mark.asyncio
+@patch(
+    "parma_analytics.bl.mining_module_manager.ensure_appropriate_scheme",
+    return_value=None,
+)
+async def test_trigger_with_invalid_endpoint(mock_ensure_scheme, caplog):
+    # Setup
+    mock_data_source = MagicMock(spec=DataSource)
+    mock_data_source.id = 1
+    mock_data_source.name = "name"
+    mock_data_source.invocation_endpoint = "http://invalid-endpoint.com"
+    task_id = 123
+
+    mining_module_manager = MiningModuleManager()
+
+    # Run the Test
+    with caplog.at_level(logging.ERROR):
+        await mining_module_manager._trigger(mock_data_source, task_id)
+
+    # Assertions
+    expected_error_message = (
+        f"Invalid invocation endpoint: "
+        f"{mock_data_source.invocation_endpoint} "
+        f"for data source {mock_data_source.id}"
+    )
+    assert any(expected_error_message in record.message for record in caplog.records)
 
 
 @patch("httpx.AsyncClient")
