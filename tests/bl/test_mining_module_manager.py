@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, timedelta
 from unittest.mock import ANY, AsyncMock, MagicMock, patch
 
 import httpx
@@ -12,6 +12,9 @@ from parma_analytics.bl.scraping_model import ScrapingPayloadModel
 from parma_analytics.db.prod.engine import get_engine
 from parma_analytics.db.prod.models.company import Company
 from parma_analytics.db.prod.models.company_data_source import CompanyDataSource
+from parma_analytics.db.prod.models.company_data_source_identifier import (
+    CompanyDataSourceIdentifier,
+)
 from parma_analytics.db.prod.models.types import (
     DataSource,
     ScheduledTask,
@@ -21,13 +24,6 @@ from parma_analytics.db.prod.models.types import (
 @pytest.fixture
 def mock_async_client():
     return MagicMock(spec=AsyncClient, get=AsyncMock(), post=AsyncMock())
-
-
-@pytest.fixture
-def mock_os_getenv():
-    with patch("os.getenv") as mock_getenv:
-        mock_getenv.return_value = "prod"
-        yield mock_getenv
 
 
 @pytest.fixture(scope="function")
@@ -435,6 +431,133 @@ async def test_trigger_with_invalid_endpoint(mock_ensure_scheme, caplog):
     assert any(expected_error_message in record.message for record in caplog.records)
 
 
+@patch(
+    "parma_analytics.bl.mining_module_manager.get_company_data_source_identifiers_bll"
+)
+def test_fetch_identifiers_success(mock_get_identifiers, mining_module_manager):
+    # Setup
+    company_id = 1
+    data_source = DataSource(id=2, source_name="TestDataSource")
+
+    mock_identifier = CompanyDataSourceIdentifier(
+        id=1,
+        company_data_source_id=1,
+        identifier_type="AUTOMATICALLY_DISCOVERED",
+        property="test_property",
+        value="test_value",
+        validity=datetime.now() + timedelta(days=1),
+    )
+
+    mock_get_identifiers.return_value = [mock_identifier]
+
+    # Run the test
+    result = mining_module_manager._fetch_identifiers(company_id, data_source)
+
+    # Assertions
+    assert isinstance(result, dict)
+    assert "test_property" in result
+    assert result["test_property"] == ["test_value"]
+    mock_get_identifiers.assert_called_once_with(company_id, data_source.id)
+
+
+@patch(
+    "parma_analytics.bl.mining_module_manager.get_company_data_source_identifiers_bll"
+)
+def test_fetch_identifiers_no_identifier(mock_get_identifiers, mining_module_manager):
+    # Setup
+    company_id = 1
+    data_source = DataSource(id=2, source_name="TestDataSource")
+
+    mock_get_identifiers.return_value = None
+
+    # Run the test
+    result = mining_module_manager._fetch_identifiers(company_id, data_source)
+
+    # Assertions
+    assert isinstance(result, dict)
+    assert result == {}
+    mock_get_identifiers.assert_called_once_with(company_id, data_source.id)
+
+
+@patch(
+    "parma_analytics.bl.mining_module_manager.get_company_data_source_identifiers_bll"
+)
+@patch("parma_analytics.bl.mining_module_manager.rediscover_identifiers")
+def test_fetch_identifiers_empty_identifier(
+    mock_rediscover_identifiers, mock_get_identifiers, mining_module_manager
+):
+    # Setup
+    company_id = 1
+    data_source = DataSource(id=2, source_name="TestDataSource")
+
+    mock_identifier = CompanyDataSourceIdentifier(
+        id=1,
+        company_data_source_id=1,
+        identifier_type="AUTOMATICALLY_DISCOVERED",
+        property="test_property",
+        value="test_value",
+        validity=datetime.now() + timedelta(days=1),
+    )
+
+    # First call to returns an empty list, triggering recursion
+    # Second call returns a non-empty list, ending the recursion
+    get_identifiers_return_array = [[], [mock_identifier]]
+    mock_get_identifiers.side_effect = get_identifiers_return_array
+
+    # Run the test
+    result = mining_module_manager._fetch_identifiers(company_id, data_source)
+
+    # Assertions
+    assert len(result) > 0
+    mock_rediscover_identifiers.assert_called_once_with(data_source, company_id)
+    assert mock_get_identifiers.call_count == len(get_identifiers_return_array)
+
+
+@patch(
+    "parma_analytics.bl.mining_module_manager.get_company_data_source_identifiers_bll"
+)
+@patch("parma_analytics.bl.mining_module_manager.rediscover_identifiers")
+def test_fetch_identifiers_with_expired_identifiers(
+    mock_rediscover_identifiers, mock_get_identifiers, mining_module_manager
+):
+    # Setup
+    company_id = 123
+    data_source = DataSource(id=456, source_name="TestDataSource")
+
+    # First call returns an expired identifier, second call returns a valid identifier
+    expired_identifier = CompanyDataSourceIdentifier(
+        id=1,
+        company_data_source_id=company_id,
+        identifier_type="AUTOMATICALLY_DISCOVERED",
+        property="test_property",
+        value="expired_value",
+        validity=datetime.now() - timedelta(days=1),
+    )
+
+    valid_identifier = CompanyDataSourceIdentifier(
+        id=2,
+        company_data_source_id=company_id,
+        identifier_type="AUTOMATICALLY_DISCOVERED",
+        property="test_property",
+        value="valid_value",
+        validity=datetime.now() + timedelta(days=1),
+    )
+
+    # First call with expired identifier
+    # Second call with valid identifier
+    get_identifiers_return_array = [[expired_identifier], [valid_identifier]]
+    mock_get_identifiers.side_effect = get_identifiers_return_array
+
+    # Run the test
+    result = mining_module_manager._fetch_identifiers(company_id, data_source)
+
+    # Assertions
+    assert len(result) > 0
+    assert result["test_property"] == ["valid_value"]
+    mock_rediscover_identifiers.assert_called_once_with(data_source, company_id)
+    assert mock_get_identifiers.call_count == len(get_identifiers_return_array)
+
+
 @patch("httpx.AsyncClient")
 @patch("parma_analytics.bl.mining_module_manager.MiningModuleManager._create_payload")
 async def test_trigger_no_payload(
@@ -442,16 +565,13 @@ async def test_trigger_no_payload(
 ):
     # Setup
     scraping_payload = ScrapingPayloadModel(task_id=123, companies={})
-    scraping_payload.model_dump_json = MagicMock(
-        return_value=None
-    )  # Mocking to return None
+    scraping_payload.model_dump_json = MagicMock(return_value=None)
     mock_create_payload.return_value = scraping_payload
 
     mock_data_source = MagicMock(spec=DataSource)
     mock_data_source.source_name = "DataSourceName"
     task_id = 123
 
-    # Run the Test
     # Run the Test
     with caplog.at_level(logging.INFO):
         await mining_module_manager._trigger(mock_data_source, task_id)
@@ -734,59 +854,3 @@ def test_trigger_datasources_exception_handling(
     mock_loop.run_until_complete.assert_not_called()
     mock_loop.close.assert_called_once()
     mock_trigger.assert_not_called()
-
-
-"""
-@pytest.mark.asyncio
-@pytest.mark.parametrize(
-    "exception, log_message_part",
-    [
-        (
-            RequestError("Request error", request=Request("POST", "http://test")),
-            "Request error",
-        ),
-        (
-            HTTPStatusError(
-                "HTTP error",
-                request=Request("POST", "http://test"),
-                response=AsyncMock(),
-            ),
-            "Error response",
-        ),
-        (Exception("Unexpected error"), "Unexpected error"),
-    ],
-)
-@patch("httpx.AsyncClient")
-async def test_trigger_errors(
-    mock_async_client_class, mining_module_manager, caplog, exception, log_message_part
-):
-    # Setup
-    mock_data_source = MagicMock(spec=DataSource)
-    mock_data_source.id = 1
-    mock_data_source.source_name = "name"
-    mock_data_source.invocation_endpoint = "http://test-endpoint.com/companies"
-
-    task_id = 123
-    expected_payload = json.dumps({"some": "payload"})
-
-    # Mocking _create_payload to return a valid payload
-    mining_module_manager._create_payload = MagicMock(return_value=expected_payload)
-
-    mock_async_client_instance = (
-        mock_async_client_class.return_value.__aenter__.return_value
-    )
-    mock_async_client_instance.post.side_effect = exception
-
-    # Run the Test
-    with caplog.at_level(logging.ERROR):
-        await mining_module_manager._trigger(mock_data_source, task_id)
-
-    # Assertions
-    assert log_message_part in caplog.text
-    mock_async_client_instance.post.assert_awaited_once_with(
-        mock_data_source.invocation_endpoint + "/companies",
-        headers=ANY,
-        content=expected_payload,
-        timeout=None,
-    )
-"""
