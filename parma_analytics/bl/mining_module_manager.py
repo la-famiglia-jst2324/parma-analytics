@@ -225,7 +225,9 @@ class MiningModuleManager:
                     continue
 
                 query_data = [
-                    DiscoveryQueryData(company_id=company_id, name=company_entity.name)
+                    DiscoveryQueryData(
+                        company_id=str(company_id), name=company_entity.name
+                    )
                 ]
                 process_discovery_response(
                     call_discover_endpoint(data_source, query_data), company.id
