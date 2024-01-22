@@ -236,7 +236,9 @@ class MiningModuleManager:
 
         data_source_id: int = data_source.id
 
-        companies = get_all_by_data_source_id_bll(data_source_id)
+        companies: list[CompanyDataSource] = get_all_by_data_source_id_bll(
+            data_source_id
+        )
 
         # Create payload
         json_payload = self._create_payload(

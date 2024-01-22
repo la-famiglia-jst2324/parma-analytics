@@ -46,7 +46,7 @@ def get_all_company_data_sources_by_data_source_id(
 ) -> list[CompanyDataSource]:
     """Fetch all CompanyDataSource instances based on data_source_id."""
     with db_session as session:
-        company_data_sources = (
+        company_data_sources: list[CompanyDataSource] = (
             session.query(CompanyDataSource)
             .filter(
                 CompanyDataSource.data_source_id == data_source_id,
