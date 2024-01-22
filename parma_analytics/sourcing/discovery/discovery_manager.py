@@ -56,11 +56,19 @@ def call_discover_endpoint(
         return DiscoveryResponseModel(**response_data)
 
     except requests.RequestException as e:
-        logger.error(f"Request error: {e}")
-        raise
+        logger.error(
+            f"Request error happened for "
+            f"data source {data_source.id} "
+            f"while calling discovery endpoint: {e}"
+        )
+        raise e
     except Exception as e:
-        logger.error(f"Unexpected error: {e}")
-        raise
+        logger.error(
+            f"Unexpected error happened for "
+            f"data source {data_source.id} "
+            f"while calling discovery endpoint: {e}"
+        )
+        raise e
 
 
 def process_discovery_response(
