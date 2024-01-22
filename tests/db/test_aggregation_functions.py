@@ -2,14 +2,12 @@ from datetime import datetime
 
 import pytest
 from sqlalchemy import Column, DateTime, Float, Integer, String, create_engine
-from sqlalchemy.ext.declarative import declarative_base
+from parma_analytics.db.prod.engine import Base
 from sqlalchemy.orm import sessionmaker
 
 from parma_analytics.db.prod.aggregation_queries import (
     get_most_recent_measurement_values,
 )
-
-Base = declarative_base()
 
 EXAMPLE_COMPANY_MEASUREMENT_ID = 1
 EXAMPLE_VALUE = 100
