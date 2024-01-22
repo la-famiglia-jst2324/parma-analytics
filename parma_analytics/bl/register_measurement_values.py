@@ -28,6 +28,9 @@ from parma_analytics.db.prod.models.measurement_value_models import (
     MeasurementParagraphValue,
     MeasurementTextValue,
 )
+from parma_analytics.reporting.news_comparison_engine import (
+    check_notification_rules,
+)
 from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
 
 logger = logging.getLogger(__name__)
@@ -60,8 +63,26 @@ def register_values(normalized_measurement: NormalizedData) -> int:
                         "company_id": company_id,
                     },
                 )
+            measurement_type = measurement_type.lower()
+            # need to check rules before creating a news
+            comparison_engine_result = check_notification_rules(
+                source_measurement_id=source_measurement_id,
+                value=value,
+                timestamp=timestamp,
+                measurement_type=measurement_type,
+                company_measurement=company_measurement,
+            )
+            if comparison_engine_result.is_rules_satisfied:
+                # TODO: send notification
+                pass
 
-            # Call the function
+            # data_source_id = get_data_source_id(source_measurement_id=
+            # source_measurement_id)
+            # summary
+            # TODO: get message and title from gpt and pass it to create_news() below.
+            # TODO: create news
+            # news = create_news(NewsCreate(...))
+
             created_measurement_id = handle_value(
                 session,
                 measurement_type,
