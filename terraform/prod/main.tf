@@ -46,7 +46,7 @@ module "main" {
   sendgrid_report_template_id       = var.sendgrid_report_template_id
 
   chatgpt_api_key = var.chatgpt_api_key
-  slack_api_key = var.slack_api_key
+  affinity_api_key = var.affinity_api_key
 
   PARMA_SHARED_SECRET_KEY = var.PARMA_SHARED_SECRET_KEY
   PARMA_ANALYTICS_SECRET_KEY = var.PARMA_ANALYTICS_SECRET_KEY

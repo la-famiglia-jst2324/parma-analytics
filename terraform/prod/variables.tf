@@ -67,9 +67,9 @@ variable "chatgpt_api_key" {
   sensitive = true
 }
 
-/* -------------------------------------- Slack ------------------------------------- */
+/* -------------------------------------- Affinity ------------------------------------- */
 
-variable "slack_api_key" {
+variable "affinity_api_key" {
   type      = string
   sensitive = true
 }
