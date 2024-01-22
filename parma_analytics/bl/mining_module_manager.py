@@ -203,7 +203,7 @@ class MiningModuleManager:
         companies_dict = {}
         for company in companies:
             company_id = company.company_id
-            identifiers = self._fetch_identifiers(company_id, data_source.id)
+            identifiers = self._fetch_identifiers(company_id, data_source)
             # Do discovery if no identifier is found
             if not identifiers:
                 company_entity = get_company_id_bll(company_id)
@@ -214,7 +214,7 @@ class MiningModuleManager:
                     call_discover_endpoint(data_source, query_data), company.id
                 )
                 # Get identifiers after they are updated
-                identifiers = self._fetch_identifiers(company_id, data_source.id)
+                identifiers = self._fetch_identifiers(company_id, data_source)
             if identifiers:
                 companies_dict[str(company_id)] = identifiers
 
