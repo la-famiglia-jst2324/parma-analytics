@@ -239,7 +239,9 @@ class MiningModuleManager:
         companies = get_all_by_data_source_id_bll(data_source_id)
 
         # Create payload
-        json_payload = self._create_payload(task_id, companies, data_source).json()
+        json_payload = self._create_payload(
+            task_id, companies, data_source
+        ).model_dump_json()
 
         logger.debug(f"Payload for data source {data_source.id}: {json_payload}")
 
