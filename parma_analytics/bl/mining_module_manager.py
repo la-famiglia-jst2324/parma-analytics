@@ -123,17 +123,6 @@ class MiningModuleManager:
 
                 data_source = cast(DataSource, task.data_source)
 
-                invocation_endpoint = ensure_appropriate_scheme(
-                    data_source.invocation_endpoint
-                )
-                if not invocation_endpoint:
-                    logger.error(
-                        f"Invalid invocation endpoint: "
-                        f"{data_source.invocation_endpoint} "
-                        f"for data source {data_source.id}"
-                    )
-                    continue
-
                 trigger_task = loop.create_task(self._trigger(data_source, task_id))
                 trigger_tasks.append(trigger_task)
 
@@ -233,10 +222,17 @@ class MiningModuleManager:
         return payload
 
     async def _trigger(self, data_source: DataSource, task_id: int) -> None:
-        """Trigger the mining module for the given invocation endpoint and payload."""
-        trigger_endpoint = urllib.parse.urljoin(
-            data_source.invocation_endpoint, "/companies"
-        )
+        """Trigger the given mining module with given task_id."""
+        invocation_endpoint = ensure_appropriate_scheme(data_source.invocation_endpoint)
+        if not invocation_endpoint:
+            logger.error(
+                f"Invalid invocation endpoint: "
+                f"{data_source.invocation_endpoint} "
+                f"for data source {data_source.id}"
+            )
+            return
+
+        trigger_endpoint = urllib.parse.urljoin(invocation_endpoint, "/companies")
 
         data_source_id: int = data_source.id
 
