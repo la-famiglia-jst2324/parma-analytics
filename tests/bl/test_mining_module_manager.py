@@ -318,41 +318,6 @@ def test_create_payload_discovery_first_none(
     mock_process_discovery_response.assert_called()
 
 
-"""
-@pytest.mark.parametrize(
-    "task_id, identifiers, expected_payload",
-    [
-        (
-            123,
-            {"name": ["TestCompany"]},
-            {"task_id": 123, "companies": {"1": {"name": ["TestCompany"]}}},
-        ),
-        (456, {}, {"task_id": 456, "companies": {}}),
-    ],
-)
-def test_create_payload(task_id, identifiers, expected_payload, mining_module_manager):
-    # Setup
-    mock_session = MagicMock()
-    mining_module_manager.session = mock_session
-    mock_company_data_source = MagicMock()
-    mock_company_data_source.company_id = 1
-    mock_session.query.return_value.filter.return_value.all.return_value = [
-        mock_company_data_source
-    ]
-
-    # Mocking _fetch_identifiers to return the provided identifiers
-    mining_module_manager._fetch_identifiers = mock.MagicMock(return_value=identifiers)
-
-    # Run the Test
-    result = mining_module_manager._create_payload(
-        task_id, [mock_company_data_source], MagicMock()
-    )
-
-    # Assertions
-    assert result.dict() == expected_payload
-"""
-
-
 @pytest.mark.asyncio
 @patch("httpx.AsyncClient")
 async def test_trigger_success(mock_async_client_class, mining_module_manager):
