@@ -66,3 +66,10 @@ variable "chatgpt_api_key" {
   type      = string
   sensitive = true
 }
+
+/* -------------------------------------- Slack ------------------------------------- */
+
+variable "slack_api_key" {
+  type      = string
+  sensitive = true
+}

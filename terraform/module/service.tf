@@ -100,6 +100,10 @@ resource "google_cloud_run_service" "parma_analytics_cloud_run" {
           value = var.chatgpt_api_key
         }
         env {
+          name  = "SLACK_API_KEY"
+          value = var.slack_api_key
+        }
+        env {
           name  = "DEPLOYMENT_ENV"
           value = var.env
         }
