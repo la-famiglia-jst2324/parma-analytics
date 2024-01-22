@@ -105,6 +105,7 @@ def update_company_measurement_query(
     for key, value in company_measurement_data.items():
         setattr(company_measurement, key, value)
     db.commit()
+    db.refresh(company_measurement)
     return company_measurement
 
 
