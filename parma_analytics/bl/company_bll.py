@@ -20,6 +20,6 @@ def create_company_if_not_exist_bll(
     return create_company_if_not_exist(get_session(), name, description, added_by)
 
 
-def get_company_id_bll(company_id: int) -> Company:
+def get_company_id_bll(company_id: int) -> Company | None:
     """Business Logic Layer for retrieving company by id."""
     return get_company(get_session(), company_id)

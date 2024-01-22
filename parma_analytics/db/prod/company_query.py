@@ -36,9 +36,10 @@ def create_company(db: Session, name: str, added_by: int, description: str | Non
     return new_company
 
 
-def get_company(db: Session, company_id: int):
+def get_company(db_session: Session, company_id: int) -> Company | None:
     """Returns a company by id."""
-    return db.query(Company).filter(Company.id == company_id).first()
+    with db_session as session:
+        return session.query(Company).filter(Company.id == company_id).first()
 
 
 def get_companies(db: Session):

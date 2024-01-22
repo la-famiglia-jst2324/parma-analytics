@@ -17,7 +17,9 @@ class IdentifierData:
     """Class for creating identifiers."""
 
     company_data_source_id: int
-    identifier_type: IdentifierType
+    identifier_type: str
+    # TODO: REMOVE identifier_key
+    identifier_key: str
     property: str
     value: str
     validity: datetime
@@ -38,7 +40,7 @@ def get_company_data_source_identifiers(
 ) -> list[CompanyDataSourceIdentifier] | None:
     """Fetch identifiers based on company_id and data_source_id."""
     with db_session as session:
-        company_data_source = (
+        company_data_source: CompanyDataSource = (
             session.query(CompanyDataSource)
             .filter(
                 CompanyDataSource.company_id == company_id,
@@ -47,10 +49,19 @@ def get_company_data_source_identifiers(
             .first()
         )
 
-        if company_data_source:
-            return company_data_source.company_data_source_identifiers
-        else:
+        if not company_data_source:
             return None
+
+        identifiers: list[CompanyDataSourceIdentifier] = (
+            session.query(CompanyDataSourceIdentifier)
+            .filter(
+                CompanyDataSourceIdentifier.company_data_source_id
+                == company_data_source.id
+            )
+            .all()
+        )
+
+        return identifiers
 
 
 def create_company_data_source_identifier(
@@ -64,6 +75,8 @@ def create_company_data_source_identifier(
             property=identifier_data.property,
             value=identifier_data.value,
             validity=identifier_data.validity,
+            # TODO: REMOVE identifier_key
+            identifier_key=identifier_data.identifier_key,
         )
 
         session.add(new_identifier)

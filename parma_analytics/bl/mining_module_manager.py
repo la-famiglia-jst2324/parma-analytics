@@ -177,11 +177,23 @@ class MiningModuleManager:
         self, company_id: int, data_source: DataSource
     ) -> dict[str, list[str]]:
         """Fetch identifiers for a given company and data source."""
+        logger.debug(f"Fetching identifiers for company {company_id}.")
+
         identifiers = get_company_data_source_identifiers_bll(
             company_id, data_source.id
         )
         if identifiers is None:
+            logger.error(
+                f"Error fetching identifiers for company {company_id} "
+                f"and data source {data_source.id}. "
+                f"CompanyDataSource not found."
+            )
             return {}
+
+        if len(identifiers) == 0:
+            logger.debug(f"No identifiers found for company {company_id}.")
+            rediscover_identifiers(data_source, company_id)
+            return self._fetch_identifiers(company_id, data_source)
 
         result: dict[str, list[str]] = {}
         for identifier in identifiers:
@@ -208,6 +220,10 @@ class MiningModuleManager:
             # Do discovery if no identifier is found
             if not identifiers:
                 company_entity = get_company_id_bll(company_id)
+                if not company_entity:
+                    logger.error(f"Company not found with id: {company_id}")
+                    continue
+
                 query_data = [
                     DiscoveryQueryData(company_id=company_id, name=company_entity.name)
                 ]
@@ -240,6 +256,10 @@ class MiningModuleManager:
 
         companies: list[CompanyDataSource] = get_all_by_data_source_id_bll(
             data_source_id
+        )
+
+        logger.debug(
+            f"{len(companies)} companies found for data source {data_source_id}."
         )
 
         # Create payload
