@@ -113,7 +113,7 @@ def delete_company_measurement_query(db: Session, company_measurement_id) -> Non
     """Delete a company_measurement from the database.
 
     Args:
-        db: Database session.
+        db: DB session.
         company_measurement_id: id of the company_measurement to be deleted.
     """
     company_measurement = (
