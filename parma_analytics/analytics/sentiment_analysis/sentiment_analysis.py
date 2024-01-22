@@ -9,58 +9,65 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
-async def get_sentiment(text: str) -> str | None:
-    """Analyze and score the comment measurement value.
+async def get_sentiment(text: str) -> int | None:
+    """Analyze and score the sentiment of a given comment.
 
     Args:
-        text: comment type value.
+        text: The comment to be analyzed.
 
     Returns:
-        sentiment score of given comment.
+        An integer representing the sentiment score of the given comment.
     """
-    data = {
-        "model": "gpt-3.5-turbo",
-        "temperature": 0.5,
-        "max_tokens": 1,
-        "top_p": 1,
-        "frequency_penalty": 0,
-        "presence_penalty": 0,
-        "stop": ["\n"],
-        "messages": [
-            {
-                "role": "system",
-                "content": (
-                    f"Analyze the sentiment of the following text"
-                    f"and provide a score from 0 to 10, "
-                    f"where 0 is extremely negative, 10 is extremely positive,"
-                    f"and 5 is neutral:\n\n"
-                    f"{text}"
-                ),
-            }
-        ],
-    }
-    api_key = os.getenv("OPENAI_API_KEY")
-    headers = {
-        "Authorization": f"Bearer {api_key}",
-        "Content-Type": "application/json",
-    }
-    retries = 0
-    sentiment = None
-    max_retries = 3
-    while retries < max_retries and sentiment is None:
+
+    # Function to send request to GPT API
+    async def send_request(prompt):
+        data = {
+            "model": "gpt-3.5-turbo",
+            "temperature": 0.5,
+            "max_tokens": 1,  # response
+            "top_p": 1,
+            "frequency_penalty": 0,
+            "presence_penalty": 0,
+            "stop": ["\n"],
+            "messages": [{"role": "system", "content": prompt}],
+        }
+        api_key = os.getenv("OPENAI_API_KEY")
+        headers = {
+            "Authorization": f"Bearer {api_key}",
+            "Content-Type": "application/json",
+        }
         async with httpx.AsyncClient() as client:
             response = await client.post(
                 "https://api.openai.com/v1/chat/completions",
                 headers=headers,
                 data=json.dumps(data),
             )
-            response.raise_for_status()  # raise an exception for HTTP error responses
+            response.raise_for_status()
+            return response.json()["choices"][0]["message"]["content"].strip().lower()
 
-        sentiment = response.json()["choices"][0]["message"]["content"]
-        if (
-            not sentiment.isdigit()
-        ):  # If score is not a digit, set sentiment to None and retry
-            sentiment = None
-            retries += 1
+    # First sentiment analysis to categorize sentiment
+    primary_sentiment = await send_request(
+        f"Analyze the sentiment of the following text,"
+        f"Positive, Negative or Neutral:\n\n{text}"
+    )
+    print(primary_sentiment)
+    # Assign score based on primary sentiment
+    if primary_sentiment == "neutral":
+        return 5
 
-    return sentiment
+    elif primary_sentiment in ["positive", "negative"]:
+        # Further sentiment analysis for scoring
+        detailed_sentiment_prompt = (
+            f"Analyze the sentiment of the following text"
+            f"and provide a score from 0 to 4, or 6-10,"
+            f"where 0 is extremely negative, 10 is extremely positive,"
+            f"your output should be a number,"
+            f"\n\n"
+            f"{text}"
+        )
+        detailed_sentiment = await send_request(detailed_sentiment_prompt)
+        print(detailed_sentiment)
+        return detailed_sentiment
+
+    else:
+        return None  # In case the response is not one of the expected sentiments

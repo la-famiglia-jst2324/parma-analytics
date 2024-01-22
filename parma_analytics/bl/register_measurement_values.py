@@ -130,15 +130,9 @@ def handle_value(
         if measurement_type == "comment":
             sentiment_score = asyncio.run(get_sentiment(value))
             comment = session.query(MeasurementCommentValue).get(measurement_id)
-            if sentiment_score is not None:
-                # update sentiment_score
-                comment.sentiment_score = sentiment_score
-                session.commit()
-            else:
-                # set a default value
-                print(f"Sentiment score {measurement_id} could not be determined.")
-                comment.sentiment_score = -1
-                session.commit()
+            # update sentiment_score
+            comment.sentiment_score = sentiment_score
+            session.commit()
 
         return measurement_id
     else:
