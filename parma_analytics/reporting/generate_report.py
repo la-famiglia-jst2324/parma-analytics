@@ -26,13 +26,13 @@ class ReportGenerator:
             response = self.client.completions.create(
                 prompt=prompt, model="gpt-3.5-turbo-instruct", max_tokens=200
             )
-            return response
+            return response.choices[0].text
 
         except Exception as e:
             logging.error(f"An error occurred while calling GPT: {e}")
             raise e
 
-    def generate_report_summary(self, report_params) -> str:
+    def generate_report(self, report_params) -> dict:
         """Generates the report content using GPT.
 
         Args:
@@ -43,26 +43,59 @@ class ReportGenerator:
                 report, including trigger change,
                 current value, metric name, timeframe, etc.
         """
-        company_name = report_params["company_name"]
-        source_name = report_params["source_name"]
-        timeframe = report_params["timeframe"]
-        metric_name = report_params["metric_name"]
-        trigger_change = report_params["trigger_change"]
-        current_value = report_params["current_value"]
+        try:
+            company_name = report_params["company_name"]
+            source_name = report_params["source_name"]
+            timeframe = report_params["timeframe"]
+            metric_name = report_params["metric_name"]
+            trigger_change = report_params["trigger_change"]
+            current_value = report_params["current_value"]
+            previous_value = report_params["previous_value"]
+            aggregated_method = report_params["aggregated_method"]
+            if not aggregated_method:
+                with open(
+                    "parma_analytics/reporting/prompts/summary_generator.txt"
+                ) as prompt_file:
+                    prompt = f"{prompt_file.read()}"
 
-        with open(
-            "parma_analytics/reporting/prompts/summary_generator.txt"
-        ) as prompt_file:
-            prompt = f"{prompt_file.read()}"
+                gpt_prompt = prompt.format(
+                    company_name=company_name,
+                    timeframe=timeframe,
+                    source_name=source_name,
+                    metric_name=metric_name,
+                    trigger_change=trigger_change,
+                    current_value=current_value,
+                )
+            else:
+                with open(
+                    "parma_analytics/reporting/prompts/aggregated_data_summary.txt"
+                ) as prompt_file:
+                    prompt = f"{prompt_file.read()}"
 
-        gpt_prompt = prompt.format(
-            company_name=company_name,
-            timeframe=timeframe,
-            source_name=source_name,
-            metric_name=metric_name,
-            trigger_change=trigger_change,
-            current_value=current_value,
-        )
+                gpt_prompt = prompt.format(
+                    company_name=company_name,
+                    source_name=source_name,
+                    metric_name=metric_name,
+                    trigger_change=trigger_change,
+                    current_value=current_value,
+                    previous_value=previous_value,
+                    aggregated_method=aggregated_method,
+                )
 
-        response = self._make_openai_request(gpt_prompt)
-        return response.choices[0].text
+            with open(
+                "parma_analytics/reporting/prompts/title_prompt.txt"
+            ) as prompt_file:
+                prompt = f"{prompt_file.read()}"
+
+            title_gpt_prompt = prompt.format(
+                company_name=company_name,
+                metric_name=metric_name,
+                trigger_change=trigger_change,
+            )
+            print(gpt_prompt)
+            summary = self._make_openai_request(gpt_prompt)
+            title = self._make_openai_request(title_gpt_prompt)
+            return {"title": title, "summary": summary}
+        except Exception as e:
+            logging.error(f"An error occurred in reporting/generate_report: {e}")
+            raise e
