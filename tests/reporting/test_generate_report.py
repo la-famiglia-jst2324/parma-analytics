@@ -1,4 +1,6 @@
 import unittest
+from unittest import mock
+from unittest.mock import MagicMock, patch
 
 from parma_analytics.reporting.generate_report import ReportGenerator
 
@@ -6,10 +8,13 @@ from parma_analytics.reporting.generate_report import ReportGenerator
 class TestReportGenerator(unittest.TestCase):
     """Test case for generating report summary and title by GPT."""
 
-    def test_generate_report(self):
+    @patch("parma_analytics.reporting.generate_report.OpenAI")
+    def test_generate_report(self, mock_openai):
         """Report test."""
+        mock_response = MagicMock()
+        mock_response.choices[0].text = "Mocked summary text"
+        mock_openai.return_value.completions.create.return_value = mock_response
         report_generator = ReportGenerator()
-
         report_params_1 = {
             "company_name": "ABC Corp",
             "source_name": "Linkedin",
@@ -42,3 +47,6 @@ class TestReportGenerator(unittest.TestCase):
         self.assertIsInstance(result_2, dict)
         self.assertIn("title", result_2)
         self.assertIn("summary", result_2)
+        mock_openai.return_value.completions.create.assert_called_with(
+            prompt=mock.ANY, model="gpt-3.5-turbo-instruct", max_tokens=200
+        )
