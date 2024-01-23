@@ -18,6 +18,8 @@ from parma_analytics.reporting.generate_report import ReportGenerator
 
 
 class GenerateReportInput(BaseModel):
+    """Generate report parameters."""
+
     company_id: int
     source_measurement_id: int
     company_measurement_id: int
@@ -45,28 +47,26 @@ def generate_report(
         source_module = get_source_measurement_query(engine, source_measurement_id)
         source_name = get_data_source_name(engine, source_module.source_module_id)
         measurement_table = f"measurement_{source_module.type.lower()}_value"
-        if not aggregation_method:
-            last_recent_value = fetch_recent_value(
-                engine, company_measurement_id, measurement_table
-            )
+        last_recent_value = fetch_recent_value(
+            engine, company_measurement_id, measurement_table
+        )
+        if last_recent_value is not None:
             timestamp_difference = (
                 datetime.now() - last_recent_value["timestamp"]
             ).days
-            report_params = {
-                "company_name": company_name,
-                "source_name": source_name,
-                "trigger_change": trigger_change,
-                "current_value": current_value,
-                "metric_name": source_module.measurement_name,
-                "timeframe": timestamp_difference,
-            }
-            report_generator = ReportGenerator()
-            summary = report_generator.generate_report_summary(report_params)
-            title = report_generator.generate_title(summary)
-            return {"title": title, "summary": summary}
-        else:
-            # TODO: a new prompt that includes aggregation_method
-            pass
+        report_params = {
+            "company_name": company_name,
+            "source_name": source_name,
+            "metric_name": source_module.measurement_name,
+            "trigger_change": trigger_change,
+            "previous_value": previous_value,
+            "current_value": current_value,
+            "timeframe": timestamp_difference,
+            "aggregated_method": aggregation_method,
+        }
+        report_generator = ReportGenerator()
+        report = report_generator.generate_report(report_params)
+        return {"title": report["title"], "summary": report["summary"]}
 
     except SQLAlchemyError as e:
         logging.error(f"Database error occurred: {e}")
