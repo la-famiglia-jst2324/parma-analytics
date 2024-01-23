@@ -290,6 +290,10 @@ The following steps will get you started with the project.
 
 - Add the [environment variables](https://www.notion.so/Sendgrid-environment-variables-07b749c85d894d51bb07c8b5375aa533) in your local.
 
+## ChatGPT
+
+- Add the [environment variables](https://www.notion.so/ChatGPT-Dev-API-KEY-2e7ffc39500943a595c31084cd24379e) in your local.
+
 ## PR workflow
 
 1. **Create a new branch**
