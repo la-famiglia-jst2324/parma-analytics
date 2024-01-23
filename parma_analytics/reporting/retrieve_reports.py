@@ -7,6 +7,7 @@ from parma_analytics.db.prod.engine import get_engine, get_session
 from parma_analytics.db.prod.news_query import get_news_of_company
 from parma_analytics.db.prod.reporting import fetch_company_ids_for_user
 from parma_analytics.db.prod.user_query import get_user
+from parma_analytics.reporting.generate_html import generate_html_report
 
 
 def retrieve_reports():
@@ -27,5 +28,5 @@ def retrieve_reports():
                             [message.message for message in messages if message.message]
                         )
 
-            # if news_by_company:
-            #     print(json.dumps(news_by_company, indent=2))
+            if news_by_company:
+                generate_html_report(news_by_company)
