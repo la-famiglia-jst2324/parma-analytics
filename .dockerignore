@@ -576,5 +576,12 @@ $RECYCLE.BIN/
 .data
 .vscode
 .secrets/
+<<<<<<< Updated upstream
 terraform/.secrets/
 **/__pycache__
+=======
+.image.name
+**/.terraform/
+**/*.tfstate.backup
+*.env
+>>>>>>> Stashed changes
