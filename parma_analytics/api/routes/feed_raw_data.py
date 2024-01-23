@@ -10,7 +10,7 @@ from parma_analytics.api.models.feed_raw_data import (
     ApiFeedRawDataCreateIn,
     ApiFeedRawDataCreateOut,
 )
-from parma_analytics.bl.create_company_bll import create_company_if_not_exist_bll
+from parma_analytics.bl.company_bll import create_company_if_not_exist_bll
 from parma_analytics.db.mining.models import NormalizationSchema, RawData, RawDataIn
 from parma_analytics.db.mining.service import (
     read_normalization_schema_by_datasource,
