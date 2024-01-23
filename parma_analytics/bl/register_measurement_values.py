@@ -1,5 +1,5 @@
 """This module contains the functions for registering measurement values."""
-
+import asyncio
 import logging
 from datetime import datetime
 from typing import Any
@@ -7,6 +7,9 @@ from typing import Any
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
+from parma_analytics.analytics.sentiment_analysis.sentiment_analysis import (
+    get_sentiment,
+)
 from parma_analytics.db.prod.company_source_measurement_query import (
     create_company_measurement_query,
     get_by_company_and_measurement_ids_query,
@@ -134,7 +137,7 @@ def handle_value(
     }
 
     if measurement_type in query_functions:
-        return query_functions[measurement_type](
+        measurement_id = query_functions[measurement_type](
             session,
             {
                 "value": value,
@@ -142,5 +145,15 @@ def handle_value(
                 "company_measurement_id": company_measurement_id,
             },
         )
+
+        # perform sentiment analysis for comment measurement value
+        if measurement_type == "comment":
+            sentiment_score = asyncio.run(get_sentiment(value))
+            comment = session.query(MeasurementCommentValue).get(measurement_id)
+            # update sentiment_score
+            comment.sentiment_score = sentiment_score
+            session.commit()
+
+        return measurement_id
     else:
         raise ValueError(f"Invalid measurement type: {measurement_type}")
