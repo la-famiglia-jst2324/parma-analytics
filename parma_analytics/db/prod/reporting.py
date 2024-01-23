@@ -6,7 +6,6 @@ import sqlalchemy as sa
 from sqlalchemy import Engine
 from sqlalchemy.orm.session import Session
 
-from parma_analytics.db.prod.models.company_subscription import CompanySubscription
 from parma_analytics.db.prod.models.measurement_value_models import (
     MeasurementCommentValue,
     MeasurementDateValue,
@@ -25,33 +24,12 @@ from parma_analytics.db.prod.models.notification_subscription import (
 )
 
 
-def fetch_user_ids_for_company(engine: Engine, company_id: int) -> list[int]:
-    """Fetch user ids for a given company.
-
-    Args:
-        engine: database engine.
-        company_id: id of the company.
-
-    Returns:
-        A list of user ids.
-    """
-    with Session(engine) as session:
-        results = (
-            session.query(CompanySubscription.user_id)
-            .where(CompanySubscription.company_id == company_id)
-            .limit(50000)
-            .all()
-        )
-    return [user_id for (user_id,) in results]
-
-
 def fetch_channel_ids(engine: Engine, user_ids: list[int]) -> list[int]:
     """Fetch channel ids for a given list of user ids.
 
     Args:
         engine: database engine.
         user_ids: list of user ids.
-        subscription_table: name of the subscription table.
 
     Returns:
         A list of channel ids.
