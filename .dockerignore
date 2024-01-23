@@ -576,5 +576,8 @@ $RECYCLE.BIN/
 .data
 .vscode
 .secrets/
+.image.name
 terraform/.secrets/
-**/__pycache__
+**/.terraform/
+**/*.tfstate.backup
+*.env
