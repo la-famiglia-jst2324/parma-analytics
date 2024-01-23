@@ -99,7 +99,7 @@ def update_company_data_source(
                 data_source.health_status = data.health_status
 
             session.commit()
-
+            session.refresh(data_source)
             return data_source
         else:
             return None

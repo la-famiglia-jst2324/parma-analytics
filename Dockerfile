@@ -1,3 +1,4 @@
+# Dockerfile to containerize the Parma Analytics repository for Google Cloud Run
 FROM --platform=linux/amd64 mambaorg/micromamba:1.5.3
 
 COPY --chown=$MAMBA_USER:$MAMBA_USER environment-prod.yml /tmp/environment.yml

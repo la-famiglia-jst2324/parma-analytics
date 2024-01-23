@@ -103,6 +103,7 @@ def update_company_data_source_identifier(
                 identifier.validity = identifier_data.validity
 
             session.commit()
+            session.refresh(identifier)
 
             return identifier
         else:
