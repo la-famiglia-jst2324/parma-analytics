@@ -49,6 +49,15 @@ def fetch_user_ids_for_company(engine: Engine, company_id: int) -> list[int]:
         )
 
 
+def fetch_company_ids_for_user(db: Session, user_id) -> list:
+    """Fetch company ids for a given user."""
+    return (
+        db.query(CompanySubscription.company_id)
+        .where(CompanySubscription.user_id == user_id)
+        .all()
+    )
+
+
 def fetch_channel_ids(
     engine: Engine,
     user_ids: list[int],
