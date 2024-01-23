@@ -7,6 +7,8 @@ Checkout the README for more information on the nosql database schema.
 from firebase_admin.firestore import firestore as firestore_types
 
 from parma_analytics.db.mining.internal.storage import save_validated_document
+from parma_analytics.db.prod.engine import get_session
+from parma_analytics.db.prod.models.datasource import DataSource
 
 from ..engine import get_engine
 from .definitions import parma_collection
@@ -15,18 +17,19 @@ from .models import Collection, Doc, DocTemplate, DocTemplateInstance
 
 def init_schema() -> None:
     """Initialize the database schema."""
-    engine = get_engine()
-
     assert isinstance(
         parma_collection.docs["mining"].collections["datasource"].docs, DocTemplate
     )
-    for datasource in ["github", "reddit", "affinity"]:  # TODO: use db
+    with get_session() as session:
+        datasources = session.query(DataSource.source_name).all()
+
+    for datasource in [d[0][0] for d in datasources]:
         parma_collection.docs["mining"].collections["datasource"].docs.instances[
             datasource
         ] = DocTemplateInstance(name=datasource)
 
     # traversal algorithm (depth first)
-    _traverse(engine, current_ref=None, current_item=parma_collection)
+    _traverse(get_engine(), current_ref=None, current_item=parma_collection)
 
 
 # ------------------------------------------------------------------------------------ #
