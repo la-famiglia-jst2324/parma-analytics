@@ -139,6 +139,7 @@ def test_create_payload_success(
 
     # Assertions
     assert isinstance(payload, ScrapingPayloadModel)
+    assert payload.companies is not None
     assert payload.task_id == task_id
     assert all(str(company.company_id) in payload.companies for company in companies)
     for company in companies:
@@ -194,6 +195,7 @@ def test_create_payload_discovery(
 
     # Assertions
     assert isinstance(payload, ScrapingPayloadModel)
+    assert payload.companies is not None
     assert payload.task_id == task_id
     assert all(str(company.company_id) in payload.companies for company in companies)
     for company in companies:
@@ -304,6 +306,7 @@ def test_create_payload_discovery_first_none(
 
     # Assertions
     assert isinstance(payload, ScrapingPayloadModel)
+    assert payload.companies is not None
     assert payload.task_id == task_id
     assert all(str(company.company_id) in payload.companies for company in companies)
     for company in companies:
