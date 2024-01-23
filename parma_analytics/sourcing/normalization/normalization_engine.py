@@ -96,17 +96,19 @@ def normalize_nested_data(
             nested_mapping_info = lookup_dict.get(key)
             if nested_mapping_info:
                 data_type = nested_mapping_info["type"]
-                if data_type == "nested":
-                    nested_results = normalize_nested_data(
-                        value, company_id, timestamp, lookup_dict
-                    )
-                    normalized_results.extend(nested_results)
-                else:
+                if value is None:
+                    continue
+                if data_type != "nested":
                     normalized_data = process_data_point(
                         value, company_id, timestamp, nested_mapping_info
                     )
                     register_values(normalized_data)
                     normalized_results.append(normalized_data)
+                else:
+                    nested_results = normalize_nested_data(
+                        value, company_id, timestamp, lookup_dict
+                    )
+                    normalized_results.extend(nested_results)
     return normalized_results
 
 
@@ -139,15 +141,18 @@ def normalize_data(
             continue
 
         data_type = mapping_info["type"]
-        if data_type == "nested":
-            nested_results = normalize_nested_data(
-                value, company_id, timestamp, lookup_dict
-            )
-            normalized_results.extend(nested_results)
-        else:
+        if value is None:
+            continue
+        if data_type != "nested":
             normalized_data = process_data_point(
                 value, company_id, timestamp, mapping_info
             )
             register_values(normalized_data)
             normalized_results.append(normalized_data)
+        else:
+            nested_results = normalize_nested_data(
+                value, company_id, timestamp, lookup_dict
+            )
+            normalized_results.extend(nested_results)
+
     return normalized_results

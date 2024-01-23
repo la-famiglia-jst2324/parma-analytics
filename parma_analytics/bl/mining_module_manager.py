@@ -212,6 +212,9 @@ class MiningModuleManager:
         self, task_id: int, companies: list[CompanyDataSource], data_source: DataSource
     ) -> ScrapingPayloadModel:
         """Create payload for triggering the mining module."""
+        if data_source.source_name == "affinity":
+            return ScrapingPayloadModel(task_id=task_id, companies=None)
+
         companies_dict = {}
         for company in companies:
             company_id = company.company_id

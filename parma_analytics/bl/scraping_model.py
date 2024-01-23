@@ -6,4 +6,4 @@ class ScrapingPayloadModel(BaseModel):
     """Model for Scraping Payload."""
 
     task_id: int
-    companies: dict[str, dict[str, list[str]]]
+    companies: dict[str, dict[str, list[str]]] | None
