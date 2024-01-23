@@ -36,7 +36,9 @@ def _init_firebase() -> firebase_admin.App:
     fb_certificate = credentials.Certificate(
         json.loads(env_var) if env_var else CREDENTIALS_PATH
     )
-    return firebase_admin.initialize_app(fb_certificate)
+    return firebase_admin.initialize_app(
+        fb_certificate, {"storageBucket": "la-famiglia-parma-ai-staging.appspot.com"}
+    )
 
 
 def _try_get_app() -> firebase_admin.App:
