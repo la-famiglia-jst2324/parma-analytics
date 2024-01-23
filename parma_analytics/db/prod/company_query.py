@@ -27,13 +27,6 @@ def create_company_if_not_exist(
             return new_company
 
 
-def get_company_name(engine: Engine, company_id: int) -> str:
-    """Get Company Name from the company_id."""
-    with Session(engine) as session:
-        company = session.query(Company).filter(Company.id == company_id).first()
-        return company.name
-
-
 def create_company(db: Session, name: str, added_by: int, description: str | None):
     """Creates a company."""
     new_company = Company(name=name, added_by=added_by, description=description)
@@ -43,9 +36,10 @@ def create_company(db: Session, name: str, added_by: int, description: str | Non
     return new_company
 
 
-def get_company(db: Session, company_id: int):
+def get_company(db_session: Session, company_id: int) -> Company | None:
     """Returns a company by id."""
-    return db.query(Company).filter(Company.id == company_id).first()
+    with db_session as session:
+        return session.query(Company).filter(Company.id == company_id).first()
 
 
 def get_companies(db: Session):
@@ -88,3 +82,10 @@ def delete_company(db: Session, company_id: int):
 def company_exists_by_name(db: Session, name: str) -> bool:
     """Checks if a company with the given name exists."""
     return bool(db.query(Company).filter(Company.name.ilike(name)).first())
+
+
+def get_company_name(engine: Engine, company_id: int) -> str:
+    """Get Company Name from the company_id."""
+    with Session(engine) as session:
+        company = session.query(Company).filter(Company.id == company_id).first()
+        return company.name
