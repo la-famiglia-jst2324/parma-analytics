@@ -27,7 +27,7 @@ def get_engine() -> Engine:
 
         db_url = f"postgresql+psycopg2://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
 
-        _engine = create_engine(db_url, client_encoding="utf8", pool_timeout=40)
+        _engine = create_engine(db_url, client_encoding="utf8", pool_timeout=10)
     return _engine
 
 
