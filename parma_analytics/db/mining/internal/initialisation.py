@@ -17,8 +17,6 @@ from .models import Collection, Doc, DocTemplate, DocTemplateInstance
 
 def init_schema() -> None:
     """Initialize the database schema."""
-    engine = get_engine()
-
     assert isinstance(
         parma_collection.docs["mining"].collections["datasource"].docs, DocTemplate
     )
@@ -31,7 +29,7 @@ def init_schema() -> None:
         ] = DocTemplateInstance(name=datasource)
 
     # traversal algorithm (depth first)
-    _traverse(engine, current_ref=None, current_item=parma_collection)
+    _traverse(get_engine(), current_ref=None, current_item=parma_collection)
 
 
 # ------------------------------------------------------------------------------------ #
