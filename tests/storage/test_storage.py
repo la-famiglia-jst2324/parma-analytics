@@ -29,7 +29,6 @@ def test_add_user_file(tmpdir):
 
     manager = FirebaseStorageManager()
     blob = manager.add_user_file(user_id, file_path)
-    print(blob.path)
     assert blob.exists()
     assert blob.name == "reports/users/johndoe/test_file.txt"
 
@@ -59,9 +58,6 @@ def test_get_existing_blob(tmpdir):
     with open(file_path, "w") as f:
         f.write("This is a test file.")
     blob = manager.add_company_file("test1", file_path)
-    print(blob.name)
-    print(blob.generation)
-    print(blob)
     existing_blob = manager.get_existing_blob(blob.name)
     assert existing_blob is not None
     assert existing_blob.name == blob.name
