@@ -579,9 +579,6 @@ $RECYCLE.BIN/
 .image.name
 **/.terraform/
 **/*.tfstate.backup
-<<<<<<< Updated upstream
 .firebaserc
 firebase.json
-=======
->>>>>>> Stashed changes
 *.env
