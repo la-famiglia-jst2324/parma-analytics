@@ -1,16 +1,12 @@
 """CompanyDataSourceIdentifier model."""
+from typing import Literal
+
 import sqlalchemy as sa
 
 from parma_analytics.db.prod.engine import Base
+from parma_analytics.db.prod.models.types import literal_to_enum
 
-
-class IdentifierType(sa.Enum):
-    """Enum for identifier types."""
-
-    __tablename__ = "identifier_type"
-
-    AUTOMATICALLY_DISCOVERED = "AUTOMATICALLY_DISCOVERED"
-    MANUALLY_ADDED = "MANUALLY_ADDED"
+IdentifierType = Literal["AUTOMATICALLY_DISCOVERED", "MANUALLY_ADDED"]
 
 
 class CompanyDataSourceIdentifier(Base):
@@ -22,8 +18,7 @@ class CompanyDataSourceIdentifier(Base):
     company_data_source_id = sa.Column(
         sa.Integer, sa.ForeignKey("company_data_source.id"), nullable=False
     )
-    identifier_key = sa.Column(sa.String, nullable=False)
-    identifier_type = sa.Column(sa.String, nullable=False)
+    identifier_type = sa.Column(literal_to_enum(IdentifierType), nullable=False)
     property = sa.Column(sa.String, nullable=False)
     value = sa.Column(sa.String, nullable=False)
     validity = sa.Column(sa.DateTime, nullable=False)

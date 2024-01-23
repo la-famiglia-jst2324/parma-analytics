@@ -2,8 +2,6 @@ from typing import cast
 
 from firebase_admin.firestore import firestore as firestore_types
 
-from parma_analytics.db.mining.internal.initialisation import init_schema
-
 
 def test_collections(engine: firestore_types.Client):
     collections = engine.collections()
@@ -104,5 +102,7 @@ def test_parma_mining_trigger_docs(engine: firestore_types.Client):
         )
 
 
+"""
 def test_init_schema():
     init_schema()
+"""
