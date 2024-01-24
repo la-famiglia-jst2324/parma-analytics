@@ -50,10 +50,11 @@ def generate_report(
         last_recent_value = fetch_recent_value(
             engine, company_measurement_id, measurement_table
         )
-        if last_recent_value is not None:
-            timestamp_difference = (
-                datetime.now() - last_recent_value["timestamp"]
-            ).days
+        timestamp_difference = (
+            (datetime.now() - last_recent_value["timestamp"]).days
+            if last_recent_value and "timestamp" in last_recent_value
+            else 0
+        )
         report_params = {
             "company_name": company_name,
             "source_name": source_name,
