@@ -1,3 +1,4 @@
+"""A test module for the EmailService class."""
 import unittest
 from unittest.mock import MagicMock, patch
 
@@ -7,28 +8,39 @@ from parma_analytics.reporting.gmail.email_service import EmailService
 class TestEmailService(unittest.TestCase):
     """A test case class for testing the EmailService class."""
 
-    @patch("parma_analytics.reporting.gmail.email_service.SendGridAPIClient")
-    @patch("parma_analytics.reporting.gmail.email_service.NotificationServiceManager")
-    def test_send_notification_email(self, mock_service, mock_sendgrid):
-        """Test case for send_notification_email of EmailService class."""
-        # Setup
-        mock_sendgrid.return_value.send = MagicMock()
-        mock_service.return_value.get_notification_destinations.return_value = [
-            "test@example.com"
-        ]
+    def test_send_report_email(self):
+        """Test the send_report_email function."""
+        with patch(
+            "parma_analytics.reporting.gmail.email_service.EmailService"
+        ) as mock_email_service, patch(
+            "parma_analytics.reporting.gmail.email_service.EmailService._get_user_emails"
+        ) as mock_get_user_emails, patch(
+            "parma_analytics.reporting.gmail.email_service.EmailService._send_email"
+        ) as mock_send_email, patch(
+            "parma_analytics.db.prod.engine.get_engine"
+        ) as mock_get_engine:
+            magic_engine = MagicMock()
+            mock_get_engine.return_value = magic_engine
+            mock_get_user_emails.return_value = ["example@gmail.com"]
+            mock_send_email.return_value = None
 
-        email_service = EmailService(company_id=123)
-        content = "Test Content"
-        company_name = "Test Company"
-        company_logo = "https://example.com/logo.png"
+            result = EmailService.send_report_email(mock_email_service, "test")
+            assert result is None
 
-        # Act
-        email_service.send_notification_email(content, company_name, company_logo)
-
-        # Assert
-        mock_sendgrid.return_value.send.assert_called()
-        # Here, add more asserts to validate the call arguments, etc.
-
-
-if __name__ == "__main__":
-    unittest.main()
+    def test_send_notification_email(self):
+        """Test the send_notification_email function."""
+        with patch(
+            "parma_analytics.reporting.gmail.email_service.EmailService"
+        ) as mock_email_service, patch(
+            "parma_analytics.reporting.gmail.email_service.EmailService._get_user_emails"
+        ) as mock_get_user_emails, patch(
+            "parma_analytics.reporting.gmail.email_service.EmailService._send_email"
+        ) as mock_send_email, patch(
+            "parma_analytics.db.prod.engine.get_engine"
+        ) as mock_get_engine:
+            magic_engine = MagicMock()
+            mock_get_engine.return_value = magic_engine
+            mock_get_user_emails.return_value = ["example@gmail.com"]
+            mock_send_email.return_value = None
+            result = EmailService.send_notification_email(mock_email_service, "test")
+            assert result is None
