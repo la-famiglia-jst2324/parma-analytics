@@ -1,4 +1,4 @@
-"""Module to get retrieve reports based on user subscription."""
+"""Module to get send reports based on user subscription."""
 
 from typing import Any
 
@@ -8,10 +8,11 @@ from parma_analytics.db.prod.news_query import get_news_of_company
 from parma_analytics.db.prod.reporting import fetch_company_ids_for_user
 from parma_analytics.db.prod.user_query import get_user
 from parma_analytics.reporting.generate_html import generate_html_report
+from parma_analytics.reporting.gmail.email_service import EmailService
 
 
-def retrieve_reports():
-    """Method to retrieve report."."""
+def send_reports():
+    """Method to send report."."""
     with get_session() as session:
         user_ids = get_user(session)
         for user_id in user_ids:
@@ -29,4 +30,6 @@ def retrieve_reports():
                         )
 
             if news_by_company:
-                generate_html_report(news_by_company)
+                html = generate_html_report(news_by_company)
+                email_service = EmailService(user_id)
+                email_service.send_report_email(html)
