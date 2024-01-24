@@ -15,8 +15,8 @@ class TestSlackService(unittest.TestCase):
         ) as mock_slack_service, patch(
             "parma_analytics.db.prod.engine.get_engine"
         ) as mock_get_engine, patch(
-            "parma_analytics.reporting.slack.send_slack_messages\
-                .SlackService._send_message_to_user"
+            "parma_analytics.reporting.slack.send_slack_messages."
+            "SlackService._send_message_to_user"
         ) as mock_send_message_to_user:
             magic_engine = MagicMock()
             mock_get_engine.return_value = magic_engine
@@ -34,8 +34,8 @@ class TestSlackService(unittest.TestCase):
         ) as mock_slack_service, patch(
             "parma_analytics.db.prod.engine.get_engine"
         ) as mock_get_engine, patch(
-            "parma_analytics.reporting.slack.send_slack_messages\
-                .SlackService._send_message_to_user"
+            "parma_analytics.reporting.slack.send_slack_messages."
+            "SlackService._send_message_to_user"
         ) as mock_send_message_to_user:
             magic_engine = MagicMock()
             mock_get_engine.return_value = magic_engine
