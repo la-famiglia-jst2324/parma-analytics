@@ -1,17 +1,11 @@
 """Database queries for the reporting module."""
 
 
-from typing import Literal
-
 import polars as pl
 import sqlalchemy as sa
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm.session import Session
 
-from parma_analytics.db.prod.models.company_bucket_membership import (
-    CompanyBucketMembership,
-)
-from parma_analytics.db.prod.models.company_subscription import CompanySubscription
 from parma_analytics.db.prod.models.measurement_value_models import (
     MeasurementCommentValue,
     MeasurementDateValue,
@@ -30,56 +24,24 @@ from parma_analytics.db.prod.models.notification_subscription import (
 )
 
 
-def fetch_user_ids_for_company(engine: Engine, company_id: int) -> list[int]:
-    """Fetch user ids for a given company.
-
-    Args:
-        engine: database engine.
-        company_id: id of the company.
-
-    Returns:
-        A list of user ids.
-    """
-    with Session(engine) as session:
-        return (
-            session.query(CompanySubscription.user_id)
-            .where(CompanySubscription.company_id == company_id)
-            .limit(50000)
-            .all()
-        )
-
-
-def fetch_company_ids_for_user(db: Session, user_id) -> list:
-    """Fetch company ids for a given user."""
-    return (
-        db.query(CompanySubscription.company_id)
-        .where(CompanySubscription.user_id == user_id)
-        .all()
-    )
-
-
-def fetch_channel_ids(
-    engine: Engine,
-    user_ids: list[int],
-    subscription_table: Literal["notification_subscription", "report_subscription"],
-) -> list[int]:
+def fetch_channel_ids(engine: Engine, user_ids: list[int]) -> list[int]:
     """Fetch channel ids for a given list of user ids.
 
     Args:
         engine: database engine.
         user_ids: list of user ids.
-        subscription_table: name of the subscription table.
 
     Returns:
         A list of channel ids.
     """
     with Session(engine) as session:
-        if subscription_table == "report_subscription":
-            raise NotImplementedError
-        table = NotificationSubscription
-        return (
-            session.query(table).where(table.user_id.in_(user_ids)).limit(50000).all()
+        results = (
+            session.query(NotificationSubscription.channel_id)
+            .where(NotificationSubscription.user_id.in_(user_ids))
+            .limit(50000)
+            .all()
         )
+        return [channel_id for (channel_id,) in results]
 
 
 def fetch_notification_destinations(
@@ -96,7 +58,7 @@ def fetch_notification_destinations(
         A list of notification destinations.
     """
     with Session(engine) as session:
-        return (
+        results = (
             session.query(NotificationChannel.destination)
             .where(
                 NotificationChannel.id.in_(channel_ids),
@@ -104,22 +66,7 @@ def fetch_notification_destinations(
             )
             .all()
         )
-
-
-def fetch_company_id_from_bucket(engine: Engine, bucket_id: int) -> int:
-    """Fetch company id for a given bucket id.
-
-    Args:
-        engine: database engine.
-        bucket_id: id of the bucket.
-
-    Returns:
-        A company id.
-    """
-    with Session(engine) as session:
-        return session.query(CompanyBucketMembership.company_id).where(
-            CompanyBucketMembership.bucket_id == bucket_id
-        )
+        return [destination for (destination,) in results]
 
 
 __TableModels: dict[str, type[MeasurementValueModels]] = {
