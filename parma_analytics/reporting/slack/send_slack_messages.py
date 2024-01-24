@@ -102,7 +102,7 @@ class SlackService:
         return blocks
 
     def _get_user_destinations(self, user_id: int):
-        """Get all user emails for notification or report."""
+        """Get all user slack channels for notification or report."""
         channel_manager = NotificationServiceManager(
             service_type="slack", user_id=user_id
         )
