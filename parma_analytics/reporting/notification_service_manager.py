@@ -4,45 +4,25 @@
 from typing import Literal
 
 from parma_analytics.db.prod.engine import get_engine
-
-from .db_operations import (
+from parma_analytics.db.prod.reporting import (
     fetch_channel_ids,
-    fetch_company_id_from_bucket,
     fetch_notification_destinations,
-    fetch_user_ids_for_company,
 )
 
-Category = Literal["company", "bucket"]
-MessageType = Literal["notification", "report"]
 ServiceType = Literal["email", "slack"]
 
 
 class NotificationServiceManager:
     """Class for managing notification."""
 
-    def __init__(
-        self,
-        company_or_bucket_id: int,
-        subscription_table: Literal["notification_subscription", "report_subscription"],
-        entity_type: MessageType,
-        service_type: ServiceType,
-        category: Category,
-    ):
-        self.company_or_bucket_id = company_or_bucket_id
-        self.subscription_table = subscription_table
-        self.entity_type: MessageType = entity_type
+    def __init__(self, service_type: ServiceType, user_id: int):
         self.service_type = service_type
-        self.category = category
+        self.user_id = user_id
 
     def get_notification_destinations(self) -> list[str]:
         """Get the notification destinations for the given company or bucket ID."""
-        company_id = self.company_or_bucket_id
-        # if the category is a bucket, get a company_id from the bucket.
-        # Assume that every company in the bucket is subscribed by the user.
-        if self.category == "bucket":
-            company_id = fetch_company_id_from_bucket(self.company_or_bucket_id)
-        user_ids = fetch_user_ids_for_company(company_id)
-        channel_ids = fetch_channel_ids(get_engine(), user_ids, self.subscription_table)
+        user_ids = [self.user_id]
+        channel_ids = fetch_channel_ids(get_engine(), user_ids=user_ids)
         return fetch_notification_destinations(
-            channel_ids, self.entity_type, self.service_type
+            get_engine(), channel_ids, self.service_type
         )
