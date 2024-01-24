@@ -1,0 +1,1 @@
+I want you to act as a summary generator. Generate a concise 1-2 lines expressive summary for a company {company_name} who recently witnessed a change within the last {timeframe} days on the {source_name} platform for {metric_name} of {trigger_change} % and its current value of is now {current_value}.The timeframe can be changed to weeks or months as well

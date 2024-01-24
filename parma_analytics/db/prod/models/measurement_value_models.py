@@ -53,6 +53,7 @@ class MeasurementCommentValue(MeasurementValueBase):
 
     __tablename__ = "measurement_comment_value"
     value = Column(String)
+    sentiment_score = Column(Integer)
 
 
 class MeasurementLinkValue(MeasurementValueBase):

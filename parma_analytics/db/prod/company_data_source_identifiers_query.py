@@ -17,8 +17,7 @@ class IdentifierData:
     """Class for creating identifiers."""
 
     company_data_source_id: int
-    identifier_key: str
-    identifier_type: IdentifierType
+    identifier_type: str
     property: str
     value: str
     validity: datetime
@@ -28,7 +27,6 @@ class IdentifierData:
 class IdentifierUpdateData:
     """Class for updating identifiers."""
 
-    identifier_key: str | None = None
     identifier_type: IdentifierType | None = None
     property: str | None = None
     value: str | None = None
@@ -40,7 +38,7 @@ def get_company_data_source_identifiers(
 ) -> list[CompanyDataSourceIdentifier] | None:
     """Fetch identifiers based on company_id and data_source_id."""
     with db_session as session:
-        company_data_source = (
+        company_data_source: CompanyDataSource = (
             session.query(CompanyDataSource)
             .filter(
                 CompanyDataSource.company_id == company_id,
@@ -49,10 +47,19 @@ def get_company_data_source_identifiers(
             .first()
         )
 
-        if company_data_source:
-            return company_data_source.company_data_source_identifiers
-        else:
+        if not company_data_source:
             return None
+
+        identifiers: list[CompanyDataSourceIdentifier] = (
+            session.query(CompanyDataSourceIdentifier)
+            .filter(
+                CompanyDataSourceIdentifier.company_data_source_id
+                == company_data_source.id
+            )
+            .all()
+        )
+
+        return identifiers
 
 
 def create_company_data_source_identifier(
@@ -62,7 +69,6 @@ def create_company_data_source_identifier(
     with db_session as session:
         new_identifier = CompanyDataSourceIdentifier(
             company_data_source_id=identifier_data.company_data_source_id,
-            identifier_key=identifier_data.identifier_key,
             identifier_type=identifier_data.identifier_type,
             property=identifier_data.property,
             value=identifier_data.value,
@@ -87,8 +93,6 @@ def update_company_data_source_identifier(
         )
 
         if identifier:
-            if identifier_data.identifier_key is not None:
-                identifier.identifier_key = identifier_data.identifier_key
             if identifier_data.identifier_type is not None:
                 identifier.identifier_type = identifier_data.identifier_type
             if identifier_data.property is not None:
@@ -99,6 +103,7 @@ def update_company_data_source_identifier(
                 identifier.validity = identifier_data.validity
 
             session.commit()
+            session.refresh(identifier)
 
             return identifier
         else:

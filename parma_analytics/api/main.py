@@ -9,6 +9,7 @@ from parma_analytics.db.prod.engine import get_engine
 
 from .routes import (
     crawling_finished_router,
+    crm_companies_router,
     data_source_handshake_router,
     dummy_router,
     feed_raw_data_router,
@@ -71,4 +72,9 @@ app.include_router(source_measurement_router, tags=["source_measurement"])
 app.include_router(
     schedule_router,
     tags=["schedule_mining_modules"],
+)
+
+app.include_router(
+    crm_companies_router,
+    tags=["crm_companies"],
 )

@@ -16,7 +16,6 @@ from parma_analytics.db.prod.company_data_source_identifiers_query import (
 from parma_analytics.db.prod.models.company_data_source import CompanyDataSource
 from parma_analytics.db.prod.models.company_data_source_identifier import (
     CompanyDataSourceIdentifier,
-    IdentifierType,
 )
 
 
@@ -43,8 +42,7 @@ def test_create_company_data_source_identifier(
 ):
     identifier_data = IdentifierData(
         company_data_source_id=1,
-        identifier_key="key",
-        identifier_type=IdentifierType(IdentifierType.AUTOMATICALLY_DISCOVERED),
+        identifier_type="AUTOMATICALLY_DISCOVERED",
         property="property",
         value="value",
         validity=datetime.now(),
@@ -61,8 +59,7 @@ def test_update_company_data_source_identifier(
     mock_db, mock_company_data_source_identifier
 ):
     update_data = IdentifierUpdateData(
-        identifier_key="key",
-        identifier_type=IdentifierType(IdentifierType.AUTOMATICALLY_DISCOVERED),
+        identifier_type="AUTOMATICALLY_DISCOVERED",
         property="property",
         value="value",
         validity=datetime.now(),

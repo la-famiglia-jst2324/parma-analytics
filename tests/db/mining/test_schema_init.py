@@ -100,3 +100,9 @@ def test_parma_mining_trigger_docs(engine: firestore_types.Client):
             )
             == 0
         )
+
+
+"""
+def test_init_schema():
+    init_schema()
+"""

@@ -1,0 +1,3 @@
+I want you to act as a short news headline generator. Given a concise detail of a news event:
+{company_name} had a change of {trigger_change}% in {metric_name}.
+Generate informative news headline of 4-7 words. Consider tone to be professional
