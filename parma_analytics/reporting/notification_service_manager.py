@@ -36,7 +36,3 @@ class NotificationServiceManager:
             get_engine(), channel_ids
         )
         return destinations_and_secret_ids
-
-
-notification_service_manager = NotificationServiceManager("slack", 1)
-notification_service_manager.get_slack_key_and_destinations()
