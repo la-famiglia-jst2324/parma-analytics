@@ -3,7 +3,7 @@ from datetime import datetime
 from unittest.mock import MagicMock, patch
 
 from parma_analytics.bl.generate_report import (
-    GenerateReportInput,
+    GenerateNewsInput,
     generate_news,
 )
 
@@ -35,7 +35,7 @@ class TestReportGenerator(unittest.TestCase):
             mock_get_data_source_name.return_value = "Sales Source"
             mock_fetch_recent_value.return_value = {"timestamp": datetime.now()}
 
-            input_params = GenerateReportInput(
+            input_params = GenerateNewsInput(
                 company_id=1,
                 source_measurement_id=1,
                 company_measurement_id=1,

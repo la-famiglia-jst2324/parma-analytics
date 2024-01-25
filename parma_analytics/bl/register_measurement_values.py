@@ -11,7 +11,7 @@ from parma_analytics.analytics.sentiment_analysis.sentiment_analysis import (
     get_sentiment,
 )
 from parma_analytics.bl.generate_report import (
-    GenerateReportInput,
+    GenerateNewsInput,
     generate_news,
 )
 from parma_analytics.db.prod.company_source_measurement_query import (
@@ -90,7 +90,7 @@ def register_values(normalized_measurement: NormalizedData) -> int:
             # create news and send notifications, only if rules are satisfied
             if comparison_engine_result.is_rules_satisfied:
                 try:
-                    report_input = GenerateReportInput(
+                    news_input = GenerateNewsInput(
                         company_id=company_id,
                         source_measurement_id=source_measurement_id,
                         company_measurement_id=company_measurement.company_measurement_id,
@@ -99,7 +99,7 @@ def register_values(normalized_measurement: NormalizedData) -> int:
                         previous_value=comparison_engine_result.previous_value,
                         aggregation_method=comparison_engine_result.aggregation_method,
                     )
-                    result = generate_news(report_input)
+                    result = generate_news(news_input)
                 except SQLAlchemyError as e:
                     logger.error(
                         f"A database error occurred while generating summary: {e}"
