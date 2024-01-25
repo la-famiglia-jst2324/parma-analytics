@@ -79,6 +79,31 @@ def fetch_notification_destinations(
         return [destination for (destination,) in results]
 
 
+def fetch_slack_destinations(engine: Engine, channel_ids: list[int]):
+    """Fetch slack destinations for a given list of channel ids.
+
+    Args:
+        engine: database engine.
+        channel_ids: list of channel ids.
+        service_type: type of the service.
+
+    Returns:
+        A list of slack destinations.
+    """
+    with Session(engine) as session:
+        results = (
+            session.query(
+                NotificationChannel.destination, NotificationChannel.secret_id
+            )
+            .where(
+                NotificationChannel.id.in_(channel_ids),
+                NotificationChannel.channel_type == "SLACK",
+            )
+            .all()
+        )
+        return results
+
+
 __TableModels: dict[str, type[MeasurementValueModels]] = {
     "measurement_int_value": MeasurementIntValue,
     "measurement_float_value": MeasurementFloatValue,

@@ -294,6 +294,22 @@ The following steps will get you started with the project.
 
 - Add the [environment variables](https://www.notion.so/ChatGPT-Dev-API-KEY-2e7ffc39500943a595c31084cd24379e) in your local.
 
+## Get Started with Slack Notifications:
+
+To ensure you're set up to receive messages in your Slack channel, simply follow these steps:
+
+1.  **Create Your Slack App**: Head over to the [Slack messaging documentation](https://api.slack.com/messaging/sending) and set up a Slack App for your workspace. Pay special attention to the _Requesting the necessary permissions_ section to get your app up and running.
+
+2.  **Invite Your Slack Bot**: Once your app is ready, bring it into the conversation by inviting it to the desired channel(s):
+
+    - In the message field of your Slack channel, type `/invite @YourAppName` and hit enter. Be sure to replace `YourAppName` with the actual name of your app.
+
+3.  **Connect to Parma AI**:
+    - Locate your `Bot User OAuth Token` on your Slack App's page under the `OAuth & Permissions` section.
+    - Enter this token and your desired Slack channel name(s) into the corresponding fields in your Parma AI settings.
+
+And that's it! You're all set to receive notifications through Parma AI in your selected Slack channel.
+
 ## PR workflow
 
 1. **Create a new branch**
