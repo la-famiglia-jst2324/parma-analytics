@@ -23,13 +23,13 @@ class GenerateReportInput(BaseModel):
     company_id: int
     source_measurement_id: int
     company_measurement_id: int
-    current_value: int | float
-    trigger_change: float
+    current_value: Any
+    trigger_change: float | None = None
     previous_value: Any
     aggregation_method: str | None = None
 
 
-def generate_report(
+def generate_news(
     report_generator_input: GenerateReportInput,
 ):
     """Generate a report summary from GPT."""
