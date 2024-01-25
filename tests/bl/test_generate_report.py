@@ -4,7 +4,7 @@ from unittest.mock import MagicMock, patch
 
 from parma_analytics.bl.generate_report import (
     GenerateReportInput,
-    generate_report,
+    generate_news,
 )
 
 
@@ -53,7 +53,7 @@ class TestReportGenerator(unittest.TestCase):
                 "summary": "Report Summary",
             }
 
-            result = generate_report(input_params)
+            result = generate_news(input_params)
 
             self.assertIsInstance(result, dict)
             self.assertIn("title", result)
