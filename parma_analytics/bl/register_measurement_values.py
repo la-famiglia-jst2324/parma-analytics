@@ -89,16 +89,24 @@ def register_values(normalized_measurement: NormalizedData) -> int:
             )
             # create news and send notifications, only if rules are satisfied
             if comparison_engine_result.is_rules_satisfied:
-                report_input = GenerateReportInput(
-                    company_id=company_id,
-                    source_measurement_id=source_measurement_id,
-                    company_measurement_id=company_measurement.company_measurement_id,
-                    current_value=value,
-                    trigger_change=comparison_engine_result.percentage_difference,
-                    previous_value=comparison_engine_result.previous_value,
-                    aggregation_method=comparison_engine_result.aggregation_method,
-                )
-                result = generate_news(report_input)
+                try:
+                    report_input = GenerateReportInput(
+                        company_id=company_id,
+                        source_measurement_id=source_measurement_id,
+                        company_measurement_id=company_measurement.company_measurement_id,
+                        current_value=value,
+                        trigger_change=comparison_engine_result.percentage_difference,
+                        previous_value=comparison_engine_result.previous_value,
+                        aggregation_method=comparison_engine_result.aggregation_method,
+                    )
+                    result = generate_news(report_input)
+                except SQLAlchemyError as e:
+                    logger.error(
+                        f"A database error occurred while generating summary: {e}"
+                    )
+                except Exception as e:
+                    logger.error(f"An error occurred while generating news: {e}")
+
                 create_news(
                     News(
                         message=result["summary"],
