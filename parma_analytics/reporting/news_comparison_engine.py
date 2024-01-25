@@ -10,8 +10,8 @@ from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel
+from sqlalchemy.orm import Session
 
-from parma_analytics.api.models.news import NewsCreate
 from parma_analytics.db.prod.aggregation_queries import (
     IncomingData,
     apply_aggregation_method,
@@ -31,7 +31,6 @@ from parma_analytics.db.prod.models.measurement_value_models import (
     MeasurementTextValue,
 )
 from parma_analytics.db.prod.models.news import News
-from parma_analytics.db.prod.news import create_news_query
 from parma_analytics.db.prod.notification_rules_query import (
     get_notification_rules_by_source_measurement_id,
 )
@@ -97,14 +96,17 @@ def check_notification_rules(
             timestamp=timestamp,
             company_measurement_id=company_measurement_id,
         )
-        if previous_value != value:
-            return NewsComparisonEngineReturn(threshold=None, is_rules_satisfied=True)
+        if previous_value is not None:
+            if previous_value != value:
+                return NewsComparisonEngineReturn(
+                    threshold=None, is_rules_satisfied=True
+                )
         return NewsComparisonEngineReturn(threshold=None, is_rules_satisfied=False)
     else:
         notification_rule = get_notification_rules_by_source_measurement_id(
             get_engine(), source_measurement_id=source_measurement_id
         )
-        if notification_rule:
+        if notification_rule is not None:
             threshold = (
                 notification_rule.threshold
             )  # threshold is measured in PERCENTAGE
@@ -118,87 +120,91 @@ def check_notification_rules(
                 company_measurement_id=company_measurement_id,
                 notification_rule=notification_rule,
             )
-            if aggregation_method is None and num_aggregation_entries is None:
-                percentage_difference = compare_to_threshold(
-                    previous_value, value, threshold
-                )
-                if percentage_difference >= 0:
-                    return NewsComparisonEngineReturn(
-                        threshold=threshold,
-                        is_rules_satisfied=True,
-                        is_aggregated=False,
-                        percentage_difference=percentage_difference,
-                        previous_value=previous_value,
+            # nothing to compare to if there is no previous value
+            if previous_value is not None:
+                if aggregation_method is None and num_aggregation_entries is None:
+                    percentage_difference = compare_to_threshold(
+                        previous_value, value, threshold
                     )
-            elif aggregation_method is not None and num_aggregation_entries is None:
-                new_aggregated_value = apply_aggregation_method(
-                    engine=get_engine(),
-                    data_table=data_table,
-                    incoming_data=IncomingData(
-                        timestamp=timestamp,
-                        value=value,
-                        company_measurement_id=company_measurement_id,
-                    ),
-                    notification_rule=notification_rule,
-                )
-                percentage_difference = compare_to_threshold(
-                    previous_value, new_aggregated_value, threshold
-                )
-                if percentage_difference >= 0:
-                    return NewsComparisonEngineReturn(
-                        threshold=threshold,
-                        is_rules_satisfied=True,
-                        is_aggregated=True,
-                        aggregation_method=aggregation_method,
-                        previous_value=new_aggregated_value,
-                        percentage_difference=percentage_difference,
+                    if percentage_difference >= 0:
+                        return NewsComparisonEngineReturn(
+                            threshold=threshold,
+                            is_rules_satisfied=True,
+                            is_aggregated=False,
+                            percentage_difference=percentage_difference,
+                            previous_value=previous_value,
+                        )
+                elif aggregation_method is not None and num_aggregation_entries is None:
+                    new_aggregated_value = apply_aggregation_method(
+                        engine=get_engine(),
+                        data_table=data_table,
+                        incoming_data=IncomingData(
+                            timestamp=timestamp,
+                            value=value,
+                            company_measurement_id=company_measurement_id,
+                        ),
+                        notification_rule=notification_rule,
                     )
-            elif aggregation_method is not None and num_aggregation_entries is not None:
-                new_aggregated_value = apply_aggregation_method(
-                    engine=get_engine(),
-                    data_table=data_table,
-                    incoming_data=IncomingData(
-                        timestamp=timestamp,
-                        value=value,
-                        company_measurement_id=company_measurement_id,
-                    ),
-                    notification_rule=notification_rule,
-                )
-                percentage_difference = compare_to_threshold(
-                    previous_value, new_aggregated_value, threshold
-                )
-                if percentage_difference >= 0:
-                    return NewsComparisonEngineReturn(
-                        threshold=threshold,
-                        is_rules_satisfied=True,
-                        is_aggregated=True,
-                        aggregation_method=aggregation_method,
-                        previous_value=new_aggregated_value,
-                        num_aggregation_entries=num_aggregation_entries,
-                        percentage_difference=percentage_difference,
+                    percentage_difference = compare_to_threshold(
+                        previous_value, new_aggregated_value, threshold
                     )
+                    if percentage_difference >= 0:
+                        return NewsComparisonEngineReturn(
+                            threshold=threshold,
+                            is_rules_satisfied=True,
+                            is_aggregated=True,
+                            aggregation_method=aggregation_method,
+                            previous_value=new_aggregated_value,
+                            percentage_difference=percentage_difference,
+                        )
+                elif (
+                    aggregation_method is not None
+                    and num_aggregation_entries is not None
+                ):
+                    new_aggregated_value = apply_aggregation_method(
+                        engine=get_engine(),
+                        data_table=data_table,
+                        incoming_data=IncomingData(
+                            timestamp=timestamp,
+                            value=value,
+                            company_measurement_id=company_measurement_id,
+                        ),
+                        notification_rule=notification_rule,
+                    )
+                    percentage_difference = compare_to_threshold(
+                        previous_value, new_aggregated_value, threshold
+                    )
+                    if percentage_difference >= 0:
+                        return NewsComparisonEngineReturn(
+                            threshold=threshold,
+                            is_rules_satisfied=True,
+                            is_aggregated=True,
+                            aggregation_method=aggregation_method,
+                            previous_value=new_aggregated_value,
+                            num_aggregation_entries=num_aggregation_entries,
+                            percentage_difference=percentage_difference,
+                        )
 
     return NewsComparisonEngineReturn(threshold=None, is_rules_satisfied=False)
 
 
-def create_news(
-    news_data: NewsCreate,
-) -> News:
+def create_news(news: News) -> News:
     """Creates a new News object with the given parameters.
 
     Args:
-       news_data: The data for creating the news.
+       news: The data for creating the news.
 
     Returns:
         News: The created News object.
     """
-    return create_news_query(
-        engine=get_engine(),
-        news_data=news_data,
-    )
+    with Session(get_engine()) as session:
+        session.add(news)
+        session.commit()
+        session.refresh(news)
+        return news
 
 
-def get_data_source_id(source_measurement_id: int) -> int:
+def get_source_module_id(source_measurement_id: int) -> int:
     """Retrieves the data source ID associated with the given source measurement ID.
 
     Args:
@@ -210,7 +216,7 @@ def get_data_source_id(source_measurement_id: int) -> int:
     source_measurement = get_source_measurement_query(
         get_engine(), source_measurement_id
     )
-    return source_measurement.data_source_id
+    return source_measurement.source_module_id
 
 
 def get_measurement_value_table(source_measurement_type: str):
