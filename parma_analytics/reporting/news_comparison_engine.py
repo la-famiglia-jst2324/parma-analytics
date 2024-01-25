@@ -178,7 +178,7 @@ def check_notification_rules(
                         percentage_difference=percentage_difference,
                     )
 
-    return NewsComparisonEngineReturn(threshold=threshold, is_rules_satisfied=False)
+    return NewsComparisonEngineReturn(threshold=None, is_rules_satisfied=False)
 
 
 def create_news(
