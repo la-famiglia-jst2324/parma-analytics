@@ -64,6 +64,7 @@ def generate_report(
             "current_value": current_value,
             "timeframe": timestamp_difference,
             "aggregated_method": aggregation_method,
+            "type": source_module.type,
         }
         report_generator = ReportGenerator()
         report = report_generator.generate_report(report_params)
