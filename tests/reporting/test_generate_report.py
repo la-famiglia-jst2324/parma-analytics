@@ -24,6 +24,7 @@ class TestReportGenerator(unittest.TestCase):
             "current_value": 1000000,
             "previous_value": 800000,
             "aggregated_method": "sum",
+            "type": "text",
         }
 
         result_1 = report_generator.generate_report(report_params_1)
@@ -40,6 +41,7 @@ class TestReportGenerator(unittest.TestCase):
             "current_value": 500,
             "previous_value": None,
             "aggregated_method": None,
+            "type": "int",
         }
 
         result_2 = report_generator.generate_report(report_params_2)

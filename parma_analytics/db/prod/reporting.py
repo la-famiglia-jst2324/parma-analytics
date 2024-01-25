@@ -6,6 +6,7 @@ import sqlalchemy as sa
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm.session import Session
 
+from parma_analytics.db.prod.models.company_subscription import CompanySubscription
 from parma_analytics.db.prod.models.measurement_value_models import (
     MeasurementCommentValue,
     MeasurementDateValue,
@@ -42,6 +43,15 @@ def fetch_channel_ids(engine: Engine, user_ids: list[int]) -> list[int]:
             .all()
         )
         return [channel_id for (channel_id,) in results]
+
+
+def fetch_company_ids_for_user(db: Session, user_id) -> list:
+    """Fetch company ids for a given user."""
+    return (
+        db.query(CompanySubscription.company_id)
+        .where(CompanySubscription.user_id == user_id)
+        .all()
+    )
 
 
 def fetch_notification_destinations(

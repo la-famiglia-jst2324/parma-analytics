@@ -15,6 +15,7 @@ from .routes import (
     feed_raw_data_router,
     new_company_router,
     schedule_router,
+    send_reports_router,
     source_measurement_router,
 )
 
@@ -77,4 +78,9 @@ app.include_router(
 app.include_router(
     crm_companies_router,
     tags=["crm_companies"],
+)
+
+app.include_router(
+    send_reports_router,
+    tags=["send_reports"],
 )

@@ -30,7 +30,7 @@ class TestReportGenerator(unittest.TestCase):
             mock_get_engine.return_value = mock_engine
             mock_get_company_name.return_value = "ABC Corp"
             mock_source_module = MagicMock()
-            mock_source_module.type = "SALES"
+            mock_source_module.type = "int"
             mock_get_source_measurement_query.return_value = mock_source_module
             mock_get_data_source_name.return_value = "Sales Source"
             mock_fetch_recent_value.return_value = {"timestamp": datetime.now()}
@@ -43,6 +43,7 @@ class TestReportGenerator(unittest.TestCase):
                 trigger_change=2,
                 previous_value=800,
                 aggregation_method="sum",
+                type="int",
             )
 
             mock_report_generator_instance = MagicMock()
@@ -65,7 +66,7 @@ class TestReportGenerator(unittest.TestCase):
                 mock_engine, mock_source_module.source_module_id
             )
             mock_fetch_recent_value.assert_called_once_with(
-                mock_engine, 1, "measurement_sales_value"
+                mock_engine, 1, "measurement_int_value"
             )
             mock_report_generator.assert_called_once()
             mock_report_generator_instance.generate_report.assert_called_once_with(
@@ -78,5 +79,6 @@ class TestReportGenerator(unittest.TestCase):
                     "current_value": 1000,
                     "timeframe": 0,
                     "aggregated_method": "sum",
+                    "type": "int",
                 }
             )
