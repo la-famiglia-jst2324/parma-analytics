@@ -1,0 +1,5 @@
+For company {company_name}.
+Provide a concise short summary for the company with the provided data:
+{current_value}
+
+Consider tone to be professional. Don't assume anything.

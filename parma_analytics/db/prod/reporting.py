@@ -6,6 +6,7 @@ import sqlalchemy as sa
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm.session import Session
 
+from parma_analytics.db.prod.models.company_subscription import CompanySubscription
 from parma_analytics.db.prod.models.measurement_value_models import (
     MeasurementCommentValue,
     MeasurementDateValue,
@@ -44,6 +45,15 @@ def fetch_channel_ids(engine: Engine, user_ids: list[int]) -> list[int]:
         return [channel_id for (channel_id,) in results]
 
 
+def fetch_company_ids_for_user(db: Session, user_id) -> list:
+    """Fetch company ids for a given user."""
+    return (
+        db.query(CompanySubscription.company_id)
+        .where(CompanySubscription.user_id == user_id)
+        .all()
+    )
+
+
 def fetch_notification_destinations(
     engine: Engine, channel_ids: list[int], service_type: str
 ) -> list[str]:
@@ -67,6 +77,31 @@ def fetch_notification_destinations(
             .all()
         )
         return [destination for (destination,) in results]
+
+
+def fetch_slack_destinations(engine: Engine, channel_ids: list[int]):
+    """Fetch slack destinations for a given list of channel ids.
+
+    Args:
+        engine: database engine.
+        channel_ids: list of channel ids.
+        service_type: type of the service.
+
+    Returns:
+        A list of slack destinations.
+    """
+    with Session(engine) as session:
+        results = (
+            session.query(
+                NotificationChannel.destination, NotificationChannel.secret_id
+            )
+            .where(
+                NotificationChannel.id.in_(channel_ids),
+                NotificationChannel.channel_type == "SLACK",
+            )
+            .all()
+        )
+        return results
 
 
 __TableModels: dict[str, type[MeasurementValueModels]] = {

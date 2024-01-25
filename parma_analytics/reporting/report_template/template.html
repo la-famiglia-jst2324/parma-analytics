@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>News by Company</title>
+</head>
+
+<body>
+  {% for company_name, news_list in news_by_company.items() %}
+  {{ company_name }}
+  <ul>
+    {% for news_message in news_list %}
+    <li>{{ news_message }}</li>
+    {% endfor %}
+  </ul>
+  {% endfor %}
+</body>
+
+</html>

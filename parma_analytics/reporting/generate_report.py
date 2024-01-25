@@ -52,47 +52,69 @@ class ReportGenerator:
             current_value = report_params["current_value"]
             previous_value = report_params["previous_value"]
             aggregated_method = report_params["aggregated_method"]
-            if not aggregated_method:
+            type = report_params["type"]
+            if type in ["paragraph", "text"]:
                 with open(
-                    "parma_analytics/reporting/prompts/summary_generator.txt"
+                    "parma_analytics/reporting/prompts/summary_generator_for_paragraph.txt"
+                ) as prompt_file:
+                    prompt = f"{prompt_file.read()}"
+                gpt_prompt = prompt.format(
+                    company_name=company_name,
+                    source_name=source_name,
+                    metric_name=metric_name,
+                    current_value=current_value,
+                )
+
+                with open(
+                    "parma_analytics/reporting/prompts/title_prompt_for_paragraph.txt"
                 ) as prompt_file:
                     prompt = f"{prompt_file.read()}"
 
-                gpt_prompt = prompt.format(
-                    company_name=company_name,
-                    timeframe=timeframe,
-                    source_name=source_name,
-                    metric_name=metric_name,
-                    trigger_change=trigger_change,
-                    current_value=current_value,
+                title_gpt_prompt = prompt.format(
+                    company_name=company_name, current_value=current_value
                 )
             else:
+                if not aggregated_method:
+                    with open(
+                        "parma_analytics/reporting/prompts/summary_generator.txt"
+                    ) as prompt_file:
+                        prompt = f"{prompt_file.read()}"
+
+                    gpt_prompt = prompt.format(
+                        company_name=company_name,
+                        timeframe=timeframe,
+                        source_name=source_name,
+                        metric_name=metric_name,
+                        trigger_change=trigger_change,
+                        current_value=current_value,
+                    )
+                else:
+                    with open(
+                        "parma_analytics/reporting/prompts/aggregated_data_summary.txt"
+                    ) as prompt_file:
+                        prompt = f"{prompt_file.read()}"
+
+                    gpt_prompt = prompt.format(
+                        company_name=company_name,
+                        source_name=source_name,
+                        metric_name=metric_name,
+                        trigger_change=trigger_change,
+                        current_value=current_value,
+                        previous_value=previous_value,
+                        aggregated_method=aggregated_method,
+                    )
+
                 with open(
-                    "parma_analytics/reporting/prompts/aggregated_data_summary.txt"
+                    "parma_analytics/reporting/prompts/title_prompt.txt"
                 ) as prompt_file:
                     prompt = f"{prompt_file.read()}"
 
-                gpt_prompt = prompt.format(
+                title_gpt_prompt = prompt.format(
                     company_name=company_name,
-                    source_name=source_name,
                     metric_name=metric_name,
                     trigger_change=trigger_change,
-                    current_value=current_value,
-                    previous_value=previous_value,
-                    aggregated_method=aggregated_method,
                 )
 
-            with open(
-                "parma_analytics/reporting/prompts/title_prompt.txt"
-            ) as prompt_file:
-                prompt = f"{prompt_file.read()}"
-
-            title_gpt_prompt = prompt.format(
-                company_name=company_name,
-                metric_name=metric_name,
-                trigger_change=trigger_change,
-            )
-            print(gpt_prompt)
             summary = self._make_openai_request(gpt_prompt)
             title = self._make_openai_request(title_gpt_prompt)
             return {"title": title, "summary": summary}
