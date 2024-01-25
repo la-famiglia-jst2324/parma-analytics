@@ -10,11 +10,15 @@ from sqlalchemy.orm import Session
 from parma_analytics.analytics.sentiment_analysis.sentiment_analysis import (
     get_sentiment,
 )
+from parma_analytics.bl.generate_report import (
+    GenerateReportInput,
+    generate_news,
+)
 from parma_analytics.db.prod.company_source_measurement_query import (
     create_company_measurement_query,
     get_by_company_and_measurement_ids_query,
 )
-from parma_analytics.db.prod.engine import get_session
+from parma_analytics.db.prod.engine import get_engine, get_session
 from parma_analytics.db.prod.measurement_value_query import MeasurementValueCRUD
 from parma_analytics.db.prod.models.measurement_value_models import (
     MeasurementCommentValue,
@@ -27,6 +31,15 @@ from parma_analytics.db.prod.models.measurement_value_models import (
     MeasurementParagraphValue,
     MeasurementTextValue,
 )
+from parma_analytics.db.prod.models.news import News
+from parma_analytics.db.prod.reporting import get_users_subscribed_to_company
+from parma_analytics.reporting.gmail.email_service import EmailService
+from parma_analytics.reporting.news_comparison_engine import (
+    check_notification_rules,
+    create_news,
+    get_source_module_id,
+)
+from parma_analytics.reporting.slack.send_slack_messages import SlackService
 from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
 
 logger = logging.getLogger(__name__)
@@ -60,26 +73,44 @@ def register_values(normalized_measurement: NormalizedData) -> int:
                     },
                 )
             measurement_type = measurement_type.lower()
+
             # need to check rules before creating a news
+            # and sending a notification
+            comparison_engine_result = check_notification_rules(
+                source_measurement_id=source_measurement_id,
+                value=value,
+                timestamp=timestamp,
+                measurement_type=measurement_type,
+                company_measurement=company_measurement,
+            )
 
-            # TODO: fix here
-            # comparison_engine_result = check_notification_rules(
-            #     source_measurement_id=source_measurement_id,
-            #     value=value,
-            #     timestamp=timestamp,
-            #     measurement_type=measurement_type,
-            #     company_measurement=company_measurement,
-            # )
-            # if comparison_engine_result.is_rules_satisfied:
-            #     # TODO: send notification
-            #     pass
-
-            # data_source_id = get_data_source_id(source_measurement_id=
-            # source_measurement_id)
-            # summary
-            # TODO: get message and title from gpt and pass it to create_news() below.
-            # TODO: create news
-            # news = create_news(NewsCreate(...))
+            data_source_id = get_source_module_id(
+                source_measurement_id=source_measurement_id
+            )
+            # create news and send notifications, only if rules are satisfied
+            if comparison_engine_result.is_rules_satisfied:
+                report_input = GenerateReportInput(
+                    company_id=company_id,
+                    source_measurement_id=source_measurement_id,
+                    company_measurement_id=company_measurement.company_measurement_id,
+                    current_value=value,
+                    trigger_change=comparison_engine_result.percentage_difference,
+                    previous_value=comparison_engine_result.previous_value,
+                    aggregation_method=comparison_engine_result.aggregation_method,
+                )
+                result = generate_news(report_input)
+                create_news(
+                    News(
+                        message=result["summary"],
+                        company_id=company_id,
+                        data_source_id=data_source_id,
+                        trigger_factor=comparison_engine_result.percentage_difference,
+                        title=result["title"],
+                        timestamp=timestamp,
+                        source_measurement_id=source_measurement_id,
+                    )
+                )
+                send_notifications(company_id=company_id, text=result["summary"])
 
             created_measurement_id = handle_value(
                 session,
@@ -156,3 +187,23 @@ def handle_value(
         return measurement_id
     else:
         raise ValueError(f"Invalid measurement type: {measurement_type}")
+
+
+def send_notifications(company_id: int, text: str):
+    """Sends notifications to users subscribed to a company.
+
+    Args:
+        company_id (int): The ID of the company.
+        text (str): The content of the notification.
+
+    Returns:
+        None
+    """
+    # need to find users subscribed to the company
+    user_ids = get_users_subscribed_to_company(get_engine(), company_id)
+    for user in user_ids:
+        user_id = user[0]
+        slack_service = SlackService()
+        email_service = EmailService(user_id)
+        slack_service.send_notification(user_id=user_id, content=text)
+        email_service.send_notification_email(notification_message=text)
