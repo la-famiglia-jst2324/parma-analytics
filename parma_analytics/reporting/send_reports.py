@@ -23,7 +23,7 @@ def send_reports():
                 news_by_company: dict[str, Any] = {}
 
                 for company_id in company_ids:
-                    if company_id.company_id:
+                    if company_id.company_id is not None:
                         messages = get_news_of_company(session, company_id.company_id)
                         company_name = get_company_name(
                             get_engine(), company_id.company_id
@@ -37,10 +37,10 @@ def send_reports():
                                     if message.message
                                 ]
                             )
-
                 if news_by_company:
+                    user_id_int = user_id.id
                     html = generate_html_report(news_by_company)
-                    email_service = EmailService(user_id)
+                    email_service = EmailService(user_id_int)
                     email_service.send_report_email(html)
 
                     content = ""
@@ -50,9 +50,8 @@ def send_reports():
 
                         for news_message in news_list:
                             content += f"- {news_message}\n"
-
                     slack_service = SlackService()
-                    slack_service.send_report(user_id, content)
+                    slack_service.send_report(user_id_int, content)
         except Exception as e:
             logging.error(f"An error occurred in reporting/send_reports: {e}")
             raise e

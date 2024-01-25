@@ -54,6 +54,16 @@ def fetch_company_ids_for_user(db: Session, user_id) -> list:
     )
 
 
+def get_users_subscribed_to_company(engine: Engine, company_id: int) -> list:
+    """Get users subscribed to a given company."""
+    with Session(engine) as session:
+        return (
+            session.query(CompanySubscription.user_id)
+            .where(CompanySubscription.company_id == company_id)
+            .all()
+        )
+
+
 def fetch_notification_destinations(
     engine: Engine, channel_ids: list[int], service_type: str
 ) -> list[str]:

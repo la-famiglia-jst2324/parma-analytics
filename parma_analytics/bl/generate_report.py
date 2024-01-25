@@ -17,30 +17,30 @@ from parma_analytics.db.prod.source_measurement_query import (
 from parma_analytics.reporting.generate_report import ReportGenerator
 
 
-class GenerateReportInput(BaseModel):
+class GenerateNewsInput(BaseModel):
     """Generate report parameters."""
 
     company_id: int
     source_measurement_id: int
     company_measurement_id: int
-    current_value: int | float
-    trigger_change: float
+    current_value: Any
+    trigger_change: float | None = None
     previous_value: Any
     aggregation_method: str | None = None
 
 
-def generate_report(
-    report_generator_input: GenerateReportInput,
+def generate_news(
+    news_generator_input: GenerateNewsInput,
 ):
     """Generate a report summary from GPT."""
     try:
-        company_id = report_generator_input.company_id
-        source_measurement_id = report_generator_input.source_measurement_id
-        company_measurement_id = report_generator_input.company_measurement_id
-        current_value = report_generator_input.current_value
-        trigger_change = report_generator_input.trigger_change
-        previous_value = report_generator_input.previous_value
-        aggregation_method = report_generator_input.aggregation_method
+        company_id = news_generator_input.company_id
+        source_measurement_id = news_generator_input.source_measurement_id
+        company_measurement_id = news_generator_input.company_measurement_id
+        current_value = news_generator_input.current_value
+        trigger_change = news_generator_input.trigger_change
+        previous_value = news_generator_input.previous_value
+        aggregation_method = news_generator_input.aggregation_method
 
         engine = get_engine()
         company_name = get_company_name(engine, company_id)
