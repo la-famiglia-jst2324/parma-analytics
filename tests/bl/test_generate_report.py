@@ -43,6 +43,7 @@ class TestReportGenerator(unittest.TestCase):
                 trigger_change=2,
                 previous_value=800,
                 aggregation_method="sum",
+                type="int",
             )
 
             mock_report_generator_instance = MagicMock()
@@ -78,5 +79,6 @@ class TestReportGenerator(unittest.TestCase):
                     "current_value": 1000,
                     "timeframe": 0,
                     "aggregated_method": "sum",
+                    "type": "int",
                 }
             )
