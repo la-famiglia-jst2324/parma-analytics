@@ -39,6 +39,11 @@ resource "google_sql_database_instance" "parma_db_instance" {
     disk_type       = "PD_SSD"
     disk_size       = "10"
 
+    database_flags {
+      name  = "max_connections"
+      value = "1000"
+    }
+
     ip_configuration {
       ipv4_enabled = true
       # ipv4_enabled                                  = false
