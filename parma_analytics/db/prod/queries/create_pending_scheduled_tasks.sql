@@ -11,12 +11,12 @@ WITH RECURSIVE last_runs_per_datasource (id, freq, last_schedule) AS (
             ELSE NOW()
         END          AS last_schedule
     FROM data_source AS ds
-    LEFT JOIN scheduled_task AS st ON ds.id = st.data_source_id
-    -- not on_demand scheduled
-    WHERE
-        (st.schedule_type = 'REGULAR' OR st.schedule_type IS NULL)
-        AND ds.is_active = TRUE
-
+    LEFT JOIN scheduled_task AS st
+        ON ds.id = st.data_source_id AND (
+            -- not on_demand scheduled
+            (st.schedule_type = 'REGULAR' OR st.schedule_type IS NULL)
+        )
+    WHERE ds.is_active = TRUE
     GROUP BY id, freq  -- look at data sources latest regular schedules
 ),
 
