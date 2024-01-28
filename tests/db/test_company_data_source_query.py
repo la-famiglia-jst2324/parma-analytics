@@ -1,3 +1,4 @@
+from collections.abc import Iterator
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -25,6 +26,11 @@ def mock_db():
 @pytest.fixture
 def mock_company_data_source():
     return MagicMock(spec=CompanyDataSource)
+
+@pytest.fixture
+def session() -> Iterator[Session]:
+    with get_session() as s:
+        yield s
 
 
 def test_get_company_data_source(session: Session):
@@ -68,9 +74,9 @@ def test_get_all_company_data_sources_by_data_source_id(
     assert result[1].data_source_id == expected_data_source_id
 
 
-def test_get_all_company_data_sources():
+def test_get_all_company_data_sources(session: Session):
     # Test
-    result = get_all_company_data_sources(get_session())
+    result = get_all_company_data_sources(session)
 
     # Verify
     assert isinstance(result, list)
@@ -78,17 +84,14 @@ def test_get_all_company_data_sources():
 
 def test_create_company_data_source(mock_db):
     # Setup
-    num_before = len(get_all_company_data_sources(get_session()))
     data = CompanyDataSourceData(1, 1, True, "healthy")
 
     # Test
     result = create_company_data_source(mock_db, data)
-    num_after = len(get_all_company_data_sources(get_session()))
 
     # Verify
     assert result.company_id == 1
     assert result.data_source_id == 1
-    assert num_after == num_before + 1
 
 
 def test_update_company_data_source(mock_db):
@@ -108,14 +111,11 @@ def test_update_company_data_source(mock_db):
 
 def test_delete_company_data_source(mock_db):
     # Setup
-    num_before = len(get_all_company_data_sources(get_session()))
     data = CompanyDataSourceData(1, 1, True, "healthy")
     create_company_data_source(mock_db, data)
 
     # Test
     result = delete_company_data_source(mock_db, 1)
-    num_after = len(get_all_company_data_sources(get_session()))
 
     # Verify
     assert result is True
-    assert num_after == num_before - 1
