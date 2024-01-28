@@ -117,7 +117,7 @@ def get_most_recent_measurement_values(
     elif not aggregation_method and not num_aggregation_entries:
         # Perform regular query
         with Session(engine) as session:
-            return (
+            result = (
                 session.query(data_table)
                 .filter(
                     data_table.timestamp < timestamp,
@@ -125,8 +125,12 @@ def get_most_recent_measurement_values(
                 )
                 .order_by(data_table.timestamp.desc())
                 .first()
-                .value
             )
+
+            if result is not None:
+                return result.value
+            else:
+                return None
 
 
 def apply_aggregation_method(

@@ -96,6 +96,7 @@ def check_notification_rules(
             timestamp=timestamp,
             company_measurement_id=company_measurement_id,
         )
+        # nothing to compare to if there is no previous value
         if previous_value is not None:
             if previous_value != value:
                 return NewsComparisonEngineReturn(
