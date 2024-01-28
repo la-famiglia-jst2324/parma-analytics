@@ -199,6 +199,26 @@ graph TD
    linkStyle default stroke:#9E9D91,stroke-width:2px;
 ```
 
+#### Activity diagram: Mining Scheduling
+
+```mermaid
+graph TD
+    A[Start] -->|Triggered by Scheduler or On-demand| B["/schedule Endpoint"]
+    B --> C[Create Pending Scheduled Tasks for Active Data Sources]
+    C --> D[Update Overdue Tasks]
+    D --> E{Check Task Attempts}
+    E -->|Attempts < 3| F[Set Tasks to Processing and Schedule]
+    E -->|Attempts = 3| G[Mark Tasks as Failed]
+    F --> H[Trigger Mining Module for Scheduled Tasks]
+    G --> I[End]
+    H --> J[Retrieve Company Data for Each Scheduled Data Source]
+    J --> K{Check Handles for Each Company}
+    K -->|Handle Exists and Valid| L[Trigger /companies Endpoint in Mining Module]
+    K -->|Handle Missing/Expired| M[Call /discovery Endpoint and Update Handles]
+    M --> L
+    L --> I[End]
+```
+
 ## How to add new data sources
 
 [ADDING_DATASOURCES.md](./docs/ADDING_DATASOURCES.md)
