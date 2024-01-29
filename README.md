@@ -425,6 +425,10 @@ The deployment of Parma Analytics is managed through a combination of Terraform 
 
 We use Terraform for defining, provisioning, and managing the cloud infrastructure required for Parma Analytics. Our Terraform configuration files are organized under the terraform directory, divided into different environments like staging (staging), and production (prod). Each environment has its own set of configurations and variables, ensuring isolation and control over different deployment stages.
 
+A pivotal aspect of our Terraform strategy is the use of a common module, which is housed in the `module` directory. This module encompasses the core infrastructure components that are shared across all environments. The utilization of a shared module ensures consistency and streamlines our infrastructure management.
+
+Each environment, staging and production, references this common module but with its own set of environment-specific configurations and variables. This structure ensures that each environment, while based on a common foundation, is independently configurable and isolated, thus providing precise control over the deployment in various stages.
+
 Key components of our infrastructure include:
 
 - **Google Cloud SQL for PostgreSQL**: We provision a PostgreSQL database instance with `google_sql_database_instance` and `google_sql_database` resources for storing application data. These are configured in the `database.tf` file in the module folder.
