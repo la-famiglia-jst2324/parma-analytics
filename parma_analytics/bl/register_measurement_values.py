@@ -45,7 +45,7 @@ from parma_analytics.sourcing.normalization.normalization_model import Normalize
 logger = logging.getLogger(__name__)
 
 
-def register_values(normalized_measurement: NormalizedData) -> int:
+def register_values(normalized_measurement: NormalizedData) -> int | None:
     """Registers a new measurement value and returns the id.
 
     Args:
@@ -73,6 +73,10 @@ def register_values(normalized_measurement: NormalizedData) -> int:
                     },
                 )
             measurement_type = measurement_type.lower()
+
+            # Don't create value for nested measurement
+            if normalized_measurement.value is None:
+                return None
 
             # need to check rules before creating a news
             # and sending a notification
