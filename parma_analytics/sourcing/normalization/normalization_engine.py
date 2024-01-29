@@ -44,7 +44,7 @@ def build_lookup_dict(mapping_schema: dict[str, Any]) -> dict[str, dict[str, str
 
 
 def process_data_point(
-    value: str, company_id: str, timestamp: str, mapping: dict[str, str]
+    value: str | None, company_id: str, timestamp: str, mapping: dict[str, str]
 ) -> NormalizedData:
     """Processes a single data point according to its mapping.
 
@@ -105,6 +105,11 @@ def normalize_nested_data(
                     register_values(normalized_data)
                     normalized_results.append(normalized_data)
                 else:
+                    normalized_data = process_data_point(
+                        None, company_id, timestamp, nested_mapping_info
+                    )
+                    register_values(normalized_data)
+                    normalized_results.append(normalized_data)
                     nested_results = normalize_nested_data(
                         value, company_id, timestamp, lookup_dict
                     )
@@ -150,6 +155,11 @@ def normalize_data(
             register_values(normalized_data)
             normalized_results.append(normalized_data)
         else:
+            normalized_data = process_data_point(
+                None, company_id, timestamp, mapping_info
+            )
+            register_values(normalized_data)
+            normalized_results.append(normalized_data)
             nested_results = normalize_nested_data(
                 value, company_id, timestamp, lookup_dict
             )
