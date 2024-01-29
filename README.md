@@ -419,9 +419,33 @@ Core libraries that this project uses:
 
 ## Deployment
 
-No deployment pipeline has been set up yet.
+The deployment of Parma Analytics is managed through a combination of Terraform for infrastructure management and GitHub Actions for continuous integration and delivery. Our deployment strategy ensures that our application is consistently deployed across different environments with high reliability and minimal manual intervention.
 
-Currently we are considering several backend frameworks like `Firebase`, `Supabase` or `AWS Amplify`.
+### Infrastructure as Code with Terraform
+
+We use Terraform for defining, provisioning, and managing the cloud infrastructure required for Parma Analytics. Our Terraform configuration files are organized under the terraform directory, divided into different environments like staging (staging), and production (prod). Each environment has its own set of configurations and variables, ensuring isolation and control over different deployment stages.
+
+Key components of our infrastructure include:
+
+- **Google Cloud SQL for PostgreSQL**: We provision a PostgreSQL database instance with `google_sql_database_instance` and `google_sql_database` resources for storing application data. These are configured in the `database.tf` file in the module folder.
+- **Google Cloud Run**: The application is containerized and deployed to Google Cloud Run, providing a scalable and serverless environment for running our APIs. This is defined in `service.tf`.
+- **Google Cloud Scheduler**: Scheduled jobs for data sourcing and report generation are managed using Google Cloud Scheduler, as defined in `scheduler.tf`.
+
+### Continuous Deployment with GitHub Actions
+
+Our GitHub Actions workflow, defined in `.github/workflows/deploy.yml`, automates the deployment process. The workflow is triggered on pushes to the main branch and on published releases. It encompasses steps for:
+
+- Setting up the Google Cloud CLI and authenticating with Google Cloud services.
+- Building and pushing Docker images to Google Container Registry.
+- Executing Terraform commands (`init`, `plan`, `apply`) to deploy the infrastructure and services as per the Terraform configurations.
+- Environment-specific variables and secrets (like database passwords, API keys, etc.) are securely managed through GitHub Secrets and are injected into the deployment process as needed.
+
+### Deployment Environments
+
+We maintain two primary environments for our application:
+
+- Staging (staging): A pre-production environment that closely resembles the production setup, used for final testing before a release.
+- Production (prod): The live environment where our application is available to end-users.
 
 ## Disclaimer
 
