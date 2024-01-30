@@ -20,27 +20,31 @@ def get_company_data_source_bll(
     company_id: int, data_source_id: int
 ) -> CompanyDataSource | None:
     """BLL for fetching CompanyDataSource instances."""
-    return get_company_data_source(get_session(), company_id, data_source_id)
+    with get_session() as session:
+        return get_company_data_source(session, company_id, data_source_id)
 
 
 def get_all_company_data_sources_bll() -> list[CompanyDataSource]:
     """Business Logic Layer for fetching all CompanyDataSource instances."""
-    return get_all_company_data_sources(get_session())
+    with get_session() as session:
+        return get_all_company_data_sources(session)
 
 
 def get_all_by_data_source_id_bll(data_source_id: int) -> list[CompanyDataSource]:
     """Business Logic Layer for fetching based on data_source_id."""
-    return get_all_company_data_sources_by_data_source_id(get_session(), data_source_id)
+    with get_session() as session:
+        return get_all_company_data_sources_by_data_source_id(session, data_source_id)
 
 
 def create_company_data_source_bll(
     data_source_data: CompanyDataSourceData,
 ) -> CompanyDataSource:
     """Business Logic Layer for creating a new CompanyDataSource instance."""
-    return create_company_data_source(
-        get_session(),
-        data_source_data,
-    )
+    with get_session() as session:
+        return create_company_data_source(
+            session,
+            data_source_data,
+        )
 
 
 def update_company_data_source_bll(
@@ -48,13 +52,15 @@ def update_company_data_source_bll(
     update_data: CompanyDataSourceUpdateData,
 ) -> CompanyDataSource | None:
     """Business Logic Layer for updating an existing CompanyDataSource instance."""
-    return update_company_data_source(
-        get_session(),
-        data_source_id,
-        update_data,
-    )
+    with get_session() as session:
+        return update_company_data_source(
+            session,
+            data_source_id,
+            update_data,
+        )
 
 
 def delete_company_data_source_bll(data_source_id: int) -> bool:
     """Business Logic Layer for deleting a CompanyDataSource instance."""
-    return delete_company_data_source(get_session(), data_source_id)
+    with get_session() as session:
+        return delete_company_data_source(session, data_source_id)

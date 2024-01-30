@@ -5,8 +5,6 @@ import os
 
 from fastapi import FastAPI
 
-from parma_analytics.db.prod.engine import get_engine
-
 from .routes import (
     crawling_finished_router,
     data_source_handshake_router,
@@ -30,9 +28,6 @@ else:
 
 
 app = FastAPI()
-
-# initialize database layer
-app.state.engine = get_engine()
 
 
 # root endpoint
