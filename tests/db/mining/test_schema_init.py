@@ -47,7 +47,7 @@ def test_parma_mining_datasource_docs(engine: firestore_types.Client):
         raw_data_collection = doc_datasource.collection("raw_data")
         for raw_data_doc in cast(
             firestore_types.CollectionReference, raw_data_collection
-        ).list_documents():
+        ).list_documents(page_size=1):
             typed_raw_data_doc = cast(firestore_types.DocumentReference, raw_data_doc)
             content = typed_raw_data_doc.get()
             if not content.exists:
@@ -59,6 +59,7 @@ def test_parma_mining_datasource_docs(engine: firestore_types.Client):
                 )
                 == 0
             )
+            break  # we only want to check one document to not penetrate the api
 
         # assert normalization_schema contents
         normalization_schema_collection = doc_datasource.collection(
@@ -66,13 +67,14 @@ def test_parma_mining_datasource_docs(engine: firestore_types.Client):
         )
         for normalization_schema_doc in cast(
             firestore_types.CollectionReference, normalization_schema_collection
-        ).list_documents():
+        ).list_documents(page_size=1):
             typed_normalization_schema_doc = cast(
                 firestore_types.DocumentReference, normalization_schema_doc
             )
             content = typed_normalization_schema_doc.get()
             assert content.exists
             assert len({"schema"} - content.to_dict().keys()) == 0
+            break  # we only want to check one document to not penetrate the api
 
 
 def test_parma_mining_trigger_docs(engine: firestore_types.Client):
@@ -81,7 +83,7 @@ def test_parma_mining_trigger_docs(engine: firestore_types.Client):
     )
     assert trigger_collection
 
-    for d in trigger_collection.list_documents():
+    for d in trigger_collection.list_documents(page_size=1):
         doc_trigger = cast(firestore_types.DocumentReference, d)
         content = doc_trigger.get()
         assert content.exists
@@ -100,9 +102,4 @@ def test_parma_mining_trigger_docs(engine: firestore_types.Client):
             )
             == 0
         )
-
-
-"""
-def test_init_schema():
-    init_schema()
-"""
+        break  # we only want to check one document to not penetrate the api
