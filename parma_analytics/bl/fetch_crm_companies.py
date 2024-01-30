@@ -9,18 +9,20 @@ def get_new_crm_companies_bll(user_id: int) -> str:
     # here get the companies:
     all_crm_companies: list[str] = []
     # Filter for new companies.
-    with get_session() as db:
+    with get_session() as session:
         return_message = "No new companies found in the CRM"
         new_companies = [
             company
             for company in all_crm_companies
-            if not company_exists_by_name(db, company)
+            if not company_exists_by_name(session, company)
         ]
 
         # Add new companies to the DB.
         if new_companies != []:
             created_companies = [
-                create_company(db, name=company, description=None, added_by=user_id)
+                create_company(
+                    session, name=company, description=None, added_by=user_id
+                )
                 for company in new_companies
             ]
             # Set the return message to a string of comma separated company names.
