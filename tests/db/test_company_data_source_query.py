@@ -1,6 +1,7 @@
 from unittest.mock import MagicMock, patch
 
 import pytest
+from sqlalchemy.orm import Session
 
 from parma_analytics.db.prod.company_data_source_query import (
     CompanyDataSourceData,
@@ -11,7 +12,6 @@ from parma_analytics.db.prod.company_data_source_query import (
     get_company_data_source,
     update_company_data_source,
 )
-from parma_analytics.db.prod.engine import get_session
 from parma_analytics.db.prod.models.company_data_source import CompanyDataSource
 
 
@@ -26,9 +26,9 @@ def mock_company_data_source():
     return MagicMock(spec=CompanyDataSource)
 
 
-def test_get_company_data_source():
-    # Exercise
-    result = get_company_data_source(get_session(), 1, 1)
+def test_get_company_data_source(session: Session):
+    # Test
+    result = get_company_data_source(session, 1, 1)
 
     # Verify
     if result is not None:
@@ -56,7 +56,7 @@ def test_get_all_company_data_sources_by_data_source_id(
     )
     mock_get_all_company_data_sources_by_data_source_id.return_value = [data1, data2]
 
-    # Exercise
+    # Test
     result = mock_get_all_company_data_sources_by_data_source_id()
 
     # Verify
@@ -67,9 +67,9 @@ def test_get_all_company_data_sources_by_data_source_id(
     assert result[1].data_source_id == expected_data_source_id
 
 
-def test_get_all_company_data_sources():
-    # Exercise
-    result = get_all_company_data_sources(get_session())
+def test_get_all_company_data_sources(session: Session):
+    # Test
+    result = get_all_company_data_sources(session)
 
     # Verify
     assert len(result) > 0
@@ -79,7 +79,7 @@ def test_create_company_data_source(mock_db):
     # Setup
     data = CompanyDataSourceData(1, 1, True, "healthy")
 
-    # Exercise
+    # Test
     result = create_company_data_source(mock_db, data)
 
     # Verify
@@ -93,7 +93,7 @@ def test_update_company_data_source(mock_db):
     create_company_data_source(mock_db, data)
     update_data = CompanyDataSourceUpdateData(False, "unhealthy")
 
-    # Exercise
+    # Test
     result = update_company_data_source(mock_db, 1, update_data)
 
     # Verify
@@ -107,7 +107,7 @@ def test_delete_company_data_source(mock_db):
     data = CompanyDataSourceData(1, 1, True, "healthy")
     create_company_data_source(mock_db, data)
 
-    # Exercise
+    # Test
     result = delete_company_data_source(mock_db, 1)
 
     # Verify

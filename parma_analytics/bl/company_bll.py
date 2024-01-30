@@ -17,9 +17,11 @@ def create_company_if_not_exist_bll(
 
     This function calls the ORM query function create_company_if_doesnt_exist.
     """
-    return create_company_if_not_exist(get_session(), name, description, added_by)
+    with get_session() as session:
+        return create_company_if_not_exist(session, name, description, added_by)
 
 
 def get_company_id_bll(company_id: int) -> Company | None:
     """Business Logic Layer for retrieving company by id."""
-    return get_company(get_session(), company_id)
+    with get_session() as session:
+        return get_company(session, company_id)

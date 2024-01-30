@@ -23,9 +23,8 @@ def get_company_data_source_identifiers_bll(
 
     This function calls the ORM query function get_company_data_source_identifiers.
     """
-    return get_company_data_source_identifiers(
-        get_session(), company_id, data_source_id
-    )
+    with get_session() as session:
+        return get_company_data_source_identifiers(session, company_id, data_source_id)
 
 
 def create_company_data_source_identifier_bll(
@@ -35,10 +34,8 @@ def create_company_data_source_identifier_bll(
 
     This function calls the ORM query function create_company_data_source_identifier.
     """
-    return create_company_data_source_identifier(
-        get_session(),
-        identifier_data,
-    )
+    with get_session() as session:
+        return create_company_data_source_identifier(session, identifier_data)
 
 
 def update_company_data_source_identifier_bll(
@@ -51,11 +48,10 @@ def update_company_data_source_identifier_bll(
 
     This function calls the ORM query function update_company_data_source_identifier.
     """
-    return update_company_data_source_identifier(
-        get_session(),
-        identifier_id,
-        update_data,
-    )
+    with get_session() as session:
+        return update_company_data_source_identifier(
+            session, identifier_id, update_data
+        )
 
 
 def delete_company_data_source_identifier_bll(identifier_id: int) -> bool:
@@ -63,4 +59,5 @@ def delete_company_data_source_identifier_bll(identifier_id: int) -> bool:
 
     This function calls the ORM query function delete_company_data_source_identifier.
     """
-    return delete_company_data_source_identifier(get_session(), identifier_id)
+    with get_session() as session:
+        return delete_company_data_source_identifier(session, identifier_id)
