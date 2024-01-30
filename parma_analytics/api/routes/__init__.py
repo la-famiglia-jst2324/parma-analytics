@@ -4,7 +4,6 @@ from .crawling_finished import router as crawling_finished_router
 from .data_source_handshake import router as data_source_handshake_router
 from .dummy import router as dummy_router
 from .feed_raw_data import router as feed_raw_data_router
-from .fetch_crm_companies import router as crm_companies_router
 from .new_company import router as new_company_router
 from .schedule import router as schedule_router
 from .send_reports import router as send_reports_router
@@ -18,6 +17,5 @@ __all__ = [
     "schedule_router",
     "source_measurement_router",
     "data_source_handshake_router",
-    "crm_companies_router",
     "send_reports_router",
 ]
