@@ -59,6 +59,7 @@ def test_parma_mining_datasource_docs(engine: firestore_types.Client):
                 )
                 == 0
             )
+            break  # we only want to check one document to not penetrate the api
 
         # assert normalization_schema contents
         normalization_schema_collection = doc_datasource.collection(
@@ -73,6 +74,7 @@ def test_parma_mining_datasource_docs(engine: firestore_types.Client):
             content = typed_normalization_schema_doc.get()
             assert content.exists
             assert len({"schema"} - content.to_dict().keys()) == 0
+            break  # we only want to check one document to not penetrate the api
 
 
 def test_parma_mining_trigger_docs(engine: firestore_types.Client):
@@ -100,3 +102,4 @@ def test_parma_mining_trigger_docs(engine: firestore_types.Client):
             )
             == 0
         )
+        break  # we only want to check one document to not penetrate the api
