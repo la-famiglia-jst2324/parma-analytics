@@ -10,7 +10,7 @@ class ReportGenerator:
     """Class to generate reports."""
 
     def __init__(self):
-        self.api_key = os.environ.get("OPENAI_API_KEY")
+        self.api_key = os.environ.get("CHATGPT_API_KEY")
         self.client = OpenAI(api_key=self.api_key)
 
     def _make_openai_request(self, prompt):
