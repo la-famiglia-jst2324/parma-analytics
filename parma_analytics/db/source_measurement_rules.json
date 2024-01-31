@@ -13,7 +13,7 @@
       "rule_name": "CrunchBase Total Funding",
       "threshold": 0.1,
       "aggregation_method": "SUM",
-      "num_aggregation_entries": 0,
+      "num_aggregation_entries": null,
       "notification_message": null
     },
     {
@@ -101,7 +101,7 @@
       "rule_name": "number of event appearances",
       "threshold": 0.25,
       "aggregation_method": null,
-      "num_aggregation_entries": 0,
+      "num_aggregation_entries": null,
       "notification_message": null
     },
     {
@@ -133,7 +133,7 @@
       "rule_name": "company semrush global rank",
       "threshold": 0.1,
       "aggregation_method": null,
-      "num_aggregation_entries": 0,
+      "num_aggregation_entries": null,
       "notification_message": null
     },
     {
@@ -141,7 +141,7 @@
       "rule_name": "company visits last month by semrush",
       "threshold": 0.25,
       "aggregation_method": null,
-      "num_aggregation_entries": 0,
+      "num_aggregation_entries": null,
       "notification_message": null
     },
     {
@@ -149,7 +149,7 @@
       "rule_name": "company visits percentage monthly by semrush",
       "threshold": 0.25,
       "aggregation_method": null,
-      "num_aggregation_entries": 0,
+      "num_aggregation_entries": null,
       "notification_message": null
     },
     {
@@ -157,7 +157,7 @@
       "rule_name": "company number of products by siftery",
       "threshold": 0.25,
       "aggregation_method": null,
-      "num_aggregation_entries": 0,
+      "num_aggregation_entries": null,
       "notification_message": null
     },
     {
@@ -381,11 +381,11 @@
       "notification_message": "A"
     },
     {
-      "measurement_name": "company total funding (usd)",
-      "rule_name": "Total Funding",
+      "measurement_name": "# of Employees",
+      "rule_name": "Total Employees",
       "threshold": 0.1,
-      "aggregation_method": "SUM",
-      "num_aggregation_entries": 0,
+      "aggregation_method": null,
+      "num_aggregation_entries": null,
       "notification_message": null
     }
   ]
