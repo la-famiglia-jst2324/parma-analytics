@@ -1,0 +1,392 @@
+{
+  "crunchbase": [
+    {
+      "measurement_name": "company crunchbase rank",
+      "rule_name": "CrunchBase Rank",
+      "threshold": 0.1,
+      "aggregation_method": null,
+      "num_aggregation_entries": null,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "company total funding (usd)",
+      "rule_name": "CrunchBase Total Funding",
+      "threshold": 0.1,
+      "aggregation_method": "SUM",
+      "num_aggregation_entries": 0,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "number of funding rounds",
+      "rule_name": "Funding Rounds",
+      "threshold": 0.05,
+      "aggregation_method": "SUM",
+      "num_aggregation_entries": null,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "number of investors",
+      "rule_name": "Number of Investors",
+      "threshold": 0.1,
+      "aggregation_method": "COUNT",
+      "num_aggregation_entries": null,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "number of acquirees",
+      "rule_name": "Number of Acquirees",
+      "threshold": 0.15,
+      "aggregation_method": "COUNT",
+      "num_aggregation_entries": null,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "number of technologies used",
+      "rule_name": "Number of technologies used",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "number of apps by apptopia",
+      "rule_name": "Number of apps by apptopia",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "number of downloads by apptopia",
+      "rule_name": "number of downloads by apptopia",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "number of contact emails",
+      "rule_name": "number of contact emails",
+      "threshold": 0.25,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "number of contact phones",
+      "rule_name": "number of contact phones",
+      "threshold": 0.25,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "number of total contacts",
+      "rule_name": "number of total contacts",
+      "threshold": 0.25,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "number of similar companies",
+      "rule_name": "number of similar companies",
+      "threshold": 0.5,
+      "aggregation_method": null,
+      "num_aggregation_entries": null,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "number of event appearances",
+      "rule_name": "number of event appearances",
+      "threshold": 0.25,
+      "aggregation_method": null,
+      "num_aggregation_entries": 0,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "number of patents",
+      "rule_name": "number of patents",
+      "threshold": 0.05,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "number of trademarks",
+      "rule_name": "number of trademarks",
+      "threshold": 0.05,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "number of activities",
+      "rule_name": "number of activities",
+      "threshold": 0.3,
+      "aggregation_method": "MAX",
+      "num_aggregation_entries": 1,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "company semrush global rank",
+      "rule_name": "company semrush global rank",
+      "threshold": 0.1,
+      "aggregation_method": null,
+      "num_aggregation_entries": 0,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "company visits last month by semrush",
+      "rule_name": "company visits last month by semrush",
+      "threshold": 0.25,
+      "aggregation_method": null,
+      "num_aggregation_entries": 0,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "company visits percentage monthly by semrush",
+      "rule_name": "company visits percentage monthly by semrush",
+      "threshold": 0.25,
+      "aggregation_method": null,
+      "num_aggregation_entries": 0,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "company number of products by siftery",
+      "rule_name": "company number of products by siftery",
+      "threshold": 0.25,
+      "aggregation_method": null,
+      "num_aggregation_entries": 0,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "acquisition price (USD)",
+      "rule_name": "acquisition price (USD)",
+      "threshold": 0.05,
+      "aggregation_method": "SUM",
+      "num_aggregation_entries": 5,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "funding round money raised (USD)",
+      "rule_name": "funding round money raised (USD)",
+      "threshold": 0.05,
+      "aggregation_method": "SUM",
+      "num_aggregation_entries": 5,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "funding round number of investors",
+      "rule_name": "funding round number of investors",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    }
+  ],
+  "discord": [
+    {
+      "measurement_name": "server max presences",
+      "rule_name": "server max presences",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "server max members",
+      "rule_name": "server max members",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "server premium tier",
+      "rule_name": "server premium tier",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "server premium subscription count",
+      "rule_name": "server premium subscription count",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "server member count",
+      "rule_name": "server member count",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "server active member count",
+      "rule_name": "server active member count",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    }
+  ],
+  "github": [
+    {
+      "measurement_name": "repository size",
+      "rule_name": "repository size",
+      "threshold": 0.15,
+      "aggregation_method": "SUM",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "repository watchers count",
+      "rule_name": "repository watchers count",
+      "threshold": 0.2,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "repository open issues count",
+      "rule_name": "repository open issues count",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "repository stars",
+      "rule_name": "repository stars",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "repository forks",
+      "rule_name": "repository forks",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "total repository size",
+      "rule_name": "total repository size",
+      "threshold": 0.25,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "total watchers count",
+      "rule_name": "total watchers count",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "total open issues count",
+      "rule_name": "total open issues count",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "total repository stars",
+      "rule_name": "total repository stars",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "total repository forks",
+      "rule_name": "total repository forks",
+      "threshold": 0.1,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    }
+  ],
+  "linkedin": [
+    {
+      "measurement_name": "number of employees in company",
+      "rule_name": "number of employees in company",
+      "threshold": 0.15,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "number of followers of company",
+      "rule_name": "number of followers of company",
+      "threshold": 0.2,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    }
+  ],
+  "peopledatalabs": [
+    {
+      "measurement_name": "company employee count",
+      "rule_name": "company employee count",
+      "threshold": 0.15,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    }
+  ],
+  "producthunt": [
+    {
+      "measurement_name": "product overall rating",
+      "rule_name": "product overall rating",
+      "threshold": 0.15,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "product review count",
+      "rule_name": "product review count",
+      "threshold": 0.25,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    },
+    {
+      "measurement_name": "product followers count",
+      "rule_name": "product followers count",
+      "threshold": 0.2,
+      "aggregation_method": "AVG",
+      "num_aggregation_entries": 10,
+      "notification_message": null
+    }
+  ],
+  "reddit staging": [
+    {
+      "measurement_name": "monthly revenue",
+      "rule_name": " Rank",
+      "threshold": 0.1,
+      "aggregation_method": "None",
+      "num_aggregation_entries": null,
+      "notification_message": "A"
+    },
+    {
+      "measurement_name": "company total funding (usd)",
+      "rule_name": "Total Funding",
+      "threshold": 0.1,
+      "aggregation_method": "SUM",
+      "num_aggregation_entries": 0,
+      "notification_message": null
+    }
+  ]
+}

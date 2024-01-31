@@ -26,3 +26,18 @@ def get_notification_rules_by_source_measurement_id(
             .filter(NotificationRules.source_measurement_id == source_measurement_id)
             .first()
         )
+
+
+def create_notification_rule(engine: Engine, rules_param):
+    """Create notification rules."""
+    with Session(engine) as session:
+        new_rule = NotificationRules(
+            rule_name=rules_param["rule_name"],
+            source_measurement_id=rules_param["source_measurement_id"],
+            threshold=rules_param["threshold"],
+            aggregation_method=rules_param["aggregation_method"],
+            num_aggregation_entries=rules_param["num_aggregation_entries"],
+            notification_message=rules_param["notification_message"],
+        )
+        session.add(new_rule)
+        session.commit()
