@@ -6,7 +6,13 @@
 [![Deploy Prod](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/deploy.yml/badge.svg?event=release)](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/deploy.yml)
 [![Major Tag](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/tag-major.yml/badge.svg)](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/tag-major.yml)
 
-ParmaAI analytics repository providing data processing and inference.
+## Project Description
+
+ParmaAI is a sophisticated platform combining advanced data mining with comprehensive analytics. At its core, Parma Analytics orchestrates the data lifecycle, scheduling and managing data mining modules, and processing the extracted data using tools like ChatGPT for in-depth analysis and report generation. Complementing this, Parma Web provides a user-friendly interface for data management and visualization, making the system's complex functionalities accessible and intuitive. Together, they form a powerful solution for businesses to monitor, analyze, and respond to corporate anomalies, leveraging data-driven insights for strategic decision-making.
+
+### parma-analytics
+
+Parma Analytics is the dynamic engine at the heart of the ParmaAI ecosystem, playing a multifaceted role in data processing, analysis, and orchestration. Beyond analyzing data and generating insightful reports with tools like ChatGPT, it is also tasked with the critical function of scheduling and managing interactions with data mining modules. This repository is key for contributors focused on enhancing our system's capability to not only process and analyze data but also to efficiently coordinate the various stages of data mining. It's a nexus for integrating complex workflows, scheduling tasks, and ensuring seamless communication between different data mining modules.
 
 ## `parma-ai` architecture
 
