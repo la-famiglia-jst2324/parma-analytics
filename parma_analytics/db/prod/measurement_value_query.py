@@ -47,3 +47,12 @@ class MeasurementValueCRUD:
         instance = db.query(self.model).filter(self.model.id == id).first()
         db.delete(instance)
         db.commit()
+
+    def get_recent_measurement_value(self, db: Session, id: int):
+        """Get most recent measurement value from the database."""
+        return (
+            db.query(self.model)
+            .filter(self.model.company_measurement_id == id)
+            .order_by(self.model.id.desc())
+            .first()
+        )
