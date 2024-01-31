@@ -51,16 +51,20 @@ def send_reports():
                         )
                         if messages and company_name:
                             news_by_company[company_name] = []
-
+                            funding_round_check = True
                             for message in messages:
                                 if message.message:
-                                    if "funding rounds" in message.message:
-                                        new_message = handle_funding_round(
-                                            message, company_id.company_id, company_name
-                                        )
-                                        news_by_company[company_name].append(
-                                            new_message
-                                        )
+                                    if "funding round" in message.message.lower():
+                                        if funding_round_check:
+                                            new_message = handle_funding_round(
+                                                message,
+                                                company_id.company_id,
+                                                company_name,
+                                            )
+                                            news_by_company[company_name].append(
+                                                new_message
+                                            )
+                                            funding_round_check = False
                                     else:
                                         news_by_company[company_name].append(
                                             message.message
