@@ -13,3 +13,10 @@ def get_data_source_name(engine: Engine, source_module_id: int) -> str:
             session.query(DataSource).filter(DataSource.id == source_module_id).first()
         )
         return data_source.source_name
+
+
+def get_all_data_source(engine: Engine) -> list:
+    """Get all the data source."""
+    with Session(engine) as session:
+        datasource = session.query(DataSource).all()
+        return datasource
