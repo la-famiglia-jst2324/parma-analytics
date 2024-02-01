@@ -39,7 +39,7 @@ class ReportGenerator:
                     retry_after *= self.retry_factor
                     time.sleep(retry_after)
                 else:
-                    raise e
+                    return "An error occurred while generating the report."
 
     def generate_report(self, report_params) -> dict:
         """Generates the report content using GPT.
@@ -124,8 +124,13 @@ class ReportGenerator:
                     trigger_change=trigger_change,
                 )
 
-            summary = self._make_openai_request(gpt_prompt)
-            title = self._make_openai_request(title_gpt_prompt)
+            if type in ["paragraph", "text"]:
+                summary = current_value
+                title = metric_name
+                return {"title": title, "summary": summary}
+            else:
+                summary = self._make_openai_request(gpt_prompt)
+                title = self._make_openai_request(title_gpt_prompt)
             return {"title": title, "summary": summary}
         except Exception as e:
             logging.error(f"An error occurred in reporting/generate_report: {e}")
