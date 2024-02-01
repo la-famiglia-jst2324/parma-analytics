@@ -2,6 +2,7 @@
 
 from pathlib import Path
 
+from sqlalchemy import and_
 from sqlalchemy.engine import Engine
 from sqlalchemy.orm.session import Session
 
@@ -86,6 +87,21 @@ def delete_source_measurement_query(engine: Engine, source_measurement_id: int) 
     with Session(engine) as session:
         session.delete(session.get_one(SourceMeasurement, source_measurement_id))
         session.commit()
+
+
+def get_source_measurement_from_source_module(engine: Engine, source_module_id: int):
+    """Get source measurement for int and float only."""
+    with Session(engine) as session:
+        return (
+            session.query(SourceMeasurement)
+            .filter(
+                and_(
+                    SourceMeasurement.source_module_id == source_module_id,
+                    SourceMeasurement.type.in_(["int", "float"]),
+                )
+            )
+            .all()
+        )
 
 
 def get_all_source_measurements_from_parent(engine: Engine, parent_measurement_id: int):
