@@ -102,3 +102,13 @@ def get_source_measurement_from_source_module(engine: Engine, source_module_id: 
             )
             .all()
         )
+
+
+def get_all_source_measurements_from_parent(engine: Engine, parent_measurement_id: int):
+    """Get all source measurements given parent measurement id."""
+    with Session(engine) as session:
+        return (
+            session.query(SourceMeasurement)
+            .filter(SourceMeasurement.parent_measurement_id == parent_measurement_id)
+            .all()
+        )
