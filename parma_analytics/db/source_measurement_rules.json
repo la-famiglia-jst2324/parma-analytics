@@ -211,14 +211,6 @@
       "notification_message": null
     },
     {
-      "measurement_name": "server premium subscription count",
-      "rule_name": "server premium subscription count",
-      "threshold": 0.1,
-      "aggregation_method": "AVG",
-      "num_aggregation_entries": 10,
-      "notification_message": null
-    },
-    {
       "measurement_name": "server member count",
       "rule_name": "server member count",
       "threshold": 0.1,
