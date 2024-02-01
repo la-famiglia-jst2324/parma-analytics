@@ -11,6 +11,7 @@ from .routes import (
     dummy_router,
     feed_raw_data_router,
     new_company_router,
+    populate_rules_router,
     schedule_router,
     send_reports_router,
     source_measurement_router,
@@ -72,4 +73,9 @@ app.include_router(
 app.include_router(
     send_reports_router,
     tags=["send_reports"],
+)
+
+app.include_router(
+    populate_rules_router,
+    tags=["populate_rules"],
 )
