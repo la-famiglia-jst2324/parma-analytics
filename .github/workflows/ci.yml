@@ -58,6 +58,7 @@ jobs:
           POSTGRES_DB: ${{ vars.STAGING_POSTGRES_DB }}
           FIREBASE_ADMINSDK_CERTIFICATE: ${{ secrets.STAGING_FIREBASE_ADMINSDK_CERTIFICATE}}
           GCP_SECRET_MANAGER_CERTIFICATE: ${{ secrets.GCP_SECRET_MANAGER_KEY}}
+          CHATGPT_API_KEY: ${{ secrets.STAGING_CHATGPT_API_KEY }}
       - name: Get Cover
         uses: orgoro/coverage@v3.1
         if: github.event_name == 'pull_request'

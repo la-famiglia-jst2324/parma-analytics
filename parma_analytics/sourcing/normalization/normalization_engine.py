@@ -1,14 +1,17 @@
 """Normalization engine for normalizing raw data."""
 
+import asyncio
 import logging
 from datetime import datetime
 from typing import Any
 
+from parma_analytics.analytics.sentiment_analysis.update_score import update_scores
 from parma_analytics.bl.register_measurement_values import register_values
 from parma_analytics.db.mining.models import NormalizationSchema, RawData
 from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
 
 logger = logging.getLogger(__name__)
+comment_ids = []
 
 
 def build_lookup_dict(mapping_schema: dict[str, Any]) -> dict[str, dict[str, str]]:
@@ -102,7 +105,12 @@ def normalize_nested_data(
                     normalized_data = process_data_point(
                         value, company_id, timestamp, nested_mapping_info
                     )
-                    register_values(normalized_data)
+
+                    id = register_values(normalized_data)
+                    if normalized_data.type == "comment":
+                        # append id of comment type values for sentiments analysis
+                        comment_ids.append(id)
+
                     normalized_results.append(normalized_data)
                 else:
                     normalized_data = process_data_point(
@@ -152,7 +160,11 @@ def normalize_data(
             normalized_data = process_data_point(
                 value, company_id, timestamp, mapping_info
             )
-            register_values(normalized_data)
+            id = register_values(normalized_data)
+            if normalized_data.type == "comment":
+                # append id of comment type values for sentiments analysis
+                comment_ids.append(id)
+
             normalized_results.append(normalized_data)
         else:
             normalized_data = process_data_point(
@@ -165,4 +177,5 @@ def normalize_data(
             )
             normalized_results.extend(nested_results)
 
+    asyncio.run(update_scores(comment_ids))
     return normalized_results

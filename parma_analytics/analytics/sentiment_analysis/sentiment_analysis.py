@@ -1,6 +1,7 @@
 """OpenAi API for sentiment analysis."""
 import json
 import os
+import time
 
 import httpx
 from dotenv import load_dotenv
@@ -8,8 +9,10 @@ from dotenv import load_dotenv
 # Load environment variables from .env
 load_dotenv()
 
+HTTP_TOO_MANY_REQUESTS = 429
 
-async def get_sentiment(text: str) -> int | None:
+
+async def get_sentiment(text: list) -> list:
     """Analyze and score the sentiment of a given comment.
 
     Args:
@@ -24,7 +27,7 @@ async def get_sentiment(text: str) -> int | None:
         data = {
             "model": "gpt-3.5-turbo",
             "temperature": 0.5,
-            "max_tokens": 1,  # response
+            "max_tokens": 400,  # response
             "top_p": 1,
             "frequency_penalty": 0,
             "presence_penalty": 0,
@@ -36,38 +39,43 @@ async def get_sentiment(text: str) -> int | None:
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         }
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers=headers,
-                data=json.dumps(data),
-            )
-            response.raise_for_status()
-            return response.json()["choices"][0]["message"]["content"].strip().lower()
 
-    # First sentiment analysis to categorize sentiment
+        retries = 3  # Number of retries
+        backoff_factor = 2  # Backoff factor for exponential backoff
+        max_delay = 32  # Maximum delay in seconds
+
+        for attempt in range(retries):
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.post(
+                        "https://api.openai.com/v1/chat/completions",
+                        headers=headers,
+                        data=json.dumps(data),
+                    )
+                    response.raise_for_status()
+                    return (
+                        response.json()["choices"][0]["message"]["content"]
+                        .strip()
+                        .lower()
+                    )
+
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == HTTP_TOO_MANY_REQUESTS:
+                    # API throttling, apply exponential backoff
+                    delay = min(backoff_factor**attempt, max_delay)
+                    time.sleep(delay)
+                else:
+                    # If it's not a 429 error, raise the exception
+                    raise
+        # If all retries fail, raise the last exception
+        raise Exception("Max retries reached, unable to make a successful request.")
+
     primary_sentiment = await send_request(
-        f"Analyze the sentiment of the following text,"
-        f"Positive, Negative or Neutral:\n\n{text}"
+        f"Analyze the sentiment of the sentences in the given array,"
+        f"provide the all sentiment scores for each sentence"
+        f"with integer scores ranging from 0 to 10."
+        f"where 0 is the most negative, 10 is the most positive, 5 is neutral"
+        f"\n\n{text}"
     )
-    print(primary_sentiment)
-    # Assign score based on primary sentiment
-    if primary_sentiment == "neutral":
-        return 5
 
-    elif primary_sentiment in ["positive", "negative"]:
-        # Further sentiment analysis for scoring
-        detailed_sentiment_prompt = (
-            f"Analyze the sentiment of the following text"
-            f"and provide a score from 0 to 4, or 6-10,"
-            f"where 0 is extremely negative, 10 is extremely positive,"
-            f"your output should be a number,"
-            f"\n\n"
-            f"{text}"
-        )
-        detailed_sentiment = await send_request(detailed_sentiment_prompt)
-        print(detailed_sentiment)
-        return detailed_sentiment
-
-    else:
-        return None  # In case the response is not one of the expected sentiments
+    return primary_sentiment
