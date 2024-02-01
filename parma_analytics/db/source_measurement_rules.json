@@ -91,7 +91,7 @@
     {
       "measurement_name": "number of similar companies",
       "rule_name": "number of similar companies",
-      "threshold": 0.5,
+      "threshold": 0.2,
       "aggregation_method": null,
       "num_aggregation_entries": null,
       "notification_message": null
@@ -123,7 +123,7 @@
     {
       "measurement_name": "number of activities",
       "rule_name": "number of activities",
-      "threshold": 0.3,
+      "threshold": 0.1,
       "aggregation_method": "MAX",
       "num_aggregation_entries": 1,
       "notification_message": null
@@ -368,7 +368,7 @@
       "measurement_name": "monthly revenue",
       "rule_name": " Rank",
       "threshold": 0.1,
-      "aggregation_method": "None",
+      "aggregation_method": null,
       "num_aggregation_entries": null,
       "notification_message": "A"
     },
