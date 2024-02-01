@@ -1,8 +1,6 @@
-import os
 from datetime import datetime
 
 import pytest
-from dotenv import load_dotenv
 
 from parma_analytics.db.mining.models import NormalizationSchema, RawData
 from parma_analytics.sourcing.normalization.normalization_engine import (
@@ -11,10 +9,6 @@ from parma_analytics.sourcing.normalization.normalization_engine import (
     process_data_point,
 )
 from parma_analytics.sourcing.normalization.normalization_model import NormalizedData
-
-# Load environment variables from .env
-load_dotenv()
-api_key = os.getenv("CHATGPT_API_KEY")
 
 
 @pytest.fixture
