@@ -25,7 +25,7 @@ class GenerateNewsInput(BaseModel):
     company_measurement_id: int
     current_value: Any
     trigger_change: float | None = None
-    previous_value: Any
+    previous_value: Any | None = None
     aggregation_method: str | None = None
 
 
