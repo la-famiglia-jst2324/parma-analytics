@@ -370,7 +370,7 @@
       "threshold": 10,
       "aggregation_method": null,
       "num_aggregation_entries": null,
-      "notification_message": "A"
+      "notification_message": "B"
     },
     {
       "measurement_name": "# of Employees",
