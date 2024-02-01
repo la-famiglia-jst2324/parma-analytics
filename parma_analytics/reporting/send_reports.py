@@ -59,7 +59,6 @@ def send_reports():
                                             new_message = handle_funding_round(
                                                 message,
                                                 company_id.company_id,
-                                                company_name,
                                             )
                                             news_by_company[company_name].append(
                                                 new_message
@@ -89,7 +88,7 @@ def send_reports():
             raise e
 
 
-def handle_funding_round(message, company_id, name):
+def handle_funding_round(message, company_id):
     """Method to handle if change in funding round has happened."""
     source_measurement_id = message.source_measurement_id
     source_measurement = get_source_measurement_query(
