@@ -1,12 +1,15 @@
 """OpenAi API for sentiment analysis."""
 import json
 import os
+import time
 
 import httpx
 from dotenv import load_dotenv
 
 # Load environment variables from .env
 load_dotenv()
+
+HTTP_TOO_MANY_REQUESTS = 429
 
 
 async def get_sentiment(text: str) -> int | None:
@@ -36,14 +39,36 @@ async def get_sentiment(text: str) -> int | None:
             "Authorization": f"Bearer {api_key}",
             "Content-Type": "application/json",
         }
-        async with httpx.AsyncClient() as client:
-            response = await client.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers=headers,
-                data=json.dumps(data),
-            )
-            response.raise_for_status()
-            return response.json()["choices"][0]["message"]["content"].strip().lower()
+
+        retries = 3  # Number of retries
+        backoff_factor = 2  # Backoff factor for exponential backoff
+        max_delay = 32  # Maximum delay in seconds
+
+        for attempt in range(retries):
+            try:
+                async with httpx.AsyncClient() as client:
+                    response = await client.post(
+                        "https://api.openai.com/v1/chat/completions",
+                        headers=headers,
+                        data=json.dumps(data),
+                    )
+                    response.raise_for_status()
+                    return (
+                        response.json()["choices"][0]["message"]["content"]
+                        .strip()
+                        .lower()
+                    )
+
+            except httpx.HTTPStatusError as e:
+                if e.response.status_code == HTTP_TOO_MANY_REQUESTS:
+                    # API throttling, apply exponential backoff
+                    delay = min(backoff_factor**attempt, max_delay)
+                    time.sleep(delay)
+                else:
+                    # If it's not a 429 error, raise the exception
+                    raise
+        # If all retries fail, raise the last exception
+        raise Exception("Max retries reached, unable to make a successful request.")
 
     # First sentiment analysis to categorize sentiment
     primary_sentiment = await send_request(
