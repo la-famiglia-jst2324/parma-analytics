@@ -86,3 +86,13 @@ def delete_source_measurement_query(engine: Engine, source_measurement_id: int) 
     with Session(engine) as session:
         session.delete(session.get_one(SourceMeasurement, source_measurement_id))
         session.commit()
+
+
+def get_all_source_measurements_from_parent(engine: Engine, parent_measurement_id: int):
+    """Get all source measurements given parent measurement id."""
+    with Session(engine) as session:
+        return (
+            session.query(SourceMeasurement)
+            .filter(SourceMeasurement.parent_measurement_id == parent_measurement_id)
+            .all()
+        )
