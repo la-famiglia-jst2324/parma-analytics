@@ -232,8 +232,8 @@
       "measurement_name": "repository size",
       "rule_name": "repository size",
       "threshold": 0.15,
-      "aggregation_method": "SUM",
-      "num_aggregation_entries": 10,
+      "aggregation_method": null,
+      "num_aggregation_entries": null,
       "notification_message": null
     },
     {
