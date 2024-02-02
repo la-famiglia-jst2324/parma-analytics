@@ -16,6 +16,8 @@ from parma_analytics.db.prod.source_measurement_query import (
 )
 from parma_analytics.reporting.generate_report import ReportGenerator
 
+logger = logging.getLogger(__name__)
+
 
 class GenerateNewsInput(BaseModel):
     """Generate report parameters."""
