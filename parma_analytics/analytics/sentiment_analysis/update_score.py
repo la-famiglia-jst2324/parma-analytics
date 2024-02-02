@@ -1,5 +1,7 @@
 """Function for updating sentiment analysis score in DB."""
 
+import logging
+
 from parma_analytics.analytics.sentiment_analysis.sentiment_analysis import (
     get_sentiment,
 )
@@ -8,6 +10,8 @@ from parma_analytics.db.prod.measurement_value_query import MeasurementValueCRUD
 from parma_analytics.db.prod.models.measurement_value_models import (
     MeasurementCommentValue,
 )
+
+logger = logging.getLogger(__name__)
 
 
 async def update_scores(ids: list) -> list | None:
@@ -36,7 +40,7 @@ async def update_scores(ids: list) -> list | None:
                 scores.append(int_item)
             except ValueError:
                 continue
-        print(scores)
+        logger.debug(scores)
 
         try:
             for i, id in enumerate(ids):
