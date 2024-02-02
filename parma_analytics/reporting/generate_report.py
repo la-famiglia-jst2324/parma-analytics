@@ -2,6 +2,7 @@
 
 import logging
 import os
+import time
 
 from openai import OpenAI
 
@@ -12,9 +13,12 @@ class ReportGenerator:
     def __init__(self):
         self.api_key = os.environ.get("CHATGPT_API_KEY")
         self.client = OpenAI(api_key=self.api_key)
+        self.retry_count = int(os.environ.get("CHATGPT_RETRY_COUNT", 5))
+        self.base_retry_after = float(os.environ.get("BASE_RETRY_AFTER", 20))
+        self.retry_factor = float(os.environ.get("RETRY_FACTOR", 1.5))
 
     def _make_openai_request(self, prompt):
-        """Make a request to the OpenAI API.
+        """Make a request to the OpenAI API with retry mechanism.
 
         Args:
             prompt (str): The prompt to be used in the API request.
@@ -22,15 +26,20 @@ class ReportGenerator:
         Returns:
             dict: The response from the OpenAI API.
         """
-        try:
-            response = self.client.completions.create(
-                prompt=prompt, model="gpt-3.5-turbo-instruct", max_tokens=200
-            )
-            return response.choices[0].text
-
-        except Exception as e:
-            logging.error(f"An error occurred while calling GPT: {e}")
-            raise e
+        retry_after = self.base_retry_after
+        for attempt in range(self.retry_count):
+            try:
+                response = self.client.completions.create(
+                    prompt=prompt, model="gpt-3.5-turbo-instruct", max_tokens=200
+                )
+                return response.choices[0].text
+            except Exception as e:
+                logging.error(f"An error occurred while calling GPT: {e}")
+                if attempt < self.retry_count - 1:
+                    retry_after *= self.retry_factor
+                    time.sleep(retry_after)
+                else:
+                    return "An error occurred while generating the report."
 
     def generate_report(self, report_params) -> dict:
         """Generates the report content using GPT.
@@ -115,8 +124,13 @@ class ReportGenerator:
                     trigger_change=trigger_change,
                 )
 
-            summary = self._make_openai_request(gpt_prompt)
-            title = self._make_openai_request(title_gpt_prompt)
+            if type in ["paragraph", "text"]:
+                summary = current_value
+                title = metric_name
+                return {"title": title, "summary": summary}
+            else:
+                summary = self._make_openai_request(gpt_prompt)
+                title = self._make_openai_request(title_gpt_prompt)
             return {"title": title, "summary": summary}
         except Exception as e:
             logging.error(f"An error occurred in reporting/generate_report: {e}")
