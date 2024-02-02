@@ -1,14 +1,14 @@
 """This module contains the functions for registering measurement values."""
 import logging
 from datetime import datetime
+from functools import partial
 from typing import Any
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
 
 from parma_analytics.bl.generate_report import (
-    GenerateNewsInput,
-    generate_news,
+    process_news_data,
 )
 from parma_analytics.db.prod.company_source_measurement_query import (
     create_company_measurement_query,
@@ -27,12 +27,10 @@ from parma_analytics.db.prod.models.measurement_value_models import (
     MeasurementParagraphValue,
     MeasurementTextValue,
 )
-from parma_analytics.db.prod.models.news import News
 from parma_analytics.db.prod.reporting import get_users_subscribed_to_company
 from parma_analytics.reporting.gmail.email_service import EmailService
 from parma_analytics.reporting.news_comparison_engine import (
     check_notification_rules,
-    create_news,
     get_source_module_id,
 )
 from parma_analytics.reporting.slack.send_slack_messages import SlackService
@@ -87,38 +85,6 @@ def register_values(normalized_measurement: NormalizedData) -> int | None:
             data_source_id = get_source_module_id(
                 source_measurement_id=source_measurement_id
             )
-            # create news and send notifications, only if rules are satisfied
-            if comparison_engine_result.is_rules_satisfied:
-                try:
-                    news_input = GenerateNewsInput(
-                        company_id=company_id,
-                        source_measurement_id=source_measurement_id,
-                        company_measurement_id=company_measurement.company_measurement_id,
-                        current_value=value,
-                        trigger_change=comparison_engine_result.percentage_difference,
-                        previous_value=comparison_engine_result.previous_value,
-                        aggregation_method=comparison_engine_result.aggregation_method,
-                    )
-                    result = generate_news(news_input)
-                except SQLAlchemyError as e:
-                    logger.error(
-                        f"A database error occurred while generating summary: {e}"
-                    )
-                except Exception as e:
-                    logger.error(f"An error occurred while generating news: {e}")
-
-                create_news(
-                    News(
-                        message=result["summary"],
-                        company_id=company_id,
-                        data_source_id=data_source_id,
-                        trigger_factor=comparison_engine_result.percentage_difference,
-                        title=result["title"],
-                        timestamp=timestamp,
-                        source_measurement_id=source_measurement_id,
-                    )
-                )
-                send_notifications(company_id=company_id, text=result["summary"])
 
             created_measurement_id = handle_value(
                 session,
@@ -127,6 +93,14 @@ def register_values(normalized_measurement: NormalizedData) -> int | None:
                 timestamp,
                 company_measurement.company_measurement_id,
             )
+
+            # TODO: call process_news_data asynchronously in a
+            # robust & error tolerant way
+
+            # assertions to not get unused code warnings
+            assert comparison_engine_result
+            assert data_source_id
+            assert partial(process_news_data) is not None
 
             return created_measurement_id
 

@@ -1,20 +1,30 @@
 """Report generation business layer module."""
 
 import logging
+from dataclasses import dataclass
 from datetime import datetime
 from typing import Any
 
 from pydantic import BaseModel
 from sqlalchemy.exc import SQLAlchemyError
 
+from parma_analytics.bl.register_measurement_values import send_notifications
 from parma_analytics.db.prod.company_query import get_company_name
 from parma_analytics.db.prod.data_source_query import get_data_source_name
 from parma_analytics.db.prod.engine import get_engine
+from parma_analytics.db.prod.models.company_source_measurement import CompanyMeasurement
+from parma_analytics.db.prod.models.news import News
 from parma_analytics.db.prod.reporting import fetch_recent_value
 from parma_analytics.db.prod.source_measurement_query import (
     get_source_measurement_query,
 )
 from parma_analytics.reporting.generate_report import ReportGenerator
+from parma_analytics.reporting.news_comparison_engine import (
+    NewsComparisonEngineReturn,
+    create_news,
+)
+
+logger = logging.getLogger(__name__)
 
 
 class GenerateNewsInput(BaseModel):
@@ -76,3 +86,53 @@ def generate_news(
     except Exception as e:
         logging.error(f"An error occurred while generating summary: {e}")
         raise e
+
+
+@dataclass
+class NewsInputData:
+    """News input data for process_news_data."""
+
+    company_id: int
+    source_measurement_id: int
+    data_source_id: int
+    company_measurement: CompanyMeasurement
+    value: Any
+    timestamp: datetime
+
+
+async def process_news_data(
+    comparison_engine_result: NewsComparisonEngineReturn, news_input_data: NewsInputData
+) -> None:
+    """Asynchoronously process the data and send notifications."""
+    # create news and send notifications, only if rules are satisfied
+    if comparison_engine_result.is_rules_satisfied:
+        try:
+            news_input = GenerateNewsInput(
+                company_id=news_input_data.company_id,
+                source_measurement_id=news_input_data.source_measurement_id,
+                company_measurement_id=news_input_data.company_measurement.company_measurement_id,
+                current_value=news_input_data.value,
+                trigger_change=comparison_engine_result.percentage_difference,
+                previous_value=comparison_engine_result.previous_value,
+                aggregation_method=comparison_engine_result.aggregation_method,
+            )
+            result = generate_news(news_input)
+        except SQLAlchemyError as e:
+            logger.error(f"A database error occurred while generating summary: {e}")
+        except Exception as e:
+            logger.error(f"An error occurred while generating news: {e}")
+
+        create_news(
+            News(
+                message=result["summary"],
+                company_id=news_input_data.company_id,
+                data_source_id=news_input_data.data_source_id,
+                trigger_factor=comparison_engine_result.percentage_difference,
+                title=result["title"],
+                timestamp=news_input_data.timestamp,
+                source_measurement_id=news_input_data.source_measurement_id,
+            )
+        )
+        send_notifications(
+            company_id=news_input_data.company_id, text=result["summary"]
+        )
