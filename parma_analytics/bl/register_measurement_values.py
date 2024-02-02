@@ -54,6 +54,40 @@ def register_values(normalized_measurement: NormalizedData) -> int | None:
     Returns:
         The created measurement value id.
     """
+
+    # Inner function to handle the creation of news and notifications
+    async def create_news_and_send_notifications():
+        # create news and send notifications, only if rules are satisfied
+        if comparison_engine_result.is_rules_satisfied:
+            try:
+                news_input = GenerateNewsInput(
+                    company_id=company_id,
+                    source_measurement_id=source_measurement_id,
+                    company_measurement_id=company_measurement.company_measurement_id,
+                    current_value=value,
+                    trigger_change=comparison_engine_result.percentage_difference,
+                    previous_value=comparison_engine_result.previous_value,
+                    aggregation_method=comparison_engine_result.aggregation_method,
+                )
+                result = await generate_news(news_input)
+            except SQLAlchemyError as e:
+                logger.error(f"A database error occurred while generating summary: {e}")
+            except Exception as e:
+                logger.error(f"An error occurred while generating news: {e}")
+
+            await create_news(
+                News(
+                    message=result["summary"],
+                    company_id=company_id,
+                    data_source_id=data_source_id,
+                    trigger_factor=comparison_engine_result.percentage_difference,
+                    title=result["title"],
+                    timestamp=timestamp,
+                    source_measurement_id=source_measurement_id,
+                )
+            )
+            await send_notifications(company_id=company_id, text=result["summary"])
+
     source_measurement_id = normalized_measurement.source_measurement_id
     company_id = normalized_measurement.company_id
     value = normalized_measurement.value
@@ -91,38 +125,9 @@ def register_values(normalized_measurement: NormalizedData) -> int | None:
             data_source_id = get_source_module_id(
                 source_measurement_id=source_measurement_id
             )
-            # create news and send notifications, only if rules are satisfied
-            if comparison_engine_result.is_rules_satisfied:
-                try:
-                    news_input = GenerateNewsInput(
-                        company_id=company_id,
-                        source_measurement_id=source_measurement_id,
-                        company_measurement_id=company_measurement.company_measurement_id,
-                        current_value=value,
-                        trigger_change=comparison_engine_result.percentage_difference,
-                        previous_value=comparison_engine_result.previous_value,
-                        aggregation_method=comparison_engine_result.aggregation_method,
-                    )
-                    result = generate_news(news_input)
-                except SQLAlchemyError as e:
-                    logger.error(
-                        f"A database error occurred while generating summary: {e}"
-                    )
-                except Exception as e:
-                    logger.error(f"An error occurred while generating news: {e}")
 
-                create_news(
-                    News(
-                        message=result["summary"],
-                        company_id=company_id,
-                        data_source_id=data_source_id,
-                        trigger_factor=comparison_engine_result.percentage_difference,
-                        title=result["title"],
-                        timestamp=timestamp,
-                        source_measurement_id=source_measurement_id,
-                    )
-                )
-                send_notifications(company_id=company_id, text=result["summary"])
+            # Run the async function to create news and send notifications
+            asyncio.run(create_news_and_send_notifications())
 
             created_measurement_id = handle_value(
                 session,
