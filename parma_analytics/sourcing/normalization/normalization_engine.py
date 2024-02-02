@@ -1,6 +1,5 @@
 """Normalization engine for normalizing raw data."""
 
-import asyncio
 import logging
 from datetime import datetime
 from typing import Any
@@ -177,5 +176,7 @@ def normalize_data(
             )
             normalized_results.extend(nested_results)
 
-    asyncio.run(update_scores(comment_ids))
+    assert update_scores is not None
+    # TODO: restore sentiment analysis once ChatGPT issue is resolved
+    # asyncio.run(update_scores(comment_ids))
     return normalized_results
