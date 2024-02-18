@@ -6,6 +6,8 @@
 [![Deploy Prod](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/deploy.yml/badge.svg?event=release)](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/deploy.yml)
 [![Major Tag](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/tag-major.yml/badge.svg)](https://github.com/la-famiglia-jst2324/parma-analytics/actions/workflows/tag-major.yml)
 
+Core backend for the ParmaAI data mining and analytics platform.
+
 ## Project Description
 
 ParmaAI is a sophisticated platform combining advanced data mining with comprehensive analytics. At its core, Parma Analytics orchestrates the data lifecycle, scheduling and managing data mining modules, and processing the extracted data using tools like ChatGPT for in-depth analysis and report generation. Complementing this, Parma Web provides a user-friendly interface for data management and visualization, making the system's complex functionalities accessible and intuitive. Together, they form a powerful solution for businesses to monitor, analyze, and respond to corporate anomalies, leveraging data-driven insights for strategic decision-making.
@@ -14,15 +16,34 @@ ParmaAI is a sophisticated platform combining advanced data mining with comprehe
 
 Parma Analytics is the dynamic engine at the heart of the ParmaAI ecosystem, playing a multifaceted role in data processing, analysis, and orchestration. Beyond analyzing data and generating insightful reports with tools like ChatGPT, it is also tasked with the critical function of scheduling and managing interactions with data mining modules. This repository is key for contributors focused on enhancing our system's capability to not only process and analyze data but also to efficiently coordinate the various stages of data mining. It's a nexus for integrating complex workflows, scheduling tasks, and ensuring seamless communication between different data mining modules.
 
+**Related repositories:**
+
+- Frontend: [parma-web](https://github.com/la-famiglia-jst2324/parma-web/)
+- Modular data sourcing modules providing a standardized REST api:
+  - Copier template for new mining modules: [parma-mining-template](https://github.com/la-famiglia-jst2324/parma-mining-template)
+  - [parma-mining-producthunt](https://github.com/la-famiglia-jst2324/parma-mining-producthunt)
+  - [parma-mining-peopledatalabs](https://github.com/la-famiglia-jst2324/parma-mining-peopledatalabs)
+  - [parma-mining-discord](https://github.com/la-famiglia-jst2324/parma-mining-discord)
+  - [parma-mining-github](https://github.com/la-famiglia-jst2324/parma-mining-github)
+  - [parma-mining-linkedin](https://github.com/la-famiglia-jst2324/parma-mining-linkedin)
+  - [parma-mining-crunchbase](https://github.com/la-famiglia-jst2324/parma-mining-crunchbase)
+  - [parma-mining-affinity](https://github.com/la-famiglia-jst2324/parma-mining-affinity)
+  - [parma-mining-reddit](https://github.com/la-famiglia-jst2324/parma-mining-reddit)
+  - [parma-mining-clearbit](https://github.com/la-famiglia-jst2324/parma-mining-clearbit)
+
 ## `parma-ai` architecture
 
 The parma analytics backend is the heart of the system connecting the data mining processes with the frontend stack while being responsible for analytics and inference.
 
 ### system's architecture
 
-The parma ai backend consists of the following process flow:
+The parma ai backend consists of the following components:
 
 ![systems_architecture](docs/systems_architecture.svg)
+
+The whole deployment stack is replicated for **staging** and **production** environments.
+
+> **Note**: this is a simplified version of the architecture. More detailed process flows can be found below.
 
 #### Detailed architecture
 
